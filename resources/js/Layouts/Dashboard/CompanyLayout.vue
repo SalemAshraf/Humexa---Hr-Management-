@@ -1,4 +1,3 @@
-﻿
 <script setup>
 import DashboardSidebar from '@/Components/Dashboard/DashboardSidebar.vue';
 import DashboardHeader from '@/Components/Dashboard/DashboardHeader.vue';
@@ -19,17 +18,17 @@ const {
 } = useSidebar();
 
 const navigationItems = [
-    { label: 'Overview', href: '/dashboard', shortcut: 'OV' },
-    { label: 'Employees', href: '/employees', shortcut: 'EM' },
-    { label: 'Organization', href: '/organization', shortcut: 'OR' },
-    { label: 'Attendance', href: '/attendance', shortcut: 'AT' },
-    { label: 'Leaves', href: '/leaves', shortcut: 'LE' },
-    { label: 'Payroll', href: '/payroll', shortcut: 'PA' },
-    { label: 'Recruitment', href: '/recruitment', shortcut: 'RE' },
-    { label: 'Performance', href: '/performance', shortcut: 'PE' },
-    { label: 'Reports', href: '/reports', shortcut: 'RP' },
-    { label: 'Notifications', href: '/notifications', shortcut: 'NO' },
-    { label: 'Settings', href: '/settings', shortcut: 'SE' },
+    { label: 'Overview', href: route('tenant.dashboard'), shortcut: 'OV' },
+    { label: 'Employees', shortcut: 'EM', disabled: true, badge: 'Soon' },
+    { label: 'Organization', shortcut: 'OR', disabled: true, badge: 'Soon' },
+    { label: 'Attendance', shortcut: 'AT', disabled: true, badge: 'Soon' },
+    { label: 'Leaves', shortcut: 'LE', disabled: true, badge: 'Soon' },
+    { label: 'Payroll', shortcut: 'PA', disabled: true, badge: 'Soon' },
+    { label: 'Recruitment', shortcut: 'RE', disabled: true, badge: 'Soon' },
+    { label: 'Performance', shortcut: 'PE', disabled: true, badge: 'Soon' },
+    { label: 'Reports', shortcut: 'RP', disabled: true, badge: 'Soon' },
+    { label: 'Notifications', shortcut: 'NO', disabled: true, badge: 'Soon' },
+    { label: 'Settings', shortcut: 'SE', disabled: true, badge: 'Soon' },
 ];
 
 function handleSidebarToggle() {
@@ -44,12 +43,7 @@ function handleSidebarToggle() {
 </script>
 
 <template>
-    <div
-        class="hx-dashboard min-h-screen"
-        data-theme="company"
-        dir="ltr"
-        :dir="direction"
-    >
+    <div class="hx-dashboard min-h-screen" data-theme="company" :dir="direction">
         <DashboardSidebar
             :items="navigationItems"
             :collapsed="isCollapsed && !isMobileOpen"
@@ -64,15 +58,13 @@ function handleSidebarToggle() {
 
         <div
             class="hx-dashboard-content min-h-screen"
-            :style="{
-                '--hx-sidebar-current-width': isCollapsed ? '76px' : '260px',
-            }"
+            :style="{ '--hx-sidebar-current-width': isCollapsed ? '76px' : '260px' }"
         >
             <DashboardHeader
                 :title="title"
                 :subtitle="subtitle"
                 theme="company"
-                logout-url="/logout"
+                :logout-url="route('tenant.logout')"
                 :collapsed="isCollapsed"
                 :direction="direction"
                 @toggle-sidebar="handleSidebarToggle"
@@ -84,5 +76,3 @@ function handleSidebarToggle() {
         </div>
     </div>
 </template>
-
-
