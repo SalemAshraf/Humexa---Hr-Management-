@@ -89,7 +89,7 @@ async function removePhoto() {
 
 const initials = props.employeeName
     .trim()
-    .split(/\\s+/)
+    .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
