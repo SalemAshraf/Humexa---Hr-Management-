@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Modules\Users\Http\Controllers\TenantAuthController;
+use App\Modules\Tenants\Http\Controllers\TenantDashboardController;
 use App\Http\Middleware\EnsureTenantActive;
-use Inertia\Inertia;
 
 Route::domain('{tenant}.humexa.test')
     ->middleware([
