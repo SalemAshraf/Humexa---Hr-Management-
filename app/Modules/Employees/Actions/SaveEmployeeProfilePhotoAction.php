@@ -7,6 +7,7 @@ namespace App\Modules\Employees\Actions;
 use App\Modules\Employees\Models\Employee;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -70,12 +71,6 @@ class SaveEmployeeProfilePhotoAction
 
                 return $lockedEmployee;
             });
-
-            if (is_string($oldPath) && str_starts_with($oldPath, $directory . '/')) {
-                Storage::disk($disk)->delete($oldPath);
-            }
-
-            return $updatedEmployee;
         } catch (Throwable $exception) {
             if (is_string($newPath) && $newPath !== '') {
                 Storage::disk($disk)->delete($newPath);
@@ -83,5 +78,18 @@ class SaveEmployeeProfilePhotoAction
 
             throw $exception;
         }
+
+        if (is_string($oldPath) && str_starts_with($oldPath, $directory . '/')) {
+            try {
+                Storage::disk($disk)->delete($oldPath);
+            } catch (Throwable $exception) {
+                Log::warning('Unable to delete replaced employee profile photo.', [
+                    'tenant_id' => $tenantId,
+                    'employee_id' => $employee->id,
+                ]);
+            }
+        }
+
+        return $updatedEmployee;
     }
 }
