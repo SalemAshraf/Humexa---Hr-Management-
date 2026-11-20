@@ -20,8 +20,11 @@ class PlatformAuthController extends Controller
             return redirect()->route('platform.dashboard');
         }
 
-        return Inertia::render('Platform/Auth/Login', [
+        return Inertia::render('Auth/Login', [
+            'canResetPassword' => false,
             'status' => session('status'),
+            'showRegistrationLink' => false,
+            'loginUrl' => url('/platform/login'),
         ]);
     }
 
