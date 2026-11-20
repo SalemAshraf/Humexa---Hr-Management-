@@ -116,8 +116,8 @@ test('tenant cannot view or change another tenants employee profile photo', func
 
     $other = registerEmployeePhotoTenant('Employee Photo Other', 'employee-photo-other@example.test');
     actAsEmployeePhotoTenant($this, $other);
-    $otherEmployeeId = createEmployeePhotoTestEmployee($this, $other);
-    $otherBase = 'http://' . $other['domain'] . '/employees/' . $otherEmployeeId . '/profile-photo';
+    // Attempt to address the owner's employee through the other tenant's domain.
+    $otherBase = 'http://' . $other['domain'] . '/employees/' . $employeeId . '/profile-photo';
 
     $this->get($otherBase)->assertNotFound();
     $this->delete($otherBase)->assertNotFound();
