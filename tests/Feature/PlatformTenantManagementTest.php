@@ -15,6 +15,8 @@ use Spatie\Permission\PermissionRegistrar;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    app(PermissionRegistrar::class)->setPermissionsTeamId(null);
+
     config([
         'humexa.tenant_domain' => 'humexa.test',
         'humexa.reserved_subdomains' => [],
@@ -33,6 +35,15 @@ beforeEach(function () {
         'account_type' => User::ACCOUNT_TYPE_PLATFORM,
         'tenant_id' => null,
     ])->save();
+});
+
+afterEach(function () {
+    if (tenancy()->initialized) {
+        tenancy()->end();
+    }
+
+    app(PermissionRegistrar::class)->setPermissionsTeamId(null);
+    auth()->guard('platform')->logout();
 });
 
 function assignPlatformSuperAdmin(User $user): void
@@ -54,6 +65,12 @@ test('platform account without explicit tenant permissions cannot access company
     $this->actingAs($this->platformUser, 'platform')
         ->get(route('platform.companies.index'))
         ->assertForbidden();
+
+    $this->actingAs($this->platformUser, 'platform')
+        ->patch(route('platform.companies.suspend', $this->tenant))
+        ->assertForbidden();
+
+    expect($this->tenant->fresh()->status)->toBe('active');
 });
 
 test('super admin can view companies and suspend a company with an audit record', function () {
