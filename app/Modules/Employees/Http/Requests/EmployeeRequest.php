@@ -68,8 +68,24 @@ abstract class EmployeeRequest extends FormRequest
                 }
             }
 
-            if ($managerId && $this->employeeId() !== null && (string) $managerId === $this->employeeId()) {
-                $validator->errors()->add('manager_id', 'An employee cannot be their own manager.');
+            if ($managerId && $this->employeeId() !== null) {
+                $currentEmployeeId = $this->employeeId();
+                $manager = Employee::query()
+                    ->where('tenant_id', $tenantId)
+                    ->find($managerId);
+                $visited = [];
+
+                while ($manager && ! in_array((string) $manager->id, $visited, true)) {
+                    if ((string) $manager->id === $currentEmployeeId) {
+                        $validator->errors()->add('manager_id', 'This manager assignment would create a reporting cycle.');
+                        break;
+                    }
+
+                    $visited[] = (string) $manager->id;
+                    $manager = $manager->manager_id
+                        ? Employee::query()->where('tenant_id', $tenantId)->find($manager->manager_id)
+                        : null;
+                }
             }
 
             if ($userId) {
