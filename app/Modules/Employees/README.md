@@ -1,13 +1,16 @@
 # Employees Module
 
 ## Scope
-The first Employees release provides tenant-scoped employee profile management:
+The Employees module provides tenant-scoped employee profile management:
 - Employee directory with search, status filter, pagination, and summary counts.
 - Create, view, update, and archive employee profiles.
 - Optional link to an existing tenant user account.
 - Automatic or manually supplied employee numbers.
 - Branch, department, position, and direct-manager assignment.
 - Employment status history.
+- Multiple addresses and emergency contacts per employee.
+- National ID and passport records with one current record per type and retained history.
+- Private employee profile photos and private employee document metadata/storage.
 
 ## Employment statuses
 - draft: profile can be created before a hire date is known.
@@ -17,19 +20,31 @@ The first Employees release provides tenant-scoped employee profile management:
 - suspended
 - resigned
 - terminated
+
 A hire date is required for every status except draft. A termination date is required for resigned and terminated.
 
 ## Employee numbers
 If employee_number is omitted during creation, the application generates a tenant-local number using the EMP-0001 format. The tenant row is locked inside the creation transaction to serialize automatic number generation. Manually supplied numbers are accepted, and the database enforces uniqueness per tenant. Archived employee numbers are not reused.
 
-## Database
-### employees
-Stores employee identity, contact details, employment dates/status, optional user account, organization assignment, and manager relationship.
+## Phase 2 database
+- employees gains personal_email, alternate_phone, nationality, marital_status, and profile_photo_path.
+- employee_addresses supports multiple addresses and enforces one primary address per employee with a generated column and unique index.
+- employee_emergency_contacts supports multiple contacts and unique per-employee priorities.
+- employee_identity_records stores encrypted identity numbers, HMAC blind indexes, one current record per identity type, and retained historical records.
+- employee_document_types stores tenant-configurable document categories.
+- employee_documents stores private file metadata and expiry information.
 
-### employee_employment_histories
-Stores the initial employment status and each subsequent status change, including the previous/new status, effective date, optional reason, and actor.
+All employee-owned tables include tenant_id and composite foreign keys to the employee. Tenant-owned relationships are protected with composite foreign keys. Tenant IDs are assigned by backend tenant context and never accepted from client input.
 
-Composite foreign keys enforce tenant ownership for user, branch, department, position, manager, and history relationships. tenant_id is always assigned by backend tenant context, never accepted from the request.
+## Identity security configuration
+Set EMPLOYEE_IDENTITY_HASH_KEY to a dedicated random secret of at least 32 characters in every application environment before creating identity records. Do not reuse APP_KEY. The key must remain stable across deployments. Identity values are encrypted using Laravel's encrypted cast (APP_KEY); the HMAC key is used only for deterministic duplicate detection. Never log identity numbers or expose the ciphertext/hash to clients.
+
+Changing either encryption or HMAC keys requires a planned rotation and data re-encryption/re-indexing procedure. Do not replace keys directly in production.
+
+## File storage
+Profile photos and employee documents use private disks configured through EMPLOYEE_PROFILE_PHOTO_DISK and EMPLOYEE_DOCUMENT_DISK. Files must be served through authenticated, tenant-authorized controller actions; do not expose private storage paths or generate public URLs. Validate actual MIME type and size on upload. Database rollback does not delete stored files.
+
+Recommended initial limits: profile photo 5 MB; employee documents 10 MB; PDF/JPG/JPEG/PNG documents.
 
 ## Security
 - Tenant routes require auth:tenant and tenant.user middleware.
@@ -38,17 +53,12 @@ Composite foreign keys enforce tenant ownership for user, branch, department, po
 - Form Requests validate organization and user ownership.
 - Reporting relationships are checked to prevent self-management and circular manager chains.
 - Archiving a manager with direct reports is blocked with HTTP 409.
-- Archiving a branch, department, or position assigned to employees is blocked with HTTP 409.
-- The initial release grants employee management to authenticated tenant users. Fine-grained Spatie permissions are a separate authorization phase.
+- Sensitive identity values must be masked in UI responses and excluded from logs.
+- Document and photo downloads require tenant ownership and authorization checks.
+- Fine-grained Spatie permissions are a separate authorization phase.
 
 ## Routes
-- GET /employees — directory
-- GET /employees/create — create form
-- POST /employees — create
-- GET /employees/{employee} — profile
-- GET /employees/{employee}/edit — edit form
-- PUT /employees/{employee} — update
-- DELETE /employees/{employee} — archive
+The initial employee directory/profile routes are documented in routes/tenant.php. Phase 2 resource routes must remain nested under the authenticated tenant route group and use explicit tenant-scoped lookups.
 
-## Deferred
-Employee documents, national ID, addresses, emergency contacts, contracts, compensation, and detailed employment/organization assignment history are intentionally outside this first release.
+## Testing
+Pest feature tests must cover tenant isolation, composite constraints, current identity uniqueness, primary address uniqueness, emergency-contact ordering, upload validation, private file access, and rollback/failure cleanup.
