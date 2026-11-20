@@ -9,10 +9,10 @@ use App\Modules\Employees\Actions\SaveEmployeeProfilePhotoAction;
 use App\Modules\Employees\Http\Requests\EmployeeProfilePhotoRequest;
 use App\Modules\Employees\Models\Employee;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class EmployeeProfilePhotoController extends Controller
