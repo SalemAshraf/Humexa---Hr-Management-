@@ -6,6 +6,7 @@ namespace App\Modules\Employees\Actions;
 
 use App\Models\Tenant;
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Employees\Models\EmployeeEmploymentHistory;
 use Illuminate\Support\Facades\DB;
 
 class CreateEmployeeAction
@@ -40,7 +41,8 @@ class CreateEmployeeAction
                 'tenant_id' => $tenantId,
             ]);
 
-            $employee->employmentHistories()->forceCreate([
+            EmployeeEmploymentHistory::query()->forceCreate([
+                'employee_id' => $employee->id,
                 'tenant_id' => $tenantId,
                 'previous_status' => null,
                 'new_status' => $employee->employment_status,
