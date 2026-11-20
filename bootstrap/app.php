@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
             return '/login';
         });
         $middleware->alias([
+            'tenant.active' => \App\Http\Middleware\EnsureTenantActive::class,
         'tenant.user' => \App\Http\Middleware\EnsureTenantUser::class,
         'platform.user' => \App\Http\Middleware\EnsurePlatformUser::class,
     ]);

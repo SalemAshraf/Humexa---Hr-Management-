@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Modules\Users\Http\Controllers\TenantAuthController;
+use App\Http\Middleware\EnsureTenantActive;
 use Inertia\Inertia;
 
 Route::domain('{tenant}.humexa.test')
@@ -13,6 +14,7 @@ Route::domain('{tenant}.humexa.test')
         'web',
         InitializeTenancyByDomain::class,
         PreventAccessFromCentralDomains::class,
+        EnsureTenantActive::class,
     ])
     ->group(function () {
         Route::get('/', function () {
