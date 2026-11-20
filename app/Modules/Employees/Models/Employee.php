@@ -98,7 +98,7 @@ class Employee extends Model
 
     public function employmentHistories(): HasMany
     {
-        return $this->hasMany(EmployeeEmploymentHistory::class);
+        return $this->hasMany(EmployeeEmploymentHistory::class)->orderByDesc('id');
     }
 
     public function getFullNameAttribute(): string
