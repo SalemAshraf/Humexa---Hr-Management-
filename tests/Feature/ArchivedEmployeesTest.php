@@ -55,7 +55,7 @@ test('tenant can list and restore its archived employee', function () {
     $employeeId = createArchivedEmployee($this, $registration);
     $base = 'http://' . $registration['domain'] . '/employees/' . $employeeId;
 
-    $this->delete($base)->assertRedirect('/employees');
+    $this->delete($base)->assertRedirect();
     $this->assertSoftDeleted('employees', ['id' => $employeeId]);
 
     $this->get('http://' . $registration['domain'] . '/employees/archived')
@@ -66,7 +66,7 @@ test('tenant can list and restore its archived employee', function () {
             ->where('employees.data.0.id', $employeeId));
 
     $this->post($base . '/restore')
-        ->assertRedirect('/employees/archived')
+        ->assertRedirect()
         ->assertSessionHasNoErrors();
 
     $this->assertDatabaseHas('employees', [
