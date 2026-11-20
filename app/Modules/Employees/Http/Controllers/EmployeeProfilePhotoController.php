@@ -9,8 +9,11 @@ use App\Modules\Employees\Actions\SaveEmployeeProfilePhotoAction;
 use App\Modules\Employees\Http\Requests\EmployeeProfilePhotoRequest;
 use App\Modules\Employees\Models\Employee;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class EmployeeProfilePhotoController extends Controller
 {
@@ -68,15 +71,33 @@ class EmployeeProfilePhotoController extends Controller
         $record = $this->employee();
         $this->authorize('update', $record);
 
-        $path = $record->profile_photo_path;
+        $tenantId = (string) tenant()->getTenantKey();
+        $directory = 'tenants/' . $tenantId . '/employees/' . $record->id . '/profile';
 
-        if (is_string($path) && $path !== '') {
-            $directory = 'tenants/' . tenant()->getTenantKey() . '/employees/' . $record->id . '/profile';
+        [$path] = DB::transaction(function () use ($record, $tenantId): array {
+            $lockedEmployee = Employee::query()
+                ->where('tenant_id', $tenantId)
+                ->lockForUpdate()
+                ->findOrFail($record->id);
 
-            $record->forceFill(['profile_photo_path' => null])->save();
+            $oldPath = $lockedEmployee->profile_photo_path;
+            $lockedEmployee->forceFill(['profile_photo_path' => null])->save();
 
-            if (str_starts_with($path, $directory . '/')) {
-                Storage::disk((string) config('employee.profile_photo_disk', 'local'))->delete($path);
+            return [$oldPath];
+        });
+
+        $disk = (string) config('employee.profile_photo_disk', 'local');
+
+        if (is_string($path) && str_starts_with($path, $directory . '/')
+            && $disk !== '' && $disk !== 'public'
+            && config('filesystems.disks.' . $disk . '.visibility') !== 'public') {
+            try {
+                Storage::disk($disk)->delete($path);
+            } catch (Throwable $exception) {
+                Log::warning('Unable to delete removed employee profile photo.', [
+                    'tenant_id' => $tenantId,
+                    'employee_id' => $record->id,
+                ]);
             }
         }
 
