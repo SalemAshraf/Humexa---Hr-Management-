@@ -1,10 +1,9 @@
-﻿
 <script setup>
 import DashboardSidebar from '@/Components/Dashboard/DashboardSidebar.vue';
 import DashboardHeader from '@/Components/Dashboard/DashboardHeader.vue';
 import { useSidebar } from '@/Composables/useSidebar';
 
-const props = defineProps({
+defineProps({
     title: { type: String, default: 'Dashboard' },
     subtitle: { type: String, default: 'Platform Overview' },
     direction: { type: String, default: 'ltr' },
@@ -19,14 +18,14 @@ const {
 } = useSidebar();
 
 const navigationItems = [
-    { label: 'Overview', href: '/platform/dashboard', shortcut: 'OV' },
-    { label: 'Companies', href: '/platform/companies', shortcut: 'CO' },
-    { label: 'Subscriptions', href: '/platform/subscriptions', shortcut: 'SU' },
-    { label: 'Billing', href: '/platform/billing', shortcut: 'BI' },
-    { label: 'Platform Users', href: '/platform/users', shortcut: 'US' },
-    { label: 'Activity Logs', href: '/platform/activity-logs', shortcut: 'AC' },
-    { label: 'Notifications', href: '/platform/notifications', shortcut: 'NO' },
-    { label: 'Settings', href: '/platform/settings', shortcut: 'SE' },
+    { label: 'Overview', href: route('platform.dashboard'), shortcut: 'OV' },
+    { label: 'Companies', href: route('platform.companies.index'), shortcut: 'CO' },
+    { label: 'Activity Logs', href: route('platform.activity-logs.index'), shortcut: 'AC' },
+    { label: 'Subscriptions', shortcut: 'SU', disabled: true, badge: 'Soon' },
+    { label: 'Billing', shortcut: 'BI', disabled: true, badge: 'Soon' },
+    { label: 'Platform Users', shortcut: 'US', disabled: true, badge: 'Soon' },
+    { label: 'Notifications', shortcut: 'NO', disabled: true, badge: 'Soon' },
+    { label: 'Settings', shortcut: 'SE', disabled: true, badge: 'Soon' },
 ];
 
 function handleSidebarToggle() {
@@ -41,14 +40,13 @@ function handleSidebarToggle() {
 </script>
 
 <template>
-    <div class="hx-dashboard min-h-screen" data-theme="platform"
-                :logout-url="route('platform.logout')" :dir="direction">
+    <div class="hx-dashboard min-h-screen" data-theme="platform" :dir="direction">
         <DashboardSidebar
             :items="navigationItems"
             :collapsed="isCollapsed && !isMobileOpen"
             :mobile-open="isMobileOpen"
             theme="platform"
-                :logout-url="route('platform.logout')"
+            :logout-url="route('platform.logout')"
             :direction="direction"
             title="Humexa"
             subtitle="Platform Administration"
@@ -58,9 +56,7 @@ function handleSidebarToggle() {
 
         <div
             class="hx-dashboard-content min-h-screen"
-            :style="{
-                '--hx-sidebar-current-width': isCollapsed ? '76px' : '260px',
-            }"
+            :style="{ '--hx-sidebar-current-width': isCollapsed ? '76px' : '260px' }"
         >
             <DashboardHeader
                 :title="title"
@@ -78,4 +74,3 @@ function handleSidebarToggle() {
         </div>
     </div>
 </template>
-
