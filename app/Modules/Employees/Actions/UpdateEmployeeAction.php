@@ -15,6 +15,7 @@ class UpdateEmployeeAction
             $previousStatus = $employee->employment_status;
             $nextStatus = $data['employment_status'] ?? $previousStatus;
             $reason = $data['status_change_reason'] ?? null;
+            unset($data['status_change_reason']);
 
             $employee->update($data);
 
