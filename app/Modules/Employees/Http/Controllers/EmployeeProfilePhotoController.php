@@ -28,12 +28,6 @@ class EmployeeProfilePhotoController extends Controller
 
     public function show(string $tenant, string $employee): Response
     {
-        // Temporary checkpoint to determine whether unexpected output exists before controller logic.
-        Log::info('Profile photo buffer at controller entry', [
-            'buffer_level' => ob_get_level(),
-            'buffer_contents' => bin2hex((string) ob_get_contents()),
-        ]);
-
         $record = $this->employee();
         $this->authorize('view', $record);
 
