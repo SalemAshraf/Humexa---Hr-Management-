@@ -159,18 +159,6 @@ const statsCards = [
                     </Link>
 
                     <Link
-                        :href="route('platform.activity-logs.index')"
-                        class="group flex items-center gap-3 rounded-xl border border-slate-800 p-3 transition hover:border-cyan-400/30 hover:bg-cyan-400/5"
-                    >
-                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400/10 text-xs font-bold text-cyan-300">AC</span>
-                        <span class="min-w-0 flex-1">
-                            <span class="block text-sm font-semibold text-slate-200">Activity Logs</span>
-                            <span class="mt-1 block text-xs text-slate-500">Inspect administrative status changes</span>
-                        </span>
-                        <span class="text-slate-500 transition group-hover:text-cyan-300">→</span>
-                    </Link>
-
-                    <Link
                         v-if="canViewActivityLogs"
                         :href="route('platform.activity-logs.index')"
                         class="group flex items-center gap-3 rounded-xl border border-slate-800 p-3 transition hover:border-cyan-400/30 hover:bg-cyan-400/5"
