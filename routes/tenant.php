@@ -14,6 +14,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
 use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
 use App\Modules\Employees\Http\Controllers\EmployeeDocumentTypeController;
 use App\Modules\Employees\Http\Controllers\EmployeeDocumentController;
+use App\Modules\Employees\Http\Controllers\EmployeeProfilePhotoController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.humexa.test')
