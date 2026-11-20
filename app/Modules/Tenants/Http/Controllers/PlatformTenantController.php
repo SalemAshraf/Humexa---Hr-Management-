@@ -102,6 +102,7 @@ class PlatformTenantController extends Controller
 
         return Inertia::render('Platform/ActivityLogs/Index', [
             'activity' => $activity,
+            'canViewActivityLogs' => true,
         ]);
     }
 
