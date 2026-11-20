@@ -12,6 +12,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    canViewActivityLogs: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const page = usePage();
@@ -169,7 +173,7 @@ function changeStatus(company, action) {
             </div>
         </section>
 
-        <section class="hx-card mt-6 p-5 sm:p-6">
+        <section v-if="canViewActivityLogs" class="hx-card mt-6 p-5 sm:p-6">
             <div class="mb-5">
                 <h2 class="font-semibold text-white">Company Status Audit Log</h2>
                 <p class="mt-1 text-sm text-slate-400">
