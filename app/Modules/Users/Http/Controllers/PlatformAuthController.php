@@ -32,7 +32,9 @@ class PlatformAuthController extends Controller
     {
         $request->authenticate('platform');
 
-        return redirect()->intended(route('platform.dashboard', absolute: false));
+        // Never honor a shared session's intended URL here: it may belong to a tenant
+        // portal because central and tenant subdomains share the same session cookie.
+        return redirect()->route('platform.dashboard', absolute: false);
     }
 
     public function destroy(Request $request): RedirectResponse
