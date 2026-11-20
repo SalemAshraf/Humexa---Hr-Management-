@@ -27,6 +27,7 @@ class HandleInertiaRequests extends Middleware
 
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
+                'success' => fn () => $request->session()->get('success'),
                 'registered_domain' => fn () => $request->session()->get('registered_domain'),
             ],
         ];
