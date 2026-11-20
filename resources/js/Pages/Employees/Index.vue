@@ -7,16 +7,22 @@ const props = defineProps({
     employees: { type: Object, required: true },
     filters: { type: Object, default: () => ({}) },
     summary: { type: Object, default: () => ({}) },
+    branches: { type: Array, default: () => [] },
+    departments: { type: Array, default: () => [] },
 });
 const page = usePage();
 const search = ref(props.filters.search || '');
 const status = ref(props.filters.status || '');
+const branchId = ref(props.filters.branch_id || '');
+const departmentId = ref(props.filters.department_id || '');
 let searchTimer;
-watch([search, status], () => {
+watch([search, status, branchId, departmentId], () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => router.get('/employees', {
         search: search.value || undefined,
         status: status.value || undefined,
+        branch_id: branchId.value || undefined,
+        department_id: departmentId.value || undefined,
     }, { preserveState: true, replace: true }), 300);
 });
 onBeforeUnmount(() => clearTimeout(searchTimer));
@@ -45,12 +51,21 @@ const paginationLinks = computed(() => props.employees.links || []);
         </section>
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row">
-                <input v-model="search" type="search" placeholder="Search name, employee number or email..." class="w-full rounded-xl border-slate-300 text-sm sm:max-w-md">
-                <select v-model="status" class="rounded-xl border-slate-300 text-sm sm:w-56">
+            <div class="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:flex-wrap">
+                <input v-model="search" type="search" placeholder="Search name, employee number or email..." class="w-full rounded-xl border-slate-300 text-sm lg:max-w-sm">
+                <select v-model="status" class="rounded-xl border-slate-300 text-sm lg:w-44">
                     <option value="">All statuses</option>
                     <option v-for="item in ['draft','probation','active','on_leave','suspended','resigned','terminated']" :key="item" :value="item">{{ statusLabel(item) }}</option>
                 </select>
+                <select v-model="branchId" class="rounded-xl border-slate-300 text-sm lg:w-48">
+                    <option value="">All branches</option>
+                    <option v-for="item in branches" :key="item.id" :value="item.id">{{ item.name }}</option>
+                </select>
+                <select v-model="departmentId" class="rounded-xl border-slate-300 text-sm lg:w-52">
+                    <option value="">All departments</option>
+                    <option v-for="item in departments" :key="item.id" :value="item.id">{{ item.name }}</option>
+                </select>
+                <button type="button" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50" @click="search = ''; status = ''; branchId = ''; departmentId = ''">Clear filters</button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[850px] text-left text-sm">
