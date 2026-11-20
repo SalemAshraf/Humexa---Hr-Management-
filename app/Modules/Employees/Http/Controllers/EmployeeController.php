@@ -42,8 +42,10 @@ class EmployeeController extends Controller
             'departments' => Department::query()->where('tenant_id', $tenantId)->where(function ($query) use ($employee) { $query->where('is_active', true)->when($employee?->department_id, fn ($query, $id) => $query->orWhereKey($id)); })->with('branch:id,name')->orderBy('name')->get(['id', 'branch_id', 'name']),
             'positions' => Position::query()->where('tenant_id', $tenantId)->where(function ($query) use ($employee) { $query->where('is_active', true)->when($employee?->position_id, fn ($query, $id) => $query->orWhereKey($id)); })->with('department:id,name')->orderBy('name')->get(['id', 'department_id', 'name']),
             'managers' => $this->employeeQuery()
-                ->whereNotIn('employment_status', [Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])
-                ->when($employee?->manager_id, fn ($query, $id) => $query->orWhereKey($id))
+                ->where(function ($query) use ($employee) {
+                    $query->whereNotIn('employment_status', [Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])
+                        ->when($employee?->manager_id, fn ($query, $id) => $query->orWhereKey($id));
+                })
                 ->orderBy('first_name')
                 ->get(['id', 'first_name', 'last_name', 'employee_number']),
             'accounts' => User::query()
