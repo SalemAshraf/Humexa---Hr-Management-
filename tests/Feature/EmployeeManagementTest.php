@@ -189,3 +189,61 @@ test('employee assignment cannot mix branches and departments or use a foreign t
         'first_name' => 'Salem',
     ]);
 });
+
+
+test('organization records assigned to employees cannot be archived', function () {
+    $registration = registerEmployeeTenant('Employees Organization Guard', 'employees-org-guard@example.test');
+    actAsEmployeeTenant($this, $registration);
+
+    $tenantId = $registration['tenant']->id;
+    $branchId = DB::table('branches')->insertGetId([
+        'tenant_id' => $tenantId,
+        'name' => 'Employee Branch',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $departmentId = DB::table('departments')->insertGetId([
+        'tenant_id' => $tenantId,
+        'name' => 'Employee Department',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $positionDepartmentId = DB::table('departments')->insertGetId([
+        'tenant_id' => $tenantId,
+        'name' => 'Position Department',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $positionId = DB::table('positions')->insertGetId([
+        'tenant_id' => $tenantId,
+        'department_id' => $positionDepartmentId,
+        'name' => 'Assigned Position',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    $base = 'http://' . $registration['domain'];
+    $this->post($base . '/employees', employeePayload([
+        'first_name' => 'Branch',
+        'branch_id' => $branchId,
+    ]))->assertRedirect();
+
+    $this->post($base . '/employees', employeePayload([
+        'first_name' => 'Department',
+        'department_id' => $departmentId,
+    ]))->assertRedirect();
+
+    $this->post($base . '/employees', employeePayload([
+        'first_name' => 'Position',
+        'department_id' => $positionDepartmentId,
+        'position_id' => $positionId,
+    ]))->assertRedirect();
+
+    $this->delete($base . '/organization/branches/' . $branchId)->assertStatus(409);
+    $this->delete($base . '/organization/departments/' . $departmentId)->assertStatus(409);
+    $this->delete($base . '/organization/positions/' . $positionId)->assertStatus(409);
+});
