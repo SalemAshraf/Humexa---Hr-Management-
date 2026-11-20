@@ -17,6 +17,10 @@ class UpdateEmployeeAction
             $reason = $data['status_change_reason'] ?? null;
             unset($data['status_change_reason']);
 
+            if (array_key_exists('employee_number', $data)) {
+                $data['employee_number'] = trim((string) $data['employee_number']) ?: $employee->employee_number;
+            }
+
             $employee->update($data);
 
             if ($nextStatus !== $previousStatus) {
