@@ -1,5 +1,5 @@
-
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({
@@ -9,422 +9,662 @@ defineProps({
     },
 });
 
+const icons = {
+    users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
+    clock: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20 M12 6v6l4 2',
+    calendar: 'M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
+    wallet: 'M2 6h20v12H2z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6 M6 12h.01 M18 12h.01',
+    chart: 'M3 3v18h18 M7 15l4-4 3 3 5-6',
+    sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',
+    check: 'M20 6 9 17l-5-5',
+    shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+};
+
 const features = [
     {
-        number: '01',
-        icon: '👥',
-        title: 'Employee Management',
-        description: 'Keep employee profiles, documents, and organizational information organized in one secure place.',
+        icon: 'users',
+        title: 'Employee management',
+        description: 'Profiles, documents, and org structure in one secure place, instead of scattered folders and sheets.',
     },
     {
-        number: '02',
-        icon: '⏱',
-        title: 'Smart Attendance',
-        description: 'Track working hours, shifts, late arrivals, and overtime with flexible attendance policies.',
+        icon: 'clock',
+        title: 'Attendance',
+        description: 'Track working hours, shifts, late arrivals, and overtime with policies that match how you work.',
     },
     {
-        number: '03',
-        icon: '🏖',
-        title: 'Leave Management',
-        description: 'Simplify leave requests, approvals, balances, and employee absence tracking.',
+        icon: 'calendar',
+        title: 'Leave management',
+        description: 'Employees request, managers approve, and balances update automatically.',
     },
     {
-        number: '04',
-        icon: '💰',
-        title: 'Payroll Management',
-        description: 'Organize payroll workflows and keep compensation data accessible to authorized users.',
+        icon: 'wallet',
+        title: 'Payroll',
+        description: 'Keep payroll workflows organized, with compensation data visible only to authorized people.',
     },
     {
-        number: '05',
-        icon: '📊',
-        title: 'Reports & Analytics',
-        description: 'Turn workforce information into clear insights that support better decisions.',
+        icon: 'chart',
+        title: 'Reports',
+        description: 'Headcount, attendance, and leave summaries your management team can read at a glance.',
     },
     {
-        number: '06',
-        icon: '✦',
-        title: 'AI Assistant',
-        description: 'Explore a smarter way to understand HR information through an intelligent assistant.',
+        icon: 'sparkle',
+        title: 'AI assistant',
+        description: 'Ask questions about your HR data in plain language and get answers without building a report.',
     },
 ];
 
-const stats = [
-    { value: '01', label: 'Unified HR Platform' },
-    { value: '24/7', label: 'Access to Your Workspace' },
-    { value: '100%', label: 'Tenant Data Isolation' },
+const steps = [
+    {
+        title: 'Create your workspace',
+        description: 'Sign up and get a dedicated space for your company in minutes.',
+    },
+    {
+        title: 'Add your people and policies',
+        description: 'Set up departments, shifts, and leave types, then invite your team.',
+    },
+    {
+        title: 'Run HR from one place',
+        description: 'Handle attendance, leave, and payroll without switching between tools.',
+    },
 ];
+
+const securityPoints = [
+    'Every company works in its own isolated workspace',
+    'Role-based permissions for owners, HR, and managers',
+    'Sensitive employee data limited to authorized users',
+];
+
+const faqs = [
+    {
+        q: 'Is my company data separated from other companies?',
+        a: 'Yes. Humexa is built as a multi-tenant platform where each organization has its own workspace, and its data is kept isolated from every other organization.',
+    },
+    {
+        q: 'Which HR tasks can I manage in Humexa?',
+        a: 'Employee records, attendance, leave requests and balances, payroll workflows, and reporting, all inside one workspace.',
+    },
+    {
+        q: 'How do I get started?',
+        a: 'Create your workspace, add your departments and employees, and invite your team. You can start with one module and add the others as you need them.',
+    },
+];
+
+const employees = [
+    { name: 'Ahmed Hassan', dept: 'Engineering', status: 'Present', time: '08:52' },
+    { name: 'Mona Adel', dept: 'Finance', status: 'Present', time: '09:04' },
+    { name: 'Nour Khaled', dept: 'HR', status: 'Late', time: '09:41' },
+    { name: 'Karim Samir', dept: 'Sales', status: 'On leave', time: '—' },
+];
+
+const statusStyle = {
+    Present: 'bg-emerald-50 text-emerald-700',
+    Late: 'bg-amber-50 text-amber-700',
+    'On leave': 'bg-slate-100 text-slate-600',
+};
+
+const leaveState = ref('pending');
+
+const assistants = [
+    { id: 'claude', name: 'Claude' },
+    { id: 'chatgpt', name: 'ChatGPT' },
+];
+const activeAssistant = ref('claude');
+const aiPoints = [
+    'Works with Claude and ChatGPT',
+    'Answers come from your own workspace data',
+    'Follows the same roles and permissions as Humexa',
+];
+const aiPanel = ref(null);
+const aiVisible = ref(false);
+
+const scrolled = ref(false);
+const progress = ref(0);
+function onScroll() {
+    const y = window.scrollY;
+    scrolled.value = y > 8;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    progress.value = max > 0 ? Math.min(y / max, 1) : 0;
+}
+
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Reveal elements as they scroll into view. Usage: v-reveal or v-reveal="delayMs"
+const vReveal = {
+    mounted(el, binding) {
+        el.classList.add('reveal');
+        if (binding.value) el.style.setProperty('--d', `${binding.value}ms`);
+        if (reduceMotion() || !('IntersectionObserver' in window)) {
+            el.classList.add('is-visible');
+            return;
+        }
+        const io = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    el.classList.add('is-visible');
+                    io.disconnect();
+                }
+            },
+            { threshold: 0.15 },
+        );
+        io.observe(el);
+    },
+};
+
+let aiObserver;
+onMounted(() => {
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    if (reduceMotion() || !('IntersectionObserver' in window)) {
+        aiVisible.value = true;
+    } else {
+        aiObserver = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    aiVisible.value = true;
+                    aiObserver.disconnect();
+                }
+            },
+            { threshold: 0.35 },
+        );
+        if (aiPanel.value) aiObserver.observe(aiPanel.value);
+    }
+});
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', onScroll);
+    if (aiObserver) aiObserver.disconnect();
+});
+
+const focusRing =
+    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1F4FD8]';
+const btnPrimary = `inline-flex items-center justify-center rounded-lg bg-[#1F4FD8] px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#1A43B8] hover:shadow-lg hover:shadow-[#1F4FD8]/30 active:translate-y-0 ${focusRing}`;
+const btnSecondary = `inline-flex items-center justify-center rounded-lg border border-[#C9D2E0] bg-white px-6 py-3.5 text-sm font-semibold text-[#0F1B33] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#1F4FD8]/50 hover:bg-[#EEF2F8] active:translate-y-0 ${focusRing}`;
 </script>
 
 <template>
     <Head>
-        <title>Humexa — Human Resources, Simplified</title>
+        <title>Humexa | HR software for growing companies</title>
         <meta
             name="description"
-            content="Manage your people, attendance, leaves, and HR operations with Humexa, your unified human resources platform."
+            content="Manage employees, attendance, leave, and payroll in one workspace with Humexa."
         />
-        <meta name="theme-color" content="#080D1B" />
+        <meta name="theme-color" content="#F6F8FB" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
     </Head>
 
-    <div class="min-h-screen overflow-hidden bg-[#080D1B] font-sans text-white selection:bg-cyan-400/30 selection:text-cyan-100">
-
-        <!-- Background -->
-        <div class="pointer-events-none fixed inset-0 overflow-hidden">
-            <div class="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-blue-600/10 blur-[130px]"></div>
-            <div class="absolute -right-40 top-40 h-[500px] w-[500px] rounded-full bg-cyan-500/10 blur-[130px]"></div>
-            <div class="absolute bottom-0 left-1/2 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-indigo-600/10 blur-[140px]"></div>
-            <div class="absolute inset-0 opacity-[0.035]" style="background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px); background-size: 55px 55px;"></div>
+    <div class="relative isolate min-h-screen bg-[#F6F8FB] font-['Manrope',ui-sans-serif,system-ui,sans-serif] text-[#0F1B33] antialiased selection:bg-[#1F4FD8]/15">
+        <!-- Ambient background -->
+        <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+            <div class="drift absolute -left-32 -top-24 h-[420px] w-[420px] rounded-full bg-[#1F4FD8]/10 blur-[110px]"></div>
+            <div class="drift-b absolute -right-32 top-[30%] h-[380px] w-[380px] rounded-full bg-[#0E9F8E]/10 blur-[110px]"></div>
         </div>
 
-        <!-- Navigation -->
-        <header class="relative z-20 mx-auto max-w-7xl px-6 lg:px-8">
-            <nav class="flex h-20 items-center justify-between border-b border-white/[0.07]">
-
-                <a href="#" class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/30 bg-gradient-to-br from-blue-500/30 to-cyan-400/10 shadow-lg shadow-cyan-500/10">
-                        <span class="text-xl font-black text-cyan-300">H</span>
-                    </div>
-                    <span class="text-2xl font-bold tracking-tight">
-                        Humexa<span class="text-cyan-400">.</span>
-                    </span>
+        <!-- Header -->
+        <header :class="['sticky top-0 z-30 border-b border-[#DDE3EC] bg-[#F6F8FB]/80 backdrop-blur-md transition-shadow duration-300', scrolled ? 'shadow-[0_8px_24px_-16px_rgba(15,27,51,0.35)]' : '']">
+            <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 lg:px-8" aria-label="Main">
+                <a href="#" :class="['flex items-center gap-2.5 rounded-md', focusRing]">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1F4FD8] text-base font-extrabold text-white">H</span>
+                    <span class="text-lg font-extrabold tracking-tight">Humexa</span>
                 </a>
 
-                <div class="hidden items-center gap-9 text-sm text-slate-400 md:flex">
-                    <a href="#features" class="transition hover:text-white">Features</a>
-                    <a href="#platform" class="transition hover:text-white">Platform</a>
-                    <a href="#about" class="transition hover:text-white">About</a>
+                <div class="hidden items-center gap-8 text-sm font-medium text-[#4A5875] md:flex">
+                    <a href="#features" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">Features</a>
+                    <a href="#ai" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">AI</a>
+                    <a href="#how-it-works" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">How it works</a>
+                    <a href="#security" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">Security</a>
+                    <a href="#faq" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">FAQ</a>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <a
                         href="/platform/login"
-                        class="hidden rounded-lg px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:text-white sm:block"
+                        :class="['hidden rounded-lg px-4 py-2 text-sm font-semibold text-[#0F1B33] transition-colors hover:bg-[#E8EDF5] sm:block', focusRing]"
                     >
                         Sign in
                     </a>
-
                     <Link
                         v-if="canRegister"
                         :href="route('register')"
-                        class="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-400 px-5 py-2.5 text-sm font-bold text-[#07111f] shadow-lg shadow-cyan-500/20 transition hover:-translate-y-0.5 hover:shadow-cyan-400/30"
+                        :class="['inline-flex rounded-lg bg-[#1F4FD8] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1A43B8]', focusRing]"
                     >
-                        Get Started
+                        Get started
                     </Link>
                 </div>
             </nav>
+            <div class="h-0.5 origin-left bg-[#1F4FD8]" :style="{ transform: `scaleX(${progress})` }" aria-hidden="true"></div>
         </header>
 
-        <main class="relative z-10">
-
+        <main>
             <!-- Hero -->
-            <section class="mx-auto grid max-w-7xl items-center gap-16 px-6 pb-28 pt-20 lg:grid-cols-2 lg:px-8 lg:pb-36 lg:pt-28">
-
+            <section class="mx-auto grid max-w-6xl items-center gap-14 px-6 pb-24 pt-16 lg:grid-cols-[1fr_1.05fr] lg:gap-16 lg:px-8 lg:pb-32 lg:pt-24">
                 <div>
-                    <div class="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/[0.07] px-4 py-2 text-xs font-semibold tracking-wide text-cyan-300">
-                        <span class="h-2 w-2 animate-pulse rounded-full bg-cyan-400"></span>
-                        THE FUTURE OF HUMAN RESOURCES
-                    </div>
-
-                    <h1 class="max-w-2xl text-5xl font-extrabold leading-[1.12] tracking-tight sm:text-6xl lg:text-[68px]">
-                        Your People.
-                        <br />
-                        Your Business.
-                        <br />
-                        <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-sky-400 bg-clip-text text-transparent">
-                            One Platform.
-                        </span>
+                    <h1 class="max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-[56px]">
+                        <span class="hero-in block" style="--d: 0ms">HR for your whole company,</span>
+                        <span class="hero-in block" style="--d: 120ms">in one place.</span>
                     </h1>
-
-                    <p class="mt-8 max-w-xl text-base leading-8 text-slate-400 sm:text-lg">
-                        Simplify your HR operations, empower your workforce, and manage your entire organization with one intelligent platform built for modern businesses.
+                    <p class="hero-in mt-6 max-w-lg text-lg leading-8 text-[#4A5875]" style="--d: 240ms">
+                        Employee records, attendance, leave, and payroll in a single workspace, so your HR team spends less time chasing spreadsheets.
                     </p>
 
-                    <div class="mt-10 flex flex-col gap-4 sm:flex-row">
-                        <Link
-                            v-if="canRegister"
-                            :href="route('register')"
-                            class="group flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 px-7 py-4 font-bold text-[#07111f] shadow-xl shadow-blue-500/20 transition hover:-translate-y-1 hover:shadow-cyan-400/30"
-                        >
-                            Start Your Journey
-                            <span class="transition group-hover:translate-x-1">→</span>
+                    <div class="hero-in mt-9 flex flex-col gap-3 sm:flex-row" style="--d: 360ms">
+                        <Link v-if="canRegister" :href="route('register')" :class="btnPrimary">
+                            Create your workspace
                         </Link>
-
-                        <a
-                            href="#features"
-                            class="flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-7 py-4 font-semibold text-white transition hover:border-cyan-400/40 hover:bg-white/[0.07]"
-                        >
-                            Explore Features
-                        </a>
+                        <a href="#features" :class="btnSecondary">See what's included</a>
                     </div>
 
-                    <div class="mt-12 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-slate-500">
-                        <span class="flex items-center gap-2">
-                            <span class="text-cyan-400">✓</span>
-                            Unified HR workspace
-                        </span>
-                        <span class="flex items-center gap-2">
-                            <span class="text-cyan-400">✓</span>
-                            Secure by design
-                        </span>
-                    </div>
+                    <p class="hero-in mt-6 flex items-center gap-2 text-sm text-[#4A5875]" style="--d: 480ms">
+                        <svg class="h-4 w-4 text-[#0E9F8E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>
+                        Each company gets its own isolated workspace.
+                    </p>
                 </div>
 
-                <!-- Dashboard Preview -->
-                <div id="platform" class="relative mx-auto w-full max-w-xl lg:max-w-none">
-
-                    <div class="absolute -inset-8 rounded-full bg-blue-500/10 blur-[90px]"></div>
-
-                    <div class="relative rounded-2xl border border-white/10 bg-[#10182A]/90 p-3 shadow-2xl shadow-blue-950/50 backdrop-blur-xl sm:p-5">
-
-                        <div class="flex items-center justify-between border-b border-white/[0.07] px-2 pb-5">
-                            <div class="flex items-center gap-2">
-                                <div class="h-2.5 w-2.5 rounded-full bg-red-400/80"></div>
-                                <div class="h-2.5 w-2.5 rounded-full bg-yellow-400/80"></div>
-                                <div class="h-2.5 w-2.5 rounded-full bg-green-400/80"></div>
-                            </div>
-                            <div class="rounded-md border border-white/10 bg-white/[0.04] px-4 py-1.5 text-[10px] text-slate-500">
-                                app.humexa.com
-                            </div>
-                            <div class="text-xs text-cyan-300">●</div>
+                <!-- Product preview -->
+                <div class="hero-in relative" style="--d: 300ms">
+                    <div class="overflow-hidden rounded-xl border border-[#DDE3EC] bg-white shadow-[0_20px_50px_-20px_rgba(15,27,51,0.25)]">
+                        <div class="flex items-center justify-between border-b border-[#E6EBF2] px-5 py-3.5">
+                            <span class="flex items-center gap-2 text-sm font-bold">
+                                <span class="relative flex h-2 w-2" aria-hidden="true">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                </span>
+                                Today's attendance
+                            </span>
+                            <span class="text-xs text-[#6B7894]">Sample data</span>
                         </div>
 
-                        <div class="grid grid-cols-[100px_1fr] gap-4 pt-5 sm:grid-cols-[145px_1fr]">
-
-                            <!-- Sidebar -->
-                            <div class="border-r border-white/[0.07] pr-3">
-                                <div class="mb-7 flex items-center gap-2">
-                                    <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/20 text-xs font-bold text-cyan-300">H</div>
-                                    <span class="text-xs font-bold">Humexa</span>
-                                </div>
-
-                                <div class="space-y-2 text-[10px] sm:text-xs">
-                                    <div class="rounded-lg bg-blue-500/15 px-2 py-2.5 text-cyan-300">
-                                        ◈ Dashboard
-                                    </div>
-                                    <div class="px-2 py-2 text-slate-500">♙ Employees</div>
-                                    <div class="px-2 py-2 text-slate-500">◷ Attendance</div>
-                                    <div class="px-2 py-2 text-slate-500">▣ Leaves</div>
-                                    <div class="px-2 py-2 text-slate-500">◇ Payroll</div>
-                                    <div class="px-2 py-2 text-slate-500">▤ Reports</div>
-                                </div>
-
-                                <div class="mt-12 rounded-lg border border-cyan-400/10 bg-cyan-400/[0.04] p-2">
-                                    <div class="text-[9px] text-cyan-300">HUMEXA AI</div>
-                                    <div class="mt-1 text-[9px] text-slate-500">Your smart HR assistant</div>
-                                </div>
-                            </div>
-
-                            <!-- Main Dashboard -->
-                            <div class="min-w-0">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-[10px] text-slate-500">Overview</div>
-                                        <div class="mt-1 text-sm font-bold sm:text-lg">Good morning 👋</div>
-                                    </div>
-                                    <div class="rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-[9px] text-slate-400">
-                                        Today, Nov 20
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 grid grid-cols-2 gap-2 sm:gap-3">
-                                    <div class="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
-                                        <div class="text-[9px] text-slate-500 sm:text-xs">Total Employees</div>
-                                        <div class="mt-2 text-xl font-bold sm:text-2xl">248</div>
-                                        <div class="mt-1 text-[9px] text-emerald-400">↑ Workforce overview</div>
-                                    </div>
-                                    <div class="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
-                                        <div class="text-[9px] text-slate-500 sm:text-xs">Present Today</div>
-                                        <div class="mt-2 text-xl font-bold sm:text-2xl">216</div>
-                                        <div class="mt-1 text-[9px] text-cyan-400">Attendance overview</div>
-                                    </div>
-                                    <div class="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
-                                        <div class="text-[9px] text-slate-500 sm:text-xs">On Leave</div>
-                                        <div class="mt-2 text-xl font-bold sm:text-2xl">12</div>
-                                        <div class="mt-1 text-[9px] text-amber-400">Leave overview</div>
-                                    </div>
-                                    <div class="rounded-xl border border-white/[0.07] bg-white/[0.03] p-3">
-                                        <div class="text-[9px] text-slate-500 sm:text-xs">Departments</div>
-                                        <div class="mt-2 text-xl font-bold sm:text-2xl">08</div>
-                                        <div class="mt-1 text-[9px] text-blue-400">Organization overview</div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-xs font-semibold">Workforce Overview</span>
-                                        <span class="text-[9px] text-slate-500">Illustrative data</span>
-                                    </div>
-
-                                    <div class="mt-5 flex h-24 items-end gap-2 sm:h-32">
-                                        <div v-for="(height, index) in [42, 65, 52, 85, 60, 95, 72, 88, 57, 76, 92, 68]" :key="index" class="flex-1 rounded-t-sm bg-gradient-to-t from-blue-600/30 to-cyan-400/80" :style="{ height: `${height}%` }"></div>
-                                    </div>
-
-                                    <div class="mt-3 flex justify-between text-[8px] text-slate-600">
-                                        <span>Jan</span>
-                                        <span>Mar</span>
-                                        <span>May</span>
-                                        <span>Jul</span>
-                                        <span>Sep</span>
-                                        <span>Dec</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 flex items-center justify-between rounded-xl border border-cyan-400/10 bg-cyan-400/[0.04] p-3">
-                                    <div>
-                                        <div class="text-[10px] font-semibold text-cyan-200">Everything in one place</div>
-                                        <div class="mt-1 text-[9px] text-slate-500">A unified view of your workforce</div>
-                                    </div>
-                                    <div class="text-xl text-cyan-300">✦</div>
-                                </div>
-                            </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full min-w-[420px] text-left text-sm">
+                                <caption class="sr-only">Sample attendance list</caption>
+                                <thead>
+                                    <tr class="text-xs text-[#6B7894]">
+                                        <th scope="col" class="px-5 py-3 font-semibold">Employee</th>
+                                        <th scope="col" class="px-3 py-3 font-semibold">Department</th>
+                                        <th scope="col" class="px-3 py-3 font-semibold">Status</th>
+                                        <th scope="col" class="px-5 py-3 text-right font-semibold">Check-in</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[#EEF1F6]">
+                                    <tr v-for="(e, i) in employees" :key="e.name" class="hero-in transition-colors hover:bg-[#F6F8FB]" :style="{ '--d': `${700 + i * 120}ms` }">
+                                        <td class="px-5 py-3 font-semibold">{{ e.name }}</td>
+                                        <td class="px-3 py-3 text-[#4A5875]">{{ e.dept }}</td>
+                                        <td class="px-3 py-3">
+                                            <span :class="['rounded-full px-2.5 py-1 text-xs font-semibold', statusStyle[e.status]]">{{ e.status }}</span>
+                                        </td>
+                                        <td class="px-5 py-3 text-right tabular-nums text-[#4A5875]">{{ e.time }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <div class="absolute -bottom-7 -left-5 hidden rounded-xl border border-white/10 bg-[#111D31] p-4 shadow-2xl sm:block">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-400/10 text-lg text-emerald-300">✓</div>
+                    <!-- Interactive leave request -->
+                    <div class="float-slow mt-4 rounded-xl border border-[#DDE3EC] bg-white p-5 shadow-[0_12px_30px_-18px_rgba(15,27,51,0.25)] sm:absolute sm:-bottom-10 sm:-left-8 sm:mt-0 sm:w-[300px]">
+                        <div class="flex items-start justify-between gap-3">
                             <div>
-                                <div class="text-xs font-bold">Workspace secured</div>
-                                <div class="mt-1 text-[10px] text-slate-500">Tenant-aware architecture</div>
+                                <p class="text-sm font-bold">Leave request</p>
+                                <p class="mt-1 text-sm text-[#4A5875]">Mona Adel · Annual leave</p>
+                                <p class="text-sm text-[#4A5875]">3 days, Nov 24 to 26</p>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="absolute -right-4 top-20 hidden rounded-xl border border-cyan-400/20 bg-[#111D31] p-3 shadow-xl sm:block">
-                        <div class="text-[10px] text-cyan-300">✦ Intelligent HR</div>
-                        <div class="mt-1 text-xs font-semibold">Built for growth</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stats -->
-            <section class="relative border-y border-white/[0.07] bg-white/[0.015]">
-                <div class="mx-auto grid max-w-7xl gap-8 px-6 py-12 sm:grid-cols-3 lg:px-8">
-                    <div v-for="stat in stats" :key="stat.label" class="text-center">
-                        <div class="text-3xl font-extrabold text-cyan-300">{{ stat.value }}</div>
-                        <div class="mt-2 text-sm text-slate-500">{{ stat.label }}</div>
+                        <div v-if="leaveState === 'pending'" class="mt-4 flex gap-2">
+                            <button
+                                type="button"
+                                :class="['flex-1 rounded-lg bg-[#1F4FD8] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1A43B8]', focusRing]"
+                                @click="leaveState = 'approved'"
+                            >
+                                Approve
+                            </button>
+                            <button
+                                type="button"
+                                :class="['flex-1 rounded-lg border border-[#C9D2E0] px-3 py-2 text-sm font-semibold transition-colors hover:bg-[#EEF2F8]', focusRing]"
+                                @click="leaveState = 'declined'"
+                            >
+                                Decline
+                            </button>
+                        </div>
+                        <div v-else class="mt-4 flex items-center justify-between" role="status">
+                            <span
+                                :class="[
+                                    'rounded-full px-2.5 py-1 text-xs font-semibold',
+                                    leaveState === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600',
+                                ]"
+                            >
+                                {{ leaveState === 'approved' ? 'Approved' : 'Declined' }}
+                            </span>
+                            <button
+                                type="button"
+                                :class="['rounded text-sm font-semibold text-[#1F4FD8] hover:underline', focusRing]"
+                                @click="leaveState = 'pending'"
+                            >
+                                Undo
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- Features -->
-            <section id="features" class="mx-auto max-w-7xl px-6 py-28 lg:px-8">
+            <section id="features" class="border-y border-[#DDE3EC] bg-white">
+                <div class="mx-auto grid max-w-6xl gap-12 px-6 py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:px-8">
+                    <div v-reveal class="lg:sticky lg:top-28 lg:self-start">
+                        <h2 class="max-w-sm text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+                            Everything your HR team does every week.
+                        </h2>
+                        <p class="mt-5 max-w-sm leading-7 text-[#4A5875]">
+                            Start with the module you need first and bring the rest in as your company grows.
+                        </p>
+                    </div>
 
-                <div class="mx-auto max-w-2xl text-center">
-                    <div class="text-xs font-bold tracking-[0.25em] text-cyan-400">POWERFUL CAPABILITIES</div>
-                    <h2 class="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                        Everything HR.
-                        <span class="text-cyan-300">One System.</span>
-                    </h2>
-                    <p class="mt-6 leading-8 text-slate-400">
-                        From employee management to workforce insights, bring your essential HR operations together in one connected workspace.
-                    </p>
+                    <ul class="divide-y divide-[#E6EBF2] border-y border-[#E6EBF2]">
+                        <li v-for="(f, i) in features" :key="f.title" v-reveal="i * 70"><div class="group flex gap-5 py-6 transition-transform duration-300 hover:translate-x-1.5">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#EAF0FD] text-[#1F4FD8] transition-all duration-300 group-hover:scale-110 group-hover:bg-[#1F4FD8] group-hover:text-white">
+                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons[f.icon]" /></svg>
+                            </span>
+                            <div>
+                                <h3 class="text-base font-bold">{{ f.title }}</h3>
+                                <p class="mt-1.5 max-w-lg text-[15px] leading-7 text-[#4A5875]">{{ f.description }}</p>
+                            </div>
+                        </div></li>
+                    </ul>
                 </div>
+            </section>
 
-                <div class="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    <div
-                        v-for="feature in features"
-                        :key="feature.number"
-                        class="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.045] to-white/[0.015] p-7 transition duration-300 hover:-translate-y-1 hover:border-cyan-400/30 hover:bg-cyan-400/[0.04]"
-                    >
-                        <div class="absolute right-6 top-6 text-xs font-bold text-slate-700">{{ feature.number }}</div>
-                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/15 bg-cyan-400/[0.07] text-2xl transition group-hover:border-cyan-400/30 group-hover:bg-cyan-400/10">
-                            {{ feature.icon }}
+            <!-- AI integrations -->
+            <section id="ai" class="mx-auto max-w-6xl px-6 py-24 lg:px-8">
+                <div class="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+                    <div v-reveal>
+                        <h2 class="max-w-md text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+                            Ask Humexa from Claude or ChatGPT.
+                        </h2>
+                        <p class="mt-5 max-w-md leading-7 text-[#4A5875]">
+                            Connect your workspace to the AI assistant your team already uses. Ask in plain language and get answers from your own HR data, without opening a report.
+                        </p>
+                        <ul class="mt-8 space-y-4">
+                            <li v-for="point in aiPoints" :key="point" class="flex items-start gap-3">
+                                <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF0FD] text-[#1F4FD8]">
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>
+                                </span>
+                                <span class="leading-7 text-[#4A5875]">{{ point }}</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div ref="aiPanel" v-reveal="150" class="rounded-2xl bg-[#EAF0FD] p-4 sm:p-8">
+                        <div class="overflow-hidden rounded-xl border border-[#DDE3EC] bg-white shadow-[0_20px_50px_-20px_rgba(15,27,51,0.25)]">
+                            <div class="flex items-center justify-between gap-3 border-b border-[#E6EBF2] px-4 py-3">
+                                <div role="tablist" aria-label="AI assistant" class="inline-flex rounded-lg bg-[#F1F4F9] p-1">
+                                    <button
+                                        v-for="a in assistants"
+                                        :key="a.id"
+                                        type="button"
+                                        role="tab"
+                                        :aria-selected="activeAssistant === a.id"
+                                        :class="[
+                                            'rounded-md px-3.5 py-1.5 text-sm font-semibold transition-all duration-200',
+                                            focusRing,
+                                            activeAssistant === a.id ? 'bg-white text-[#0F1B33] shadow-sm' : 'text-[#6B7894] hover:text-[#0F1B33]',
+                                        ]"
+                                        @click="activeAssistant = a.id"
+                                    >
+                                        {{ a.name }}
+                                    </button>
+                                </div>
+                                <span class="text-xs text-[#6B7894]">Sample conversation</span>
+                            </div>
+
+                            <div class="min-h-[340px] p-5 sm:p-6" aria-live="polite">
+                                <div v-if="aiVisible" :key="activeAssistant" class="space-y-4">
+                                    <div class="flex justify-end">
+                                        <div class="hero-in max-w-[85%] rounded-2xl rounded-br-md bg-[#0F1B33] px-4 py-3 text-sm leading-6 text-white" style="--d: 0ms">
+                                            Who is on leave next week, and who has more than 15 days of annual leave left?
+                                        </div>
+                                    </div>
+
+                                    <div class="hero-in inline-flex items-center gap-2 rounded-full border border-[#DDE3EC] bg-[#F6F8FB] px-3 py-1.5 text-xs font-semibold text-[#4A5875]" style="--d: 600ms">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-[#0E9F8E]"></span>
+                                        Humexa: Leave balances
+                                    </div>
+
+                                    <div class="typing flex gap-1.5 px-1" aria-hidden="true">
+                                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                    </div>
+
+                                    <div class="hero-in max-w-[92%] rounded-2xl rounded-bl-md bg-[#F1F4F9] px-4 py-3 text-sm leading-6" style="--d: 1700ms">
+                                        <p class="text-xs font-bold text-[#6B7894]">{{ assistants.find((a) => a.id === activeAssistant).name }}</p>
+                                        <p class="mt-1.5">Two people are on leave next week:</p>
+                                        <ul class="mt-1.5 list-disc space-y-0.5 pl-5">
+                                            <li>Karim Samir (Sales), all week</li>
+                                            <li>Mona Adel (Finance), Nov 24 to 26</li>
+                                        </ul>
+                                        <p class="mt-2.5">Three employees have more than 15 days of annual leave left: Ahmed Hassan, Nour Khaled, and Youssef Ali.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <h3 class="mt-7 text-lg font-bold">{{ feature.title }}</h3>
-                        <p class="mt-4 text-sm leading-7 text-slate-400">{{ feature.description }}</p>
                     </div>
                 </div>
             </section>
 
+            <!-- How it works -->
+            <section id="how-it-works" class="mx-auto max-w-6xl px-6 py-24 lg:px-8">
+                <h2 v-reveal class="max-w-xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+                    Up and running in three steps.
+                </h2>
+
+                <ol class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
+                    <li v-for="(s, i) in steps" :key="s.title" v-reveal="i * 120"><div class="group border-t-2 border-[#0F1B33] pt-6 transition-colors duration-300 hover:border-[#1F4FD8]">
+                        <span class="text-sm font-bold text-[#1F4FD8]">Step {{ i + 1 }}</span>
+                        <h3 class="mt-3 text-lg font-bold">{{ s.title }}</h3>
+                        <p class="mt-2 text-[15px] leading-7 text-[#4A5875]">{{ s.description }}</p>
+                    </div></li>
+                </ol>
+            </section>
+
             <!-- Security -->
-            <section id="about" class="mx-auto max-w-7xl px-6 pb-28 lg:px-8">
-                <div class="relative overflow-hidden rounded-3xl border border-cyan-400/15 bg-gradient-to-br from-blue-950/70 via-[#10182A] to-[#0B1424] p-8 sm:p-14 lg:p-16">
-                    <div class="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-cyan-500/10 blur-[100px]"></div>
-
-                    <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                        <div>
-                            <div class="text-xs font-bold tracking-[0.2em] text-cyan-300">BUILT WITH SECURITY IN MIND</div>
-                            <h2 class="mt-6 text-3xl font-extrabold leading-tight sm:text-5xl">
-                                Your business data.
-                                <br />
-                                <span class="text-cyan-300">Your private space.</span>
-                            </h2>
-                            <p class="mt-6 max-w-lg leading-8 text-slate-400">
-                                Humexa is designed around a multi-tenant architecture, helping keep each company's workspace and business data isolated.
-                            </p>
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="mt-9 inline-flex items-center gap-3 rounded-xl bg-cyan-400 px-6 py-3.5 font-bold text-[#07111f] transition hover:bg-cyan-300"
-                            >
-                                Create Your Workspace
-                                <span>→</span>
-                            </Link>
-                        </div>
-
-                        <div class="relative mx-auto w-full max-w-md">
-                            <div class="rounded-2xl border border-white/10 bg-[#080D1B]/70 p-6 shadow-2xl backdrop-blur-xl">
-                                <div class="flex items-center justify-between border-b border-white/10 pb-5">
-                                    <span class="text-sm font-bold">Security Overview</span>
-                                    <span class="rounded-full bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold text-emerald-300">Designed for isolation</span>
-                                </div>
-                                <div class="mt-6 space-y-5">
-                                    <div v-for="item in ['Tenant-aware access', 'Role-based permissions', 'Protected employee data', 'Secure workspace boundaries']" :key="item" class="flex items-center gap-3">
-                                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/10 text-cyan-300">✓</span>
-                                        <span class="text-sm text-slate-300">{{ item }}</span>
-                                    </div>
-                                </div>
-                                <div class="mt-7 rounded-xl border border-cyan-400/10 bg-cyan-400/[0.04] p-4">
-                                    <div class="text-xs text-slate-500">Architecture</div>
-                                    <div class="mt-2 font-semibold text-cyan-200">Multi-Tenant HRMS</div>
-                                    <div class="mt-1 text-xs text-slate-500">A dedicated workspace for every organization</div>
-                                </div>
-                            </div>
-                            <div class="absolute -bottom-5 -right-5 -z-10 h-full w-full rounded-2xl border border-cyan-400/10"></div>
-                        </div>
+            <section id="security" class="mx-auto max-w-6xl px-6 pb-24 lg:px-8">
+                <div v-reveal class="grid items-center gap-10 rounded-2xl bg-[#0F1B33] p-8 text-white sm:p-12 lg:grid-cols-2 lg:gap-16 lg:p-14">
+                    <div>
+                        <h2 class="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+                            Your employee data stays yours.
+                        </h2>
+                        <p class="mt-5 max-w-md leading-7 text-[#B8C3D9]">
+                            Humexa is built around a multi-tenant architecture that keeps every company's workspace and data separate from everyone else's.
+                        </p>
                     </div>
+
+                    <ul class="space-y-4">
+                        <li v-for="(p, i) in securityPoints" :key="p" v-reveal="250 + i * 120" class="flex items-start gap-3">
+                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1F4FD8]">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>
+                            </span>
+                            <span class="leading-7 text-[#E3E9F5]">{{ p }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section id="faq" class="mx-auto max-w-3xl px-6 pb-24 lg:px-8">
+                <h2 v-reveal class="text-3xl font-extrabold tracking-tight sm:text-4xl">Common questions</h2>
+
+                <div class="mt-10 divide-y divide-[#DDE3EC] border-y border-[#DDE3EC]">
+                    <details v-for="(item, i) in faqs" :key="item.q" v-reveal="i * 80" class="group py-5">
+                        <summary :class="['flex cursor-pointer list-none items-center justify-between gap-6 rounded text-base font-bold [&::-webkit-details-marker]:hidden', focusRing]">
+                            {{ item.q }}
+                            <span class="text-xl leading-none text-[#6B7894] transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                        </summary>
+                        <p class="mt-3 max-w-xl leading-7 text-[#4A5875]">{{ item.a }}</p>
+                    </details>
                 </div>
             </section>
 
             <!-- Final CTA -->
-            <section class="px-6 pb-28">
-                <div class="mx-auto max-w-4xl text-center">
-                    <div class="text-xs font-bold tracking-[0.25em] text-cyan-400">READY TO GET STARTED?</div>
-                    <h2 class="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                        Make HR work
-                        <span class="text-cyan-300">for you.</span>
-                    </h2>
-                    <p class="mx-auto mt-6 max-w-xl leading-8 text-slate-400">
-                        Bring your people, processes, and organization together with Humexa.
-                    </p>
-                    <Link
-                        v-if="canRegister"
-                        :href="route('register')"
-                        class="mt-9 inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-400 px-8 py-4 font-bold text-[#07111f] shadow-xl shadow-cyan-500/20 transition hover:-translate-y-1"
-                    >
-                        Get Started with Humexa
-                        <span>→</span>
+            <section class="border-t border-[#DDE3EC] bg-white">
+                <div v-reveal class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-6 py-16 sm:flex-row sm:items-center lg:px-8">
+                    <div>
+                        <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Ready to move HR out of spreadsheets?</h2>
+                        <p class="mt-2 text-[#4A5875]">Create a workspace for your company and invite your team.</p>
+                    </div>
+                    <Link v-if="canRegister" :href="route('register')" :class="[btnPrimary, 'shrink-0']">
+                        Create your workspace
                     </Link>
                 </div>
             </section>
         </main>
 
         <!-- Footer -->
-        <footer class="relative border-t border-white/[0.07]">
-            <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-9 sm:flex-row lg:px-8">
-                <a href="#" class="flex items-center gap-2 text-xl font-bold">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/10 text-cyan-300">H</span>
-                    Humexa<span class="text-cyan-400">.</span>
-                </a>
-
-                <p class="text-center text-xs text-slate-600">
-                    © {{ new Date().getFullYear() }} Humexa. All rights reserved.
-                </p>
-
-                <a href="/platform/login" class="text-xs text-slate-500 transition hover:text-cyan-300">
-                    Platform Administration
-                </a>
+        <footer class="border-t border-[#DDE3EC]">
+            <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-[#6B7894] sm:flex-row lg:px-8">
+                <p>© {{ new Date().getFullYear() }} Humexa. All rights reserved.</p>
+                <a href="/platform/login" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">Platform administration</a>
             </div>
         </footer>
     </div>
 </template>
+
+<style scoped>
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+        opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--d, 0ms);
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(22px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+.hero-in {
+    opacity: 0;
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--d, 0ms);
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+.float-slow {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes drift {
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(40px, 30px);
+    }
+}
+.drift {
+    animation: drift 18s ease-in-out infinite;
+}
+.drift-b {
+    animation: drift 22s ease-in-out infinite reverse;
+}
+
+.typing {
+    overflow: hidden;
+    opacity: 0;
+    animation:
+        rise 0.4s ease 700ms forwards,
+        typing-out 0.3s ease 1500ms forwards;
+}
+@keyframes typing-out {
+    from {
+        opacity: 1;
+        max-height: 24px;
+    }
+    to {
+        opacity: 0;
+        max-height: 0;
+        margin-top: 0;
+    }
+}
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #9aa7bf;
+    animation: blink 1s ease-in-out infinite;
+}
+.dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+@keyframes blink {
+    0%,
+    80%,
+    100% {
+        opacity: 0.3;
+    }
+    40% {
+        opacity: 1;
+    }
+}
+
+details[open] > p {
+    animation: fade-down 0.35s ease;
+}
+@keyframes fade-down {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    .hero-in {
+        opacity: 1;
+        animation: none;
+    }
+    .float-slow,
+    .drift,
+    .drift-b,
+    .dot {
+        animation: none;
+    }
+    .typing {
+        display: none;
+    }
+    details[open] > p {
+        animation: none;
+    }
+}
+</style>
