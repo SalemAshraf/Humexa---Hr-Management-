@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Employees\Actions;
 
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Employees\Models\EmployeeEmploymentHistory;
 use Illuminate\Support\Facades\DB;
 
 class UpdateEmployeeAction
@@ -24,7 +25,8 @@ class UpdateEmployeeAction
             $employee->update($data);
 
             if ($nextStatus !== $previousStatus) {
-                $employee->employmentHistories()->forceCreate([
+                EmployeeEmploymentHistory::query()->forceCreate([
+                    'employee_id' => $employee->id,
                     'tenant_id' => $employee->tenant_id,
                     'previous_status' => $previousStatus,
                     'new_status' => $nextStatus,
