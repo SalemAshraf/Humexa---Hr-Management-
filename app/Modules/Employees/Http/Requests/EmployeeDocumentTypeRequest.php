@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\\Modules\\Employees\\Http\\Requests;
+namespace App\Modules\Employees\Http\Requests;
 
-use Illuminate\\Foundation\\Http\\FormRequest;
+use Illuminate\Foundation\Http\FormRequest;
 
 class EmployeeDocumentTypeRequest extends FormRequest
 {
