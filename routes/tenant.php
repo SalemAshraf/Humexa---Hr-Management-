@@ -122,6 +122,7 @@ Route::domain('{tenant}.humexa.test')
                         Route::get('/{document}/download', 'download')->whereNumber('document')->name('download');
                         Route::get('/{document}/preview', 'preview')->whereNumber('document')->name('preview');
                         Route::post('/{document}/archive', 'archive')->whereNumber('document')->name('archive');
+                        Route::post('/{document}/delete', 'destroy')->whereNumber('document')->name('delete');
                     });
             });
 
