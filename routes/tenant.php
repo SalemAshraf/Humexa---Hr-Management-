@@ -55,4 +55,3 @@ Route::domain('{tenant}.humexa.test')
             Route::post('/logout', [TenantAuthController::class, 'destroy'])->name('tenant.logout');
         });
     });
-}
