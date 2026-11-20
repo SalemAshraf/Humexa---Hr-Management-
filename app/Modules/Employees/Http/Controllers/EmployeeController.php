@@ -134,7 +134,7 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function restore(string $employee): RedirectResponse
+    public function restore(string $tenant, string $employee): RedirectResponse
     {
         $record = Employee::withTrashed()
             ->where('tenant_id', $this->tenantId())
