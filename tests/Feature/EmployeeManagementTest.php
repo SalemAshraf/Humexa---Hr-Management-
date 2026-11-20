@@ -319,3 +319,45 @@ test('employee reporting relationships cannot create a manager cycle', function 
         'manager_id' => null,
     ]);
 });
+
+test('employee create and update persist all supported personal contact fields', function () {
+    $registration = registerEmployeeTenant('Employees Personal Fields', 'employees-personal-fields@example.test');
+    actAsEmployeeTenant($this, $registration);
+
+    $base = 'http://' . $registration['domain'] . '/employees';
+    $this->post($base, employeePayload([
+        'work_email' => 'employee.work@example.test',
+        'personal_email' => 'employee.personal@example.test',
+        'phone' => '+201001234567',
+        'alternate_phone' => '+201112223333',
+        'date_of_birth' => '1998-05-10',
+        'gender' => 'male',
+        'nationality' => 'Egyptian',
+        'marital_status' => 'single',
+    ]))->assertRedirect()->assertSessionHasNoErrors();
+
+    $employee = DB::table('employees')
+        ->where('tenant_id', $registration['tenant']->id)
+        ->first();
+
+    expect($employee)->not->toBeNull()
+        ->and($employee->personal_email)->toBe('employee.personal@example.test')
+        ->and($employee->alternate_phone)->toBe('+201112223333')
+        ->and($employee->nationality)->toBe('Egyptian')
+        ->and($employee->marital_status)->toBe('single');
+
+    $this->put($base . '/' . $employee->id, employeePayload([
+        'personal_email' => 'updated.personal@example.test',
+        'alternate_phone' => '+201199988877',
+        'nationality' => 'Egypt',
+        'marital_status' => 'married',
+    ]))->assertRedirect()->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('employees', [
+        'id' => $employee->id,
+        'personal_email' => 'updated.personal@example.test',
+        'alternate_phone' => '+201199988877',
+        'nationality' => 'Egypt',
+        'marital_status' => 'married',
+    ]);
+});
