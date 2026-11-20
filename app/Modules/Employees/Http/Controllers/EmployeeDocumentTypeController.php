@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\\Modules\\Employees\\Http\\Controllers;
+namespace App\Modules\Employees\Http\Controllers;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Modules\\Employees\\Actions\\SaveEmployeeDocumentTypeAction;
-use App\\Modules\\Employees\\Http\\Requests\\EmployeeDocumentTypeRequest;
-use App\\Modules\\Employees\\Models\\EmployeeDocumentType;
-use Illuminate\\Http\\JsonResponse;
-use Illuminate\\Http\\RedirectResponse;
+use App\Http\Controllers\Controller;
+use App\Modules\Employees\Actions\SaveEmployeeDocumentTypeAction;
+use App\Modules\Employees\Http\Requests\EmployeeDocumentTypeRequest;
+use App\Modules\Employees\Models\EmployeeDocumentType;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 
 class EmployeeDocumentTypeController extends Controller
 {
