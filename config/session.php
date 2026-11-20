@@ -156,7 +156,7 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => env('SESSION_DOMAIN', '.'.ltrim((string) env('HUMEXA_TENANT_DOMAIN', 'humexa.test'), '.')),
 
     /*
     |--------------------------------------------------------------------------
