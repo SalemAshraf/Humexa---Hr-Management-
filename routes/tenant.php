@@ -12,6 +12,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeController;
 use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
 use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
+use App\Modules\Employees\Http\Controllers\EmployeeDocumentTypeController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.humexa.test')
@@ -31,6 +32,16 @@ Route::domain('{tenant}.humexa.test')
 
         Route::middleware(['auth:tenant', 'tenant.user'])->group(function () {
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
+
+            Route::prefix('/employee-document-types')
+                ->name('employee-document-types.')
+                ->controller(EmployeeDocumentTypeController::class)
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::post('/', 'store')->name('store');
+                    Route::put('/{type}', 'update')->whereNumber('type')->name('update');
+                    Route::delete('/{type}', 'destroy')->whereNumber('type')->name('destroy');
+                });
 
             Route::prefix('/organization')->name('organization.')->controller(OrganizationController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
