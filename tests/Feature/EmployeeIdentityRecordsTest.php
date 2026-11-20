@@ -83,7 +83,7 @@ test('tenant can save identity records and list only masked values', function ()
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.identity_type', 'national_id')
-        ->assertJsonPath('data.0.masked_number', '•••••••••••4567')
+        ->assertJsonPath('data.0.masked_number', '••••••••••4567')
         ->assertJsonPath('data.0.is_current', true)
         ->assertJsonMissingPath('data.0.identity_number')
         ->assertJsonMissingPath('data.0.identity_number_hash');
