@@ -63,7 +63,7 @@ class OrganizationController extends Controller
         return back()->with('success', 'Branch created successfully.');
     }
 
-    public function updateBranch(BranchRequest $request, int $branch): RedirectResponse
+    public function updateBranch(BranchRequest $request, string $branch): RedirectResponse
     {
         $record = Branch::query()->where('tenant_id', $this->tenantId())->findOrFail($branch);
         $record->update($request->validated());
@@ -71,7 +71,7 @@ class OrganizationController extends Controller
         return back()->with('success', 'Branch updated successfully.');
     }
 
-    public function destroyBranch(int $branch): RedirectResponse
+    public function destroyBranch(string $branch): RedirectResponse
     {
         $record = Branch::query()->where('tenant_id', $this->tenantId())->findOrFail($branch);
 
@@ -96,7 +96,7 @@ class OrganizationController extends Controller
         return back()->with('success', 'Department created successfully.');
     }
 
-    public function updateDepartment(DepartmentRequest $request, int $department): RedirectResponse
+    public function updateDepartment(DepartmentRequest $request, string $department): RedirectResponse
     {
         $record = Department::query()->where('tenant_id', $this->tenantId())->findOrFail($department);
         $record->update($request->validated());
@@ -104,7 +104,7 @@ class OrganizationController extends Controller
         return back()->with('success', 'Department updated successfully.');
     }
 
-    public function destroyDepartment(int $department): RedirectResponse
+    public function destroyDepartment(string $department): RedirectResponse
     {
         $record = Department::query()->where('tenant_id', $this->tenantId())->findOrFail($department);
 
@@ -129,7 +129,7 @@ class OrganizationController extends Controller
         return back()->with('success', 'Position created successfully.');
     }
 
-    public function updatePosition(PositionRequest $request, int $position): RedirectResponse
+    public function updatePosition(PositionRequest $request, string $position): RedirectResponse
     {
         $record = Position::query()->where('tenant_id', $this->tenantId())->findOrFail($position);
         $record->update($request->validated());
@@ -137,7 +137,7 @@ class OrganizationController extends Controller
         return back()->with('success', 'Position updated successfully.');
     }
 
-    public function destroyPosition(int $position): RedirectResponse
+    public function destroyPosition(string $position): RedirectResponse
     {
         $record = Position::query()->where('tenant_id', $this->tenantId())->findOrFail($position);
         $record->delete();
