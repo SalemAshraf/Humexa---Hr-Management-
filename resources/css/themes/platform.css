@@ -1,0 +1,22 @@
+[data-theme="platform"] {
+    color-scheme: dark;
+
+    --hx-bg: #0B1120;
+    --hx-surface: #111C2E;
+    --hx-surface-secondary: #172438;
+    --hx-sidebar-bg: #0F1A2B;
+
+    --hx-primary: #16B8D4;
+    --hx-primary-hover: #089DBB;
+    --hx-primary-soft: rgba(22, 184, 212, 0.12);
+
+    --hx-text: #F1F5F9;
+    --hx-text-muted: #94A3B8;
+
+    --hx-border: #263449;
+    --hx-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+
+    --hx-success: #22C55E;
+    --hx-warning: #F59E0B;
+    --hx-danger: #EF4444;
+}

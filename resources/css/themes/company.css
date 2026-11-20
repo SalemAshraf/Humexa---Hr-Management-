@@ -1,0 +1,22 @@
+[data-theme="company"] {
+    color-scheme: light;
+
+    --hx-bg: #F5F7FB;
+    --hx-surface: #FFFFFF;
+    --hx-surface-secondary: #F1F5F9;
+    --hx-sidebar-bg: #FFFFFF;
+
+    --hx-primary: #087F9B;
+    --hx-primary-hover: #06677F;
+    --hx-primary-soft: rgba(8, 127, 155, 0.10);
+
+    --hx-text: #172033;
+    --hx-text-muted: #64748B;
+
+    --hx-border: #E2E8F0;
+    --hx-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+
+    --hx-success: #16A34A;
+    --hx-warning: #D97706;
+    --hx-danger: #DC2626;
+}
