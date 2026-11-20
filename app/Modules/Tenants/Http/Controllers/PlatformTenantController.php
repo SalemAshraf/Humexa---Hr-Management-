@@ -77,6 +77,34 @@ class PlatformTenantController extends Controller
         ]);
     }
 
+    public function activityLogs(Request $request): InertiaResponse
+    {
+        $this->authorizePlatformPermission($request, 'platform.activity-logs.view');
+
+        $activity = PlatformActivityLog::query()
+            ->with(['actor:id,name,email', 'tenant'])
+            ->latest('created_at')
+            ->paginate(25)
+            ->through(fn (PlatformActivityLog $log): array => [
+                'id' => $log->id,
+                'tenantId' => $log->tenant_id,
+                'companyName' => $log->tenant?->getAttribute('company_name')
+                    ?: 'Deleted or unavailable company',
+                'event' => $log->event,
+                'oldStatus' => $log->old_status,
+                'newStatus' => $log->new_status,
+                'reason' => $log->reason,
+                'actor' => $log->actor?->name ?? 'Deleted platform user',
+                'actorEmail' => $log->actor?->email,
+                'ipAddress' => $log->ip_address,
+                'createdAt' => $log->created_at?->toDateTimeString(),
+            ]);
+
+        return Inertia::render('Platform/ActivityLogs/Index', [
+            'activity' => $activity,
+        ]);
+    }
+
     public function suspend(
         TenantStatusRequest $request,
         Tenant $tenant,
