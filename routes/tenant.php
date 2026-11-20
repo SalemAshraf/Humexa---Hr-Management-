@@ -61,6 +61,8 @@ Route::domain('{tenant}.humexa.test')
             Route::prefix('/employees')->name('employees.')->group(function () {
                 Route::controller(EmployeeController::class)->group(function () {
                     Route::get('/', 'index')->name('index');
+                    Route::get('/archived', 'archived')->name('archived');
+                    Route::post('/{employee}/restore', 'restore')->whereNumber('employee')->name('restore');
                     Route::get('/create', 'create')->name('create');
                     Route::post('/', 'store')->name('store');
                     Route::get('/{employee}/edit', 'edit')->whereNumber('employee')->name('edit');
