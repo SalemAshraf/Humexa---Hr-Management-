@@ -62,6 +62,9 @@ class SaveEmployeeIdentityRecordAction
             ];
 
             if ($existingRecord !== null) {
+                // The bulk update above changed the database row, not this loaded model.
+                // Refresh first so Eloquent detects is_current changing from false to true.
+                $existingRecord->refresh();
                 $existingRecord->forceFill($attributes)->save();
 
                 return $existingRecord->refresh();
