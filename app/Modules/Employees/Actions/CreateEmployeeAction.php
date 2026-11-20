@@ -13,6 +13,8 @@ class CreateEmployeeAction
     public function execute(array $data, string $tenantId, ?int $actorId): Employee
     {
         return DB::transaction(function () use ($data, $tenantId, $actorId) {
+            unset($data['status_change_reason']);
+
             $employeeNumber = trim((string) ($data['employee_number'] ?? ''));
 
             if ($employeeNumber === '') {
