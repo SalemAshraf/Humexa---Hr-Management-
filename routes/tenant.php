@@ -107,7 +107,7 @@ Route::domain('{tenant}.humexa.test')
                     ->group(function () {
                         Route::get('/', 'show')->name('show');
                         Route::post('/', 'store')->name('store');
-                        Route::delete('/', 'destroy')->name('destroy');
+                        Route::post('/remove', 'destroy')->name('remove');
                     });
 
                 Route::prefix('/{employee}/documents')
