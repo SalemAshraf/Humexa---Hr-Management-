@@ -7,7 +7,6 @@ namespace App\Modules\Employees\Actions;
 use App\Models\Tenant;
 use App\Modules\Employees\Models\Employee;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class CreateEmployeeAction
 {
@@ -33,13 +32,14 @@ class CreateEmployeeAction
                     ->exists());
             }
 
-            $employee = Employee::query()->create([
+            $employee = Employee::query()->forceCreate([
                 ...$data,
                 'employee_number' => $employeeNumber,
                 'tenant_id' => $tenantId,
             ]);
 
-            $employee->employmentHistories()->create([
+            $employee->employmentHistories()->forceCreate([
+                'tenant_id' => $tenantId,
                 'previous_status' => null,
                 'new_status' => $employee->employment_status,
                 'effective_date' => $employee->hire_date?->toDateString() ?? now()->toDateString(),
