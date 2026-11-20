@@ -144,14 +144,18 @@ test('organization parent records cannot be archived while child records exist',
 
     $base = 'http://' . $registration['domain'] . '/organization';
 
-    $this->post($base . '/branches', ['name' => 'Main Branch'])->assertRedirect();
+    $this->post($base . '/branches', ['name' => 'Main Branch'])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
     $branchId = DB::table('branches')->where('tenant_id', $registration['tenant']->id)->value('id');
+    $this->assertNotNull($branchId, 'The branch must be created before testing its archive restriction.');
 
     $this->post($base . '/departments', [
         'branch_id' => $branchId,
         'name' => 'Operations',
-    ])->assertRedirect();
+    ])->assertRedirect()->assertSessionHasNoErrors();
     $departmentId = DB::table('departments')->where('tenant_id', $registration['tenant']->id)->value('id');
+    $this->assertNotNull($departmentId, 'The department must be created before testing its archive restriction.');
 
     $this->delete($base . '/branches/' . $branchId)->assertStatus(409);
 
