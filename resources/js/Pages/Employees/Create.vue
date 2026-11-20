@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 import EmployeeForm from '@/Components/Employees/EmployeeForm.vue';
 
-defineProps({
+const props = defineProps({
     branches: Array,
     departments: Array,
     positions: Array,
@@ -22,7 +22,7 @@ defineProps({
             <p class="mt-2 text-sm text-slate-500">Create an employee profile and optionally link a login account.</p>
         </section>
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <EmployeeForm v-bind="$props" />
+            <EmployeeForm v-bind="props" />
         </section>
     </CompanyLayout>
 </template>
