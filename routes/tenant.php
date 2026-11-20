@@ -13,6 +13,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
 use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
 use App\Modules\Employees\Http\Controllers\EmployeeDocumentTypeController;
+use App\Modules\Employees\Http\Controllers\EmployeeDocumentController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.humexa.test')
@@ -96,6 +97,18 @@ Route::domain('{tenant}.humexa.test')
                     ->group(function () {
                         Route::get('/', 'index')->name('index');
                         Route::post('/', 'store')->name('store');
+                    });
+
+                Route::prefix('/{employee}/documents')
+                    ->whereNumber('employee')
+                    ->name('documents.')
+                    ->controller(EmployeeDocumentController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
+                        Route::get('/{document}/download', 'download')->whereNumber('document')->name('download');
+                        Route::get('/{document}/preview', 'preview')->whereNumber('document')->name('preview');
+                        Route::delete('/{document}', 'destroy')->whereNumber('document')->name('destroy');
                     });
             });
 
