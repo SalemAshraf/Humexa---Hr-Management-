@@ -245,6 +245,18 @@ async function archiveDocument(item) {
     finally { saving.value = false; }
 }
 
+async function deleteDocument(item) {
+    if (!window.confirm('Permanently delete this document and its stored file? This cannot be undone.')) return;
+    saving.value = true;
+    resetMessages();
+    try {
+        await window.axios.post(endpoints.value.documents + '/' + item.id + '/delete', {}, { headers: { Accept: 'application/json' } });
+        await loadSection();
+        successMessage.value = 'Document permanently deleted.';
+    } catch (error) { applyError(error); }
+    finally { saving.value = false; }
+}
+
 function resetTypeForm() {
     Object.assign(typeForm, { name: '', description: '', is_active: true });
     editingTypeId.value = null;
@@ -470,7 +482,7 @@ watch(() => [props.section, props.employeeId], loadSection, { immediate: true })
             <div class="mt-4 space-y-3">
                 <article v-for="item in documents" :key="item.id" class="flex flex-col gap-3 rounded-xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="break-words text-sm font-bold text-slate-800">{{ item.title }}</h3><span v-if="item.is_archived" class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">Archived</span><span v-else-if="item.is_expired" class="rounded-full bg-red-50 px-2 py-1 text-[10px] font-bold text-red-700">Expired</span></div><p class="mt-1 text-xs text-slate-500">{{ item.document_type_name || 'Archived type' }} · {{ item.original_file_name }} · {{ formatBytes(item.file_size) }}</p><p class="mt-1 text-xs text-slate-400">Issued {{ dateLabel(item.issue_date) }} · Expires {{ dateLabel(item.expiry_date) }}</p></div>
-                    <div class="flex shrink-0 flex-wrap gap-3 text-xs font-semibold"><a :href="endpoints.documents + '/' + item.id + '/preview'" target="_blank" rel="noopener" class="text-cyan-700">Preview</a><a :href="endpoints.documents + '/' + item.id + '/download'" class="text-cyan-700">Download</a><button v-if="canUpdate && !item.is_archived" type="button" class="text-red-600" @click.stop.prevent="archiveDocument(item)">Archive</button></div>
+                    <div class="flex shrink-0 flex-wrap gap-3 text-xs font-semibold"><a :href="endpoints.documents + '/' + item.id + '/preview'" target="_blank" rel="noopener" class="text-cyan-700">Preview</a><a :href="endpoints.documents + '/' + item.id + '/download'" class="text-cyan-700">Download</a><button v-if="canUpdate && !item.is_archived" type="button" class="text-amber-700" @click.stop.prevent="archiveDocument(item)">Archive</button><button v-if="canUpdate" type="button" class="text-red-600" @click.stop.prevent="deleteDocument(item)">Delete permanently</button></div>
                 </article>
             </div>
         </template>
