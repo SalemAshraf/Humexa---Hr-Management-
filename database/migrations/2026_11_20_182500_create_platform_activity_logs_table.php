@@ -16,7 +16,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete();
-            $table->string('tenant_id', 36)->nullable()->index();
+            $table->string('tenant_id', 36)->nullable();
             $table->string('event', 100);
             $table->string('old_status', 20)->nullable();
             $table->string('new_status', 20);
