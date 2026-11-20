@@ -16,6 +16,14 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    canSuspendCompanies: {
+        type: Boolean,
+        default: false,
+    },
+    canActivateCompanies: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const page = usePage();
@@ -129,7 +137,7 @@ function changeStatus(company, action) {
                                         class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
                                     />
                                     <button
-                                        v-if="company.status === 'active'"
+                                        v-if="company.status === 'active' && canSuspendCompanies"
                                         type="button"
                                         :disabled="processing[company.id]"
                                         class="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-400/20 disabled:opacity-50"
@@ -138,7 +146,7 @@ function changeStatus(company, action) {
                                         {{ processing[company.id] ? 'Processing...' : 'Suspend Company' }}
                                     </button>
                                     <button
-                                        v-else
+                                        v-else-if="company.status === 'suspended' && canActivateCompanies"
                                         type="button"
                                         :disabled="processing[company.id]"
                                         class="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-400/20 disabled:opacity-50"
