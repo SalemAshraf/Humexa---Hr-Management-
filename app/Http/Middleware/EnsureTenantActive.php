@@ -19,32 +19,46 @@ class EnsureTenantActive
 
         $tenant = tenant();
 
-        if ($tenant->getAttribute('status') === 'active') {
-            return $next($request);
+        $isAuthenticated = Auth::guard('tenant')->check();
+
+        if ($tenant->getAttribute('status') !== 'active') {
+            if ($isAuthenticated) {
+                Auth::guard('tenant')->logout();
+            }
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'This company account is currently suspended.',
+                ], 403);
+            }
+
+            return redirect('/login')->with(
+                'company_suspended',
+                'Your company account is currently suspended. Please contact the platform administrator.'
+            );
         }
 
-        // Revoke any authenticated tenant session.
-        if (Auth::guard('tenant')->check()) {
+        $sessionVersion = $request->session()->get('tenant_session_version');
+        $currentVersion = (int) $tenant->getAttribute('session_version');
+
+        if ($isAuthenticated && (
+            $sessionVersion === null
+            || (int) $sessionVersion !== $currentVersion
+        )) {
             Auth::guard('tenant')->logout();
 
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
+            return redirect('/login')->with(
+                'status',
+                'Your session has expired. Please sign in again.'
+            );
         }
 
-        // Allow the login page to display the suspension notice.
-        if ($request->isMethod('GET') && $request->is('login')) {
-            return $next($request);
-        }
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'message' => 'This company account is currently suspended.',
-            ], 403);
-        }
-
-        return redirect('/login')->with(
-            'company_suspended',
-            'Your company account is currently suspended. Please contact the platform administrator.'
-        );
+        return $next($request);
     }
 }

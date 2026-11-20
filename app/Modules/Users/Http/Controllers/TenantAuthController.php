@@ -28,12 +28,19 @@ class TenantAuthController extends Controller
         ]);
     }
 
-    public function store(PortalLoginRequest $request): RedirectResponse
-    {
-        $request->authenticate('tenant');
+    
+public function store(PortalLoginRequest $request): RedirectResponse
+{
+    $request->authenticate('tenant');
 
-        return redirect()->intended('/dashboard');
-    }
+    $request->session()->put(
+        'tenant_session_version',
+        (int) tenant()->getAttribute('session_version')
+    );
+
+    return redirect()->intended('/dashboard');
+}
+
 
     public function destroy(Request $request): RedirectResponse
     {
