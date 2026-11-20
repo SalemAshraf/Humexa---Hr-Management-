@@ -116,7 +116,11 @@ class PlatformTenantController extends Controller
             $newStatus,
             $operation
         ): void {
-            $oldStatus = (string) $tenant->getAttribute('status');
+            $lockedTenant = Tenant::query()
+                ->lockForUpdate()
+                ->findOrFail($tenant->getKey());
+
+            $oldStatus = (string) $lockedTenant->getAttribute('status');
             $updatedTenant = $operation();
 
             // Do not create duplicate audit entries for idempotent requests.
