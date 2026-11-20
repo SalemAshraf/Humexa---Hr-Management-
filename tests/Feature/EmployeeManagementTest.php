@@ -50,6 +50,9 @@ test('tenant can create an employee without a login account and receives an auto
 
     $base = 'http://' . $registration['domain'] . '/employees';
 
+    $this->get($base)->assertOk()->assertInertia(fn ($page) => $page->component('Employees/Index')->where('summary.total', 0));
+    $this->get($base . '/create')->assertOk()->assertInertia(fn ($page) => $page->component('Employees/Create'));
+
     $this->post($base, employeePayload())
         ->assertRedirect()
         ->assertSessionHasNoErrors();
@@ -62,6 +65,9 @@ test('tenant can create an employee without a login account and receives an auto
         ->and($employee->employee_number)->toBe('EMP-0001')
         ->and($employee->user_id)->toBeNull()
         ->and($employee->employment_status)->toBe('draft');
+
+    $this->get($base . '/' . $employee->id)->assertOk()->assertInertia(fn ($page) => $page->component('Employees/Show'));
+    $this->get($base . '/' . $employee->id . '/edit')->assertOk()->assertInertia(fn ($page) => $page->component('Employees/Edit'));
 
     $this->assertDatabaseHas('employee_employment_histories', [
         'tenant_id' => $registration['tenant']->id,
