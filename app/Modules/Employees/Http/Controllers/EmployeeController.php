@@ -48,7 +48,7 @@ class EmployeeController extends Controller
             'accounts' => User::query()
                 ->where('tenant_id', $tenantId)
                 ->where('account_type', User::ACCOUNT_TYPE_TENANT)
-                ->whereNotIn('id', Employee::query()->where('tenant_id', $tenantId)->whereNotNull('user_id')->select('user_id'))
+                ->whereNotIn('id', Employee::withTrashed()->where('tenant_id', $tenantId)->whereNotNull('user_id')->select('user_id'))
                 ->orderBy('name')
                 ->get(['id', 'name', 'email']),
             'statuses' => collect(Employee::STATUSES)
