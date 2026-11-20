@@ -25,7 +25,7 @@ class EmployeeProfilePhotoRequest extends FormRequest
                 'required',
                 'file',
                 'image',
-                'mimes:jpg,jpeg,png',
+                'mimes:' . implode(',', config('employee.allowed_profile_photo_mimes', ['jpg', 'jpeg', 'png'])),
                 'max:' . config('employee.profile_photo_max_kb', 5120),
             ],
         ];
