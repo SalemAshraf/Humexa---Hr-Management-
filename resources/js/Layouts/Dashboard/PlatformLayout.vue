@@ -2,6 +2,8 @@
 import DashboardSidebar from '@/Components/Dashboard/DashboardSidebar.vue';
 import DashboardHeader from '@/Components/Dashboard/DashboardHeader.vue';
 import { useSidebar } from '@/Composables/useSidebar';
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
 defineProps({
     title: { type: String, default: 'Dashboard' },
@@ -17,16 +19,20 @@ const {
     closeMobile,
 } = useSidebar();
 
-const navigationItems = [
+const page = usePage();
+
+const navigationItems = computed(() => [
     { label: 'Overview', href: route('platform.dashboard'), shortcut: 'OV' },
     { label: 'Companies', href: route('platform.companies.index'), shortcut: 'CO' },
-    { label: 'Activity Logs', href: route('platform.activity-logs.index'), shortcut: 'AC' },
+    ...(page.props.canViewActivityLogs
+        ? [{ label: 'Activity Logs', href: route('platform.activity-logs.index'), shortcut: 'AC' }]
+        : []),
     { label: 'Subscriptions', shortcut: 'SU', disabled: true, badge: 'Soon' },
     { label: 'Billing', shortcut: 'BI', disabled: true, badge: 'Soon' },
     { label: 'Platform Users', shortcut: 'US', disabled: true, badge: 'Soon' },
     { label: 'Notifications', shortcut: 'NO', disabled: true, badge: 'Soon' },
     { label: 'Settings', shortcut: 'SE', disabled: true, badge: 'Soon' },
-];
+]);
 
 function handleSidebarToggle() {
     if (window.matchMedia('(min-width: 1024px)').matches) {
