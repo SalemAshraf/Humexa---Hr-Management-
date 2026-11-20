@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeEmploymentHistory extends Model
 {
+    protected $hidden = ['tenant_id'];
+
     protected $fillable = [
         'previous_status',
         'new_status',
