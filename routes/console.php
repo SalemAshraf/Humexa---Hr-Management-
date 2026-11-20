@@ -7,8 +7,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-
-Artisan::command('humexa:seed-demo {tenant : The tenant ID to seed}', function (string $tenantId) {
+Artisan::command('humexa:seed-demo {tenant : The tenant ID to seed}', function () {
+    $tenantId = $this->argument('tenant');
     $tenant = \App\Models\Tenant::query()->findOrFail($tenantId);
 
     tenancy()->initialize($tenant);
