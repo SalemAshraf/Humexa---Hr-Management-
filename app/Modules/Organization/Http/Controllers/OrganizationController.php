@@ -63,20 +63,23 @@ class OrganizationController extends Controller
         return back()->with('success', 'Branch created successfully.');
     }
 
-    public function updateBranch(BranchRequest $request, string $branch): RedirectResponse
+    public function updateBranch(BranchRequest $request): RedirectResponse
     {
+        $branch = (string) $request->route('branch');
         $record = Branch::query()->where('tenant_id', $this->tenantId())->findOrFail($branch);
         $record->update($request->validated());
 
         return back()->with('success', 'Branch updated successfully.');
     }
 
-    public function destroyBranch(string $branch): RedirectResponse
+    public function destroyBranch(): RedirectResponse
     {
-        $record = Branch::query()->where('tenant_id', $this->tenantId())->findOrFail($branch);
+        $branch = (string) request()->route('branch');
+        $tenantId = $this->tenantId();
+        $record = Branch::query()->where('tenant_id', $tenantId)->findOrFail($branch);
 
         abort_if(
-            Department::query()->where('tenant_id', $this->tenantId())->where('branch_id', $record->id)->withTrashed()->exists(),
+            Department::query()->where('tenant_id', $tenantId)->where('branch_id', $record->id)->withTrashed()->exists(),
             409,
             'Move or remove this branch departments before deleting the branch.'
         );
@@ -96,20 +99,23 @@ class OrganizationController extends Controller
         return back()->with('success', 'Department created successfully.');
     }
 
-    public function updateDepartment(DepartmentRequest $request, string $department): RedirectResponse
+    public function updateDepartment(DepartmentRequest $request): RedirectResponse
     {
+        $department = (string) $request->route('department');
         $record = Department::query()->where('tenant_id', $this->tenantId())->findOrFail($department);
         $record->update($request->validated());
 
         return back()->with('success', 'Department updated successfully.');
     }
 
-    public function destroyDepartment(string $department): RedirectResponse
+    public function destroyDepartment(): RedirectResponse
     {
-        $record = Department::query()->where('tenant_id', $this->tenantId())->findOrFail($department);
+        $department = (string) request()->route('department');
+        $tenantId = $this->tenantId();
+        $record = Department::query()->where('tenant_id', $tenantId)->findOrFail($department);
 
         abort_if(
-            Position::query()->where('tenant_id', $this->tenantId())->where('department_id', $record->id)->withTrashed()->exists(),
+            Position::query()->where('tenant_id', $tenantId)->where('department_id', $record->id)->withTrashed()->exists(),
             409,
             'Move or remove this department positions before deleting the department.'
         );
@@ -129,16 +135,18 @@ class OrganizationController extends Controller
         return back()->with('success', 'Position created successfully.');
     }
 
-    public function updatePosition(PositionRequest $request, string $position): RedirectResponse
+    public function updatePosition(PositionRequest $request): RedirectResponse
     {
+        $position = (string) $request->route('position');
         $record = Position::query()->where('tenant_id', $this->tenantId())->findOrFail($position);
         $record->update($request->validated());
 
         return back()->with('success', 'Position updated successfully.');
     }
 
-    public function destroyPosition(string $position): RedirectResponse
+    public function destroyPosition(): RedirectResponse
     {
+        $position = (string) request()->route('position');
         $record = Position::query()->where('tenant_id', $this->tenantId())->findOrFail($position);
         $record->delete();
 
