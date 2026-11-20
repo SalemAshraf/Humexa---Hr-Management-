@@ -1,93 +1,131 @@
-import pypandoc, os
-readme = r'''# Humexa HRMS
+<div align="center">
 
-**Humexa** is a multi-tenant Human Resources Management System (HRMS) built with Laravel, Vue 3, Inertia.js, and Tailwind CSS.
+# Humexa HRMS
 
-The project follows a **Modular Monolith** architecture and uses **single-database tenancy**. It is being developed incrementally, with tenant isolation, authorization, and maintainability treated as core requirements.
+**A modular, multi-tenant Human Resources Management System**
 
-> **Project status:** Active development. The current codebase includes the application foundation, tenant and platform authentication flows, and initial dashboards. Not all HR modules or dashboard actions are implemented yet.
+Manage people, organization structure, and employee records through a secure, tenant-isolated platform.
+
+</div>
+
+---
+
+## Overview
+
+**Humexa** is a Human Resources Management System (HRMS) built to support organizations through a centralized platform while keeping each company's data isolated.
+
+The application follows a **Modular Monolith** architecture with Laravel on the backend and Vue 3 + Inertia.js on the frontend. It uses a **single-database tenancy model**, with tenant context resolved by domain and tenant-owned records scoped at the application level.
+
+Humexa is under active development. Features are delivered incrementally, and the implementation status described below reflects the current codebase—not a claim that every planned HR workflow is production-ready.
+
+## Key Capabilities
+
+### Platform and tenant management
+- Separate platform and tenant authentication flows.
+- Tenant registration and domain-based tenant resolution.
+- Tenant lifecycle controls, including activation and suspension.
+- Tenant-aware access middleware and authorization boundaries.
+
+### Organization management
+- Branches.
+- Departments.
+- Positions.
+- Relationships between employees and organizational records.
+
+### Employee management
+- Employee profiles and employment information.
+- Employment status and reporting relationships.
+- Multiple addresses, with a single primary address per employee.
+- Multiple emergency contacts with priority ordering.
+- National ID and passport records with encrypted values, keyed blind indexes, and masked display values.
+- Tenant-managed employee document types.
+- Private employee document uploads, previews, and downloads.
+- Optional employee profile photos stored privately.
+
+> **Implementation note:** Employee profile and related-record backend capabilities are being built and verified incrementally. Frontend workflows and broader HR processes continue to evolve. Check the current routes, module code, and automated tests before relying on a capability in a production workflow.
 
 ## Technology Stack
 
-| Area | Technology |
+| Layer | Technology |
 |---|---|
 | Backend | PHP 8.3+, Laravel 13 |
 | Frontend | Vue 3, Inertia.js 2 |
 | Styling | Tailwind CSS |
 | Database | MySQL |
-| Cache, sessions and queues | Redis |
-| Multi-tenancy | `stancl/tenancy` (single-database mode) |
-| Roles and permissions | Spatie Laravel Permission (Teams enabled) |
-| Testing | Pest |
-| Build tooling | Vite |
+| Cache and queues | Redis or the configured Laravel drivers |
+| Multi-tenancy | `stancl/tenancy` 3.10 — single-database mode |
+| Authorization | Spatie Laravel Permission with Teams |
+| Frontend tooling | Vite |
+| Automated testing | Pest |
 
 ## Architecture
 
-Humexa is organized as a modular monolith. Business capabilities are separated into modules while remaining part of one Laravel application.
-
-The intended high-level structure is:
+Humexa uses a **Modular Monolith**: one deployable Laravel application, organized into business-focused modules with clear responsibilities.
 
 ```text
 app/
 ├── Modules/
-│   ├── Users/
+│   ├── Employees/
+│   ├── Organization/
 │   ├── Tenants/
-│   └── ...
-└── Shared/
+│   └── Users/
+├── Http/
+│   └── Middleware/
+└── Models/
+
+config/
+database/
+├── factories/
+├── migrations/
+└── seeders/
+
+resources/
+└── js/
+
+routes/
+├── web.php
+└── tenant.php
+
+tests/
+├── Feature/
+└── Unit/
 ```
 
-Modules are introduced as the corresponding business capabilities are developed; this structure does not imply that every planned module is already implemented.
+The module list reflects the current application structure. Additional modules should be introduced as their business workflows are implemented.
 
 ### Multi-tenancy model
 
-- Single MySQL database shared by tenants.
-- Tenant-owned records are scoped using `tenant_id`.
-- Tenant context is resolved from the tenant's domain.
-- Tenant-owned data must not be accessed across tenant boundaries.
-- Platform administration is separated from tenant administration.
+Humexa uses single-database tenancy:
 
-### Local domains
+- A shared database stores platform and tenant data.
+- Tenant-owned records are associated with a tenant.
+- Tenant context is initialized from the tenant's domain.
+- Tenant queries and business operations must enforce tenant ownership.
+- Tenant IDs are resolved server-side; values submitted by the browser are never trusted for tenant authorization.
+- Platform access is separated from tenant access through dedicated authentication and middleware.
 
-- Central platform: `humexa.test`
-- Tenant domains: `{tenant-slug}.humexa.test`
+### Local domain convention
 
-For local Windows development, add the central domain and each tenant subdomain you want to use to the Windows hosts file (`C:\Windows\System32\drivers\etc\hosts`), pointing them to `127.0.0.1`. The Windows hosts file does not provide wildcard subdomain resolution.
+| Application area | Local domain |
+|---|---|
+| Central platform | `humexa.test` |
+| Tenant application | `{tenant-slug}.humexa.test` |
 
-## Current Foundation
+The local domain configuration must match the central domains and tenant-domain settings in the application configuration.
 
-Implemented and verified in the current development environment:
+## Getting Started
 
-- Tenant registration flow that creates a tenant, its domain, and the initial tenant administrator within a database transaction.
-- Separate tenant and platform authentication guards and login flows.
-- Tenant and platform access middleware.
-- Tenant-aware user providers.
-- Team-scoped roles and permissions configuration.
-- Initial tenant dashboard and platform dashboard.
-- Redis configured for cache, queue, and session storage.
-- Pest test suite covering the current application foundation and permission-team isolation.
+### Prerequisites
 
-The following are planned or under development and should **not** be considered complete:
-
-- Full employee management and organization structure.
-- Attendance, shifts, breaks, overtime approval, and attendance corrections.
-- Leave management.
-- Payroll.
-- Recruitment and performance management.
-- Reports, notifications, subscriptions, billing, and platform administration screens.
-- AI read-only HR assistant. This is a planned capability, not an implemented feature.
-
-## Local Development Setup
-
-### Requirements
-
-Install and configure:
+Install the following before setting up the project:
 
 - PHP 8.3 or later, with the extensions required by Laravel.
 - Composer.
 - Node.js and npm.
-- MySQL.
-- Redis.
+- MySQL 8.x.
+- Redis, if using Redis for cache, queues, or sessions.
 - Git.
+- A local web server or a Laravel-compatible development environment.
 
 ### 1. Clone the repository
 
@@ -103,24 +141,20 @@ composer install
 npm install
 ```
 
-### 3. Configure environment
+### 3. Configure the environment
 
-Create your local environment file:
+Create your local environment file.
 
-```bash
-cp .env.example .env
-```
-
-On Windows PowerShell, use:
+**Windows PowerShell:**
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Configure the database and Redis connection values in `.env`. Set the local application URL to the address used by your development environment, for example:
+**macOS / Linux:**
 
-```dotenv
-APP_URL=http://humexa.test
+```bash
+cp .env.example .env
 ```
 
 Generate the application key:
@@ -129,131 +163,189 @@ Generate the application key:
 php artisan key:generate
 ```
 
-Do not commit `.env` or place real credentials, API keys, or production secrets in `.env.example`.
+Update the values in `.env` for your local environment. At minimum, configure:
 
-### 4. Create the database
+- `APP_URL`
+- `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD`
+- Redis connection values if Redis-backed services are enabled
+- The tenant central-domain configuration required by your local setup
 
-Create a MySQL database for the application (the current local development database is named `humexa`) and update the `DB_*` values in `.env`.
+For a local MySQL setup, use `DB_CONNECTION=mysql` and provide the correct database credentials.
 
-Run migrations:
+### 4. Configure the employee identity hash key
 
-```bash
-php artisan migrate
+Employee identity numbers are encrypted at rest and use a separate keyed HMAC blind index for duplicate detection.
+
+Generate a dedicated secret of at least 32 characters and set it as:
+
+```dotenv
+EMPLOYEE_IDENTITY_HASH_KEY=your-own-random-secret-of-at-least-32-characters
 ```
 
-Do not run seeders blindly against a database containing data. Review `DatabaseSeeder` and the target environment first.
+Keep this value private, stable, and separate from `APP_KEY`. Do not commit it, share it in issue reports, or reuse the example value above. Losing or changing this key affects identity-number lookup and duplicate detection for existing records; plan key rotation deliberately.
 
 ### 5. Configure local domains
 
-Add entries similar to these to the Windows hosts file, adjusting the tenant subdomain to the tenant you registered:
+Add the central domain and the tenant subdomains you need to your hosts file, pointing them to your local development server.
+
+On Windows, edit the hosts file as Administrator:
+
+```text
+C:\Windows\System32\drivers\etc\hosts
+```
+
+Example entries:
 
 ```text
 127.0.0.1 humexa.test
-127.0.0.1 your-tenant.humexa.test
+127.0.0.1 acme.humexa.test
 ```
 
-If you change the hosts file, flush the DNS cache:
+The Windows hosts file does not support wildcard subdomains. Add an entry for each local tenant domain you use.
+
+If needed, flush the DNS cache:
 
 ```powershell
 ipconfig /flushdns
 ```
 
-Configure your local web server or Laravel development server so the domains resolve to the application. If using Laravel's development server, make sure it is listening on an address reachable through the configured local domains.
+Make sure your local web server accepts requests for the configured domains and routes them to the Laravel application.
 
-### 6. Build frontend assets
+### 6. Run database migrations
 
-For development:
+Create the configured MySQL database, then run:
+
+```bash
+php artisan migrate
+```
+
+Review the available seeders before running them. Do not run demo or development seeders against a database containing data you need to preserve.
+
+### 7. Start the application
+
+Start the Laravel application using your local environment. For the standard Laravel development server:
+
+```bash
+php artisan serve --host=127.0.0.1
+```
+
+In a separate terminal, start Vite:
 
 ```bash
 npm run dev
 ```
 
-For a production build:
+For a production frontend build:
 
 ```bash
 npm run build
 ```
 
-### 7. Run the application
+If your local environment uses Laragon, Herd, or another web server, use its normal site-serving workflow instead of starting a second web server with `php artisan serve`.
 
-Start the Laravel development server if your local environment does not already serve the application:
+## Application Areas
 
-```bash
-php artisan serve
-```
-
-Keep the Vite development process running in a separate terminal when using `npm run dev`.
-
-## Application Portals
-
-| Portal | Local URL |
+| Area | Local URL pattern |
 |---|---|
-| Public landing page | `http://humexa.test` |
-| Tenant login | `http://{tenant-slug}.humexa.test/login` |
-| Tenant dashboard | `http://{tenant-slug}.humexa.test/dashboard` |
-| Platform admin login | `http://humexa.test/platform/login` |
+| Central application | `http://humexa.test` |
+| Platform sign-in | `http://humexa.test/platform/login` |
 | Platform dashboard | `http://humexa.test/platform/dashboard` |
+| Tenant sign-in | `http://{tenant-slug}.humexa.test/login` |
+| Tenant dashboard | `http://{tenant-slug}.humexa.test/dashboard` |
 
-A platform administrator is provisioned through the application's administrative Artisan command:
+These URLs assume the local domain configuration described above.
 
-```bash
-php artisan app:create-platform-admin
-```
+## Configuration Reference
 
-Follow the interactive prompts. Do not create platform administrators through public tenant registration.
+The following environment variables are relevant to employee records and private file storage:
+
+| Variable | Purpose |
+|---|---|
+| `EMPLOYEE_IDENTITY_HASH_KEY` | Dedicated secret used for identity-number blind indexing |
+| `EMPLOYEE_PROFILE_PHOTO_DISK` | Filesystem disk for private employee profile photos |
+| `EMPLOYEE_DOCUMENT_DISK` | Filesystem disk for private employee documents |
+
+Profile photos and employee documents must use private storage. Files should be served through authenticated, tenant-authorized application routes—not public storage URLs.
 
 ## Testing
 
-Run the automated test suite with:
+Run the complete automated test suite:
 
 ```bash
 php artisan test
 ```
 
-Or run Pest directly:
+Run a focused feature test:
 
 ```bash
-./vendor/bin/pest
+php artisan test --filter=EmployeeAddressesTest
 ```
 
-Tests should cover normal behavior, validation, authorization, tenant isolation, and failure scenarios. Always run relevant tests after changing application behavior.
+Use the relevant test class name when targeting another feature.
 
-## Security Notes
+When adding or changing a feature, tests should cover:
 
-- Never commit `.env`, credentials, private keys, database dumps, or production data.
-- Never trust a `tenant_id` submitted by the frontend. Resolve tenant ownership from the authenticated tenant context.
-- Enforce tenant scope in queries, services, policies, and queued jobs.
-- Protect platform routes separately from tenant routes.
-- Apply authorization to every protected operation.
-- Use migrations for schema changes; do not make manual production schema changes.
-- Review temporary preview routes and development-only configuration before any production deployment.
-- This repository is under active development and is not a production deployment guide.
+- Expected business behavior.
+- Validation and invalid input.
+- Authentication and authorization.
+- Tenant isolation and cross-tenant access attempts.
+- Database integrity and transaction behavior.
+- Failure scenarios, including file-storage failures where relevant.
 
-## Development Principles
+A feature should not be considered complete merely because it works in the browser.
 
-- Modular Monolith with clear module responsibilities.
-- Laravel conventions and SOLID principles.
-- Form Requests for input validation.
-- Database transactions for related multi-record operations.
-- Explicit authorization and tenant isolation.
-- Pest tests for business rules and security boundaries.
-- English and Arabic localization, including RTL support, as the frontend is developed.
+## Security and Data Protection
 
-## Contributing
+Security and tenant isolation are core architectural requirements.
 
-The project is currently under active development. Before submitting changes:
+- Resolve tenant context from the authenticated tenant domain and session.
+- Never trust a frontend-supplied `tenant_id`.
+- Scope tenant-owned queries and relationships to the active tenant.
+- Enforce authorization through policies and protected routes.
+- Keep platform and tenant authentication contexts separate.
+- Validate input through Laravel Form Requests.
+- Use database transactions for operations that modify related records.
+- Encrypt sensitive employee identity values at rest.
+- Keep identity blind-index keys separate from the Laravel application key.
+- Store employee photos and documents on private disks.
+- Stream private files only after tenant and employee authorization.
+- Do not expose storage paths, encryption values, blind indexes, or confidential employee data in API responses or logs.
+- Apply schema changes through reviewed Laravel migrations.
 
-1. Keep changes focused and consistent with the existing module boundaries.
-2. Do not introduce new dependencies without a clear need.
-3. Add or update tests for behavior changes.
-4. Run the relevant test suite.
-5. Never include local environment files, secrets, or generated runtime data in commits.
+## Development Guidelines
+
+Contributions and new features should follow these conventions:
+
+1. Keep business logic inside the appropriate module.
+2. Prefer focused Actions, Services, Policies, Events, and Jobs where they improve separation of concerns.
+3. Use Form Requests for request validation.
+4. Use database transactions for related writes.
+5. Keep tenant scoping and authorization explicit.
+6. Preserve existing behavior when modifying a feature.
+7. Add Pest coverage for business rules, permissions, tenant boundaries, and edge cases.
+8. Avoid unnecessary packages and cross-module dependencies.
+9. Keep user-facing interfaces responsive and accessible.
+10. Support English and Arabic, including RTL layout requirements, as localization is implemented.
+
+## Roadmap
+
+Humexa is being developed in stages. Planned capabilities include:
+
+- Attendance management, flexible shifts, breaks, corrections, and overtime approval.
+- Leave management and approval workflows.
+- Payroll and compensation workflows.
+- Recruitment and performance management.
+- Reporting, notifications, and additional platform administration capabilities.
+- A permission-aware, read-only AI assistant for HR data, with any future write-capable AI actions treated as a separate phase.
+
+Roadmap items are plans, not statements of current availability.
+
+## Project Status
+
+**Active development — not yet a production-ready release.**
+
+Before deploying Humexa for real employee data, complete a production-readiness review covering authentication, authorization, tenant isolation, backups, file storage, encryption-key management, monitoring, queue processing, rate limiting, and operational recovery.
 
 ## License
 
-No open-source license has been specified yet. All rights are reserved unless a license is added to this repository.
-'''
-out = "/mnt/data/README.md"
-pypandoc.convert_text(readme, "md", format="md", outputfile=out, extra_args=["--standalone"])
-print(f"Created: {out}")
-print(f"Size: {os.path.getsize(out)} bytes")
+No open-source license has been declared for this repository. Unless and until a license is added, all rights are reserved.
