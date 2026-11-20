@@ -31,7 +31,7 @@ class SaveEmployeeAddressAction
                 EmployeeAddress::query()
                     ->where('tenant_id', $lockedEmployee->tenant_id)
                     ->where('employee_id', $lockedEmployee->id)
-                    ->when($address, fn ($query) => $query->whereKeyNot($address->getKey()))
+                    ->when($address, fn ($query) => $query->where('id', '!=', $address->getKey()))
                     ->update(['is_primary' => false]);
             }
 
