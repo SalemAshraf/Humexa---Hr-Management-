@@ -8,24 +8,25 @@ use App\Http\Controllers\Controller;
 use App\Modules\Employees\Actions\SaveEmployeeAddressAction;
 use App\Modules\Employees\Http\Requests\EmployeeAddressRequest;
 use App\Modules\Employees\Models\Employee;
-use App\Modules\Employees\Models\EmployeeAddress;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 
 class EmployeeAddressController extends Controller
 {
-    private function employee(string $employeeId): Employee
+    private function employee(): Employee
     {
         abort_unless(tenancy()->initialized, 404);
+
+        $employeeId = (string) request()->route('employee');
 
         return Employee::query()
             ->where('tenant_id', tenant()->getTenantKey())
             ->findOrFail($employeeId);
     }
 
-    public function index(string $employee): JsonResponse
+    public function index(string $tenant, string $employee): JsonResponse
     {
-        $record = $this->employee($employee);
+        $record = $this->employee();
         $this->authorize('view', $record);
 
         return response()->json([
@@ -35,10 +36,11 @@ class EmployeeAddressController extends Controller
 
     public function store(
         EmployeeAddressRequest $request,
+        string $tenant,
         string $employee,
         SaveEmployeeAddressAction $action
     ): RedirectResponse {
-        $record = $this->employee($employee);
+        $record = $this->employee();
         $this->authorize('update', $record);
 
         $action->execute($record, $request->validated());
@@ -48,25 +50,29 @@ class EmployeeAddressController extends Controller
 
     public function update(
         EmployeeAddressRequest $request,
+        string $tenant,
         string $employee,
         string $address,
         SaveEmployeeAddressAction $action
     ): RedirectResponse {
-        $record = $this->employee($employee);
+        $record = $this->employee();
         $this->authorize('update', $record);
 
-        $addressRecord = $record->addresses()->whereKey($address)->firstOrFail();
+        $addressId = (string) request()->route('address');
+        $addressRecord = $record->addresses()->whereKey($addressId)->firstOrFail();
+
         $action->execute($record, $request->validated(), $addressRecord);
 
         return back()->with('success', 'Employee address updated successfully.');
     }
 
-    public function destroy(string $employee, string $address): RedirectResponse
+    public function destroy(string $tenant, string $employee, string $address): RedirectResponse
     {
-        $record = $this->employee($employee);
+        $record = $this->employee();
         $this->authorize('update', $record);
 
-        $addressRecord = $record->addresses()->whereKey($address)->firstOrFail();
+        $addressId = (string) request()->route('address');
+        $addressRecord = $record->addresses()->whereKey($addressId)->firstOrFail();
         $addressRecord->delete();
 
         return back()->with('success', 'Employee address deleted successfully.');
