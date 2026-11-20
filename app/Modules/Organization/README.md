@@ -56,3 +56,23 @@ Complete suite:
 php artisan test
 
 The module currently grants access to authenticated users of the active tenant. Fine-grained Organization permissions should be applied when tenant role assignment and user administration are introduced; they must not be inferred from frontend visibility.
+
+## Demo data
+
+A tenant-scoped demo seeder is available at `database/seeders/OrganizationDemoSeeder.php`.
+It creates 4 branches, 8 departments (including one company-wide department), and 12 positions.
+It is idempotent for its demo codes and does not seed every tenant.
+
+Set the exact demo tenant ID in the local `.env` file:
+
+```env
+HUMEXA_DEMO_TENANT_ID=your-demo-tenant-id
+```
+
+Find the tenant ID from the local database `tenants` table, then run from the project root:
+
+```powershell
+php artisan db:seed --class=Database\\Seeders\\OrganizationDemoSeeder
+```
+
+Do not point this seeder at a production tenant. It intentionally refuses to run without an explicit tenant ID.
