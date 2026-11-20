@@ -18,9 +18,9 @@ class EnsureTenantActive
         }
 
         $tenant = tenant();
-
         $isAuthenticated = Auth::guard('tenant')->check();
 
+        // Block all access when the company is suspended.
         if ($tenant->getAttribute('status') !== 'active') {
             if ($isAuthenticated) {
                 Auth::guard('tenant')->logout();
@@ -29,18 +29,25 @@ class EnsureTenantActive
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
+            $message = 'Your company account is currently suspended. Please contact the platform administrator.';
+
+            // Allow the login page to display the suspension notice.
+            if ($request->isMethod('GET') && $request->is('login')) {
+                $request->session()->flash('company_suspended', $message);
+
+                return $next($request);
+            }
+
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'This company account is currently suspended.',
+                    'message' => $message,
                 ], 403);
             }
 
-            return redirect('/login')->with(
-                'company_suspended',
-                'Your company account is currently suspended. Please contact the platform administrator.'
-            );
+            return redirect('/login')->with('company_suspended', $message);
         }
 
+        // Revoke sessions created before the latest session version.
         $sessionVersion = $request->session()->get('tenant_session_version');
         $currentVersion = (int) $tenant->getAttribute('session_version');
 

@@ -21,11 +21,12 @@ class TenantAuthController extends Controller
         }
 
         return Inertia::render('Auth/Login', [
-            'canResetPassword' => false,
-            'status' => session('status'),
-            'loginUrl' => url('/login'),
-            'showRegistrationLink' => true,
-        ]);
+    'canResetPassword' => false,
+    'status' => session('status'),
+    'companySuspended' => session('company_suspended'),
+    'loginUrl' => url('/login'),
+    'showRegistrationLink' => true,
+]);
     }
 
     
