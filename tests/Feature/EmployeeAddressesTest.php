@@ -89,8 +89,9 @@ test('tenant can create and list multiple employee addresses', function () {
         'addresses_url' => $base,
     ]);
 
+    $this->withoutExceptionHandling();
+
     $response = $this->post($base, employeeAddressPayload(['is_primary' => true]));
-    dump(['address_post_status' => $response->status()]);
 
     $response->assertRedirect()->assertSessionHasNoErrors();
 
