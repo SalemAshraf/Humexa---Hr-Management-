@@ -33,16 +33,17 @@ class EmployeeController extends Controller
         return Employee::query()->where('tenant_id', $this->tenantId());
     }
 
-    private function formOptions(): array
+    private function formOptions(?Employee $employee = null): array
     {
         $tenantId = $this->tenantId();
 
         return [
-            'branches' => Branch::query()->where('tenant_id', $tenantId)->where('is_active', true)->orderBy('name')->get(['id', 'name']),
-            'departments' => Department::query()->where('tenant_id', $tenantId)->where('is_active', true)->with('branch:id,name')->orderBy('name')->get(['id', 'branch_id', 'name']),
-            'positions' => Position::query()->where('tenant_id', $tenantId)->where('is_active', true)->with('department:id,name')->orderBy('name')->get(['id', 'department_id', 'name']),
+            'branches' => Branch::query()->where('tenant_id', $tenantId)->where(function ($query) use ($employee) { $query->where('is_active', true)->when($employee?->branch_id, fn ($query, $id) => $query->orWhereKey($id)); })->orderBy('name')->get(['id', 'name']),
+            'departments' => Department::query()->where('tenant_id', $tenantId)->where(function ($query) use ($employee) { $query->where('is_active', true)->when($employee?->department_id, fn ($query, $id) => $query->orWhereKey($id)); })->with('branch:id,name')->orderBy('name')->get(['id', 'branch_id', 'name']),
+            'positions' => Position::query()->where('tenant_id', $tenantId)->where(function ($query) use ($employee) { $query->where('is_active', true)->when($employee?->position_id, fn ($query, $id) => $query->orWhereKey($id)); })->with('department:id,name')->orderBy('name')->get(['id', 'department_id', 'name']),
             'managers' => $this->employeeQuery()
                 ->whereNotIn('employment_status', [Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])
+                ->when($employee?->manager_id, fn ($query, $id) => $query->orWhereKey($id))
                 ->orderBy('first_name')
                 ->get(['id', 'first_name', 'last_name', 'employee_number']),
             'accounts' => User::query()
@@ -136,11 +137,11 @@ class EmployeeController extends Controller
 
     public function edit(string $employee): Response
     {
-        $record = $this->employeeQuery()->findOrFail($employee);
+        $record = $this->employeeQuery()->with(['user:id,name,email'])->findOrFail($employee);
         $this->authorize('update', $record);
 
         return Inertia::render('Employees/Edit', [
-            ...$this->formOptions(),
+            ...$this->formOptions($record),
             'employee' => $record,
         ]);
     }
