@@ -127,12 +127,14 @@ class EmployeeDocumentController extends Controller
         );
     }
 
-    public function destroy(string $tenant, string $employee, string $document): RedirectResponse
+    public function archive(string $tenant, string $employee, string $document): RedirectResponse
     {
         $record = $this->employee();
         $this->authorize('update', $record);
 
-        $this->document($record)->delete();
+        $documentRecord = $this->document($record);
+        abort_if($documentRecord->trashed(), 409, 'This document is already archived.');
+        $documentRecord->delete();
 
         return back()->with('success', 'Employee document archived successfully.');
     }
