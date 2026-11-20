@@ -38,6 +38,7 @@ Composite foreign keys enforce tenant ownership for user, branch, department, po
 - Form Requests validate organization and user ownership.
 - Reporting relationships are checked to prevent self-management and circular manager chains.
 - Archiving a manager with direct reports is blocked with HTTP 409.
+- Archiving a branch, department, or position assigned to employees is blocked with HTTP 409.
 - The initial release grants employee management to authenticated tenant users. Fine-grained Spatie permissions are a separate authorization phase.
 
 ## Routes
