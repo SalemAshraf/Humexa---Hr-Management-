@@ -132,8 +132,8 @@ async function saveAddress() {
     resetMessages();
     try {
         const url = endpoints.value.addresses + (editingAddressId.value ? '/' + editingAddressId.value : '');
-        if (editingAddressId.value) await window.axios.put(url, { ...addressForm });
-        else await window.axios.post(url, { ...addressForm });
+        if (editingAddressId.value) await window.axios.put(url, { ...addressForm }, { headers: { Accept: 'application/json' } });
+        else await window.axios.post(url, { ...addressForm }, { headers: { Accept: 'application/json' } });
         addressEditorOpen.value = false;
         resetAddressForm();
         successMessage.value = 'Address saved successfully.';
@@ -147,7 +147,7 @@ async function deleteAddress(item) {
     saving.value = true;
     resetMessages();
     try {
-        await window.axios.delete(endpoints.value.addresses + '/' + item.id);
+        await window.axios.delete(endpoints.value.addresses + '/' + item.id, { headers: { Accept: 'application/json' } });
         addresses.value = addresses.value.filter((row) => row.id !== item.id);
         successMessage.value = 'Address deleted.';
     } catch (error) { applyError(error); }
@@ -172,8 +172,8 @@ async function saveContact() {
     resetMessages();
     try {
         const url = endpoints.value.contacts + (editingContactId.value ? '/' + editingContactId.value : '');
-        if (editingContactId.value) await window.axios.put(url, { ...contactForm });
-        else await window.axios.post(url, { ...contactForm });
+        if (editingContactId.value) await window.axios.put(url, { ...contactForm }, { headers: { Accept: 'application/json' } });
+        else await window.axios.post(url, { ...contactForm }, { headers: { Accept: 'application/json' } });
         contactEditorOpen.value = false;
         resetContactForm();
         successMessage.value = 'Emergency contact saved successfully.';
@@ -187,7 +187,7 @@ async function deleteContact(item) {
     saving.value = true;
     resetMessages();
     try {
-        await window.axios.delete(endpoints.value.contacts + '/' + item.id);
+        await window.axios.delete(endpoints.value.contacts + '/' + item.id, { headers: { Accept: 'application/json' } });
         contacts.value = contacts.value.filter((row) => row.id !== item.id);
         successMessage.value = 'Emergency contact deleted.';
     } catch (error) { applyError(error); }
@@ -198,7 +198,7 @@ async function saveIdentity() {
     saving.value = true;
     resetMessages();
     try {
-        await window.axios.post(endpoints.value.identities, { ...identityForm });
+        await window.axios.post(endpoints.value.identities, { ...identityForm }, { headers: { Accept: 'application/json' } });
         Object.assign(identityForm, {
             identity_type: 'national_id', identity_number: '',
             issuing_country: '', issue_date: '', expiry_date: '',
@@ -223,7 +223,7 @@ async function uploadDocument() {
     saving.value = true;
     resetMessages();
     try {
-        await window.axios.post(endpoints.value.documents, payload);
+        await window.axios.post(endpoints.value.documents, payload, { headers: { Accept: 'application/json' } });
         uploadFile.value = null;
         const fileInput = document.querySelector('[data-employee-document-file]');
         if (fileInput) fileInput.value = '';
@@ -238,7 +238,7 @@ async function archiveDocument(item) {
     saving.value = true;
     resetMessages();
     try {
-        await window.axios.delete(endpoints.value.documents + '/' + item.id);
+        await window.axios.delete(endpoints.value.documents + '/' + item.id, { headers: { Accept: 'application/json' } });
         await loadSection();
         successMessage.value = 'Document archived. Its file and metadata are retained.';
     } catch (error) { applyError(error); }
@@ -259,8 +259,8 @@ async function saveType() {
     resetMessages();
     try {
         const url = endpoints.value.types + (editingTypeId.value ? '/' + editingTypeId.value : '');
-        if (editingTypeId.value) await window.axios.put(url, { ...typeForm });
-        else await window.axios.post(url, { ...typeForm });
+        if (editingTypeId.value) await window.axios.put(url, { ...typeForm }, { headers: { Accept: 'application/json' } });
+        else await window.axios.post(url, { ...typeForm }, { headers: { Accept: 'application/json' } });
         typeEditorOpen.value = false;
         resetTypeForm();
         successMessage.value = 'Document type saved.';
@@ -274,7 +274,7 @@ async function archiveType(item) {
     saving.value = true;
     resetMessages();
     try {
-        await window.axios.delete(endpoints.value.types + '/' + item.id);
+        await window.axios.delete(endpoints.value.types + '/' + item.id, { headers: { Accept: 'application/json' } });
         await loadSection();
         successMessage.value = 'Document type archived.';
     } catch (error) { applyError(error); }
