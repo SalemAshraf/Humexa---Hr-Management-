@@ -42,7 +42,7 @@ Set EMPLOYEE_IDENTITY_HASH_KEY to a dedicated random secret of at least 32 chara
 Changing either encryption or HMAC keys requires a planned rotation and data re-encryption/re-indexing procedure. Do not replace keys directly in production.
 
 ## File storage
-Profile photos and employee documents use private disks configured through EMPLOYEE_PROFILE_PHOTO_DISK and EMPLOYEE_DOCUMENT_DISK. Files must be served through authenticated, tenant-authorized controller actions; do not expose private storage paths or generate public URLs. Validate actual MIME type and size on upload. Database rollback does not delete stored files.
+Profile photos and employee documents use private disks configured through EMPLOYEE_PROFILE_PHOTO_DISK and EMPLOYEE_DOCUMENT_DISK. Files must be served through authenticated, tenant-authorized controller actions; do not expose private storage paths or generate public URLs. Validate actual MIME type and size on upload. The employee document upload action removes the newly stored file if its database write fails; profile-photo cleanup will be handled by its dedicated upload workflow.
 
 Recommended initial limits: profile photo 5 MB; employee documents 10 MB; PDF/JPG/JPEG/PNG documents.
 
