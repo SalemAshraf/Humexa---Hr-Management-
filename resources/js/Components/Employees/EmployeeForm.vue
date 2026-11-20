@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -44,6 +44,23 @@ const filteredDepartments = computed(() => props.departments.filter((item) =>
 const filteredPositions = computed(() => props.positions.filter((item) =>
     !form.department_id || String(item.department_id) === String(form.department_id)
 ));
+
+watch(() => form.branch_id, (branchId) => {
+    if (!form.department_id) return;
+    const selectedDepartment = props.departments.find((item) => String(item.id) === String(form.department_id));
+    if (selectedDepartment?.branch_id && String(selectedDepartment.branch_id) !== String(branchId)) {
+        form.department_id = '';
+        form.position_id = '';
+    }
+});
+
+watch(() => form.department_id, (departmentId) => {
+    if (!form.position_id) return;
+    const selectedPosition = props.positions.find((item) => String(item.id) === String(form.position_id));
+    if (selectedPosition && String(selectedPosition.department_id) !== String(departmentId)) {
+        form.position_id = '';
+    }
+});
 
 function submit() {
     if (props.employee) form.put('/employees/' + props.employee.id);
