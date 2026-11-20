@@ -99,6 +99,16 @@ Route::domain('{tenant}.humexa.test')
                         Route::post('/', 'store')->name('store');
                     });
 
+                Route::prefix('/{employee}/profile-photo')
+                    ->whereNumber('employee')
+                    ->name('profile-photo.')
+                    ->controller(EmployeeProfilePhotoController::class)
+                    ->group(function () {
+                        Route::get('/', 'show')->name('show');
+                        Route::post('/', 'store')->name('store');
+                        Route::delete('/', 'destroy')->name('destroy');
+                    });
+
                 Route::prefix('/{employee}/documents')
                     ->whereNumber('employee')
                     ->name('documents.')
