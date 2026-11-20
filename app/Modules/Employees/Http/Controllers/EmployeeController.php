@@ -41,14 +41,21 @@ class EmployeeController extends Controller
             'branches' => Branch::query()->where('tenant_id', $tenantId)->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'departments' => Department::query()->where('tenant_id', $tenantId)->where('is_active', true)->with('branch:id,name')->orderBy('name')->get(['id', 'branch_id', 'name']),
             'positions' => Position::query()->where('tenant_id', $tenantId)->where('is_active', true)->with('department:id,name')->orderBy('name')->get(['id', 'department_id', 'name']),
-            'managers' => $this->employeeQuery()->whereNotIn('employment_status', [Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])->orderBy('first_name')->get(['id', 'first_name', 'last_name', 'employee_number']),
+            'managers' => $this->employeeQuery()
+                ->whereNotIn('employment_status', [Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])
+                ->orderBy('first_name')
+                ->get(['id', 'first_name', 'last_name', 'employee_number']),
             'accounts' => User::query()
                 ->where('tenant_id', $tenantId)
                 ->where('account_type', User::ACCOUNT_TYPE_TENANT)
-                ->whereDoesntHave('employee')
+                ->whereNotIn('id', Employee::query()->whereNotNull('user_id')->select('user_id'))
                 ->orderBy('name')
                 ->get(['id', 'name', 'email']),
-            'statuses' => collect(Employee::STATUSES)->map(fn (string $status) => ['value' => $status, 'label' => str($status)->replace('_', ' ')->title()->toString()])->values(),
+            'statuses' => collect(Employee::STATUSES)
+                ->map(fn (string $status) => [
+                    'value' => $status,
+                    'label' => str($status)->replace('_', ' ')->title()->toString(),
+                ])->values(),
         ];
     }
 
@@ -56,7 +63,11 @@ class EmployeeController extends Controller
     {
         $this->authorize('viewAny', Employee::class);
 
-        $query = $this->employeeQuery()->with(['branch:id,name', 'department:id,name', 'position:id,name']);
+        $query = $this->employeeQuery()->with([
+            'branch:id,name',
+            'department:id,name',
+            'position:id,name',
+        ]);
 
         if ($search = trim((string) $request->query('search'))) {
             $query->where(function ($builder) use ($search) {
