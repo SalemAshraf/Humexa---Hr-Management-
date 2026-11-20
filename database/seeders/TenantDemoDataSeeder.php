@@ -32,7 +32,7 @@ class TenantDemoDataSeeder extends Seeder
             $branches = $this->seedBranches($tenantId);
             $departments = $this->seedDepartments($tenantId, $branches);
             $positions = $this->seedPositions($tenantId, $departments);
-            $this->seedEmployees($tenantId, $departments, $positions);
+            $this->seedEmployees($tenantId, $branches, $departments, $positions);
         }, 3);
     }
 
@@ -185,7 +185,7 @@ class TenantDemoDataSeeder extends Seeder
         return $result;
     }
 
-    private function seedEmployees(string $tenantId, array $departments, array $positions): void
+    private function seedEmployees(string $tenantId, array $branches, array $departments, array $positions): void
     {
         $employees = [
             'DEMO-0001' => ['first_name' => 'Omar', 'middle_name' => 'Hassan', 'last_name' => 'Ibrahim', 'gender' => 'male', 'date_of_birth' => '1985-03-12', 'nationality' => 'Egyptian', 'marital_status' => 'married', 'work_email' => 'omar.ibrahim@example.test', 'phone' => '+201000000101', 'branch' => 'ALEX-HQ', 'department' => 'EXEC', 'position' => 'CEO', 'status' => 'active', 'hire_date' => '2020-01-05', 'manager' => null],
@@ -234,7 +234,7 @@ class TenantDemoDataSeeder extends Seeder
                 'hire_date' => $data['hire_date'] ?? null,
                 'probation_end_date' => $data['probation_end_date'] ?? null,
                 'employment_status' => $data['status'],
-                'branch_id' => $this->branchIdFor($data['branch'], $departments),
+                'branch_id' => $branches[$data['branch']]->id,
                 'department_id' => $departments[$data['department']]->id,
                 'position_id' => $positions[$data['position']]->id,
                 'manager_id' => $managerId,
@@ -245,27 +245,4 @@ class TenantDemoDataSeeder extends Seeder
         }
     }
 
-    private function branchIdFor(string $branchCode, array $departments): int
-    {
-        $department = collect($departments)->first(
-            fn (Department $item) => $item->code === $this->departmentCodeForBranch($branchCode, $departments)
-        );
-
-        if (! $department) {
-            throw new LogicException('Unable to resolve demo employee branch.');
-        }
-
-        return (int) $department->branch_id;
-    }
-
-    private function departmentCodeForBranch(string $branchCode, array $departments): string
-    {
-        foreach ($departments as $code => $department) {
-            if ($branchCode === 'ALEX-HQ' && $code === 'EXEC') return $code;
-            if ($branchCode === 'CAI-OFFICE' && $code === 'SALES') return $code;
-            if ($branchCode === 'MNS-BRANCH' && $code === 'FIELD') return $code;
-        }
-
-        throw new LogicException('Unable to resolve demo employee branch code.');
-    }
 }
