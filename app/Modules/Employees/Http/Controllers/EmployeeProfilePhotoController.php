@@ -26,7 +26,7 @@ class EmployeeProfilePhotoController extends Controller
             ->findOrFail((string) request()->route('employee'));
     }
 
-    public function show(string $tenant, string $employee): StreamedResponse
+    public function show(string $tenant, string $employee): Response
     {
         $record = $this->employee();
         $this->authorize('view', $record);
