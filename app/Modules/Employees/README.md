@@ -64,3 +64,15 @@ The employee directory/profile routes and nested address endpoints are registere
 
 ## Testing
 Pest feature tests must cover tenant isolation, composite constraints, current identity uniqueness, primary address uniqueness, emergency-contact ordering, upload validation, private file access, archive retention, and rollback/failure cleanup.
+
+## Tenant demo data
+
+For local development, seed a single tenant with sample organization and employee records:
+
+```powershell
+php artisan humexa:seed-demo <TENANT_ID>
+```
+
+The command initializes the selected tenant context and creates demo branches, departments, positions, employees, reporting lines, and initial employment history records. It does not seed every tenant automatically and can be run again safely without duplicating the demo records.
+
+Demo employee numbers use the `DEMO-` prefix. The sample records use reserved `.test` email addresses and do not create or link login accounts.
