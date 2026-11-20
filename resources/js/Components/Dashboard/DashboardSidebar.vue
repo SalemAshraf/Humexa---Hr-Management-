@@ -140,53 +140,68 @@ function isActive(item) {
                 class="flex-1 space-y-1 overflow-y-auto px-3 py-5"
                 aria-label="Main navigation"
             >
-                <Link
-                    v-for="item in items"
-                    :key="item.href"
-                    :href="item.href"
-                    :title="collapsed ? item.label : undefined"
-                    :aria-current="isActive(item) ? 'page' : undefined"
-                    class="group flex min-h-11 items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
-                    :class="[
-                        isActive(item)
-                            ? isPlatform
-                                ? 'bg-cyan-500/15 text-cyan-400'
-                                : 'bg-cyan-50 text-cyan-800'
-                            : isPlatform
-                                ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-                        collapsed ? 'justify-center' : 'gap-3',
-                    ]"
-                    @click="emit('close-mobile')"
-                >
-                    <span
-                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
-                        :class="isActive(item)
-                            ? isPlatform
-                                ? 'bg-cyan-500/20 text-cyan-300'
-                                : 'bg-cyan-100 text-cyan-800'
-                            : isPlatform
-                                ? 'bg-slate-800 text-slate-400 group-hover:text-white'
-                                : 'bg-slate-100 text-slate-500 group-hover:text-slate-800'"
-                        aria-hidden="true"
+                <template v-for="item in items" :key="item.label">
+                    <Link
+                        v-if="!item.disabled"
+                        :href="item.href"
+                        :title="collapsed ? item.label : undefined"
+                        :aria-current="isActive(item) ? 'page' : undefined"
+                        class="group flex min-h-11 items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+                        :class="[
+                            isActive(item)
+                                ? isPlatform
+                                    ? 'bg-cyan-500/15 text-cyan-400'
+                                    : 'bg-cyan-50 text-cyan-800'
+                                : isPlatform
+                                    ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                            collapsed ? 'justify-center' : 'gap-3',
+                        ]"
+                        @click="emit('close-mobile')"
                     >
-                        {{ item.shortcut || item.label?.charAt(0) || '?' }}
-                    </span>
+                        <span
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                            :class="isActive(item)
+                                ? isPlatform
+                                    ? 'bg-cyan-500/20 text-cyan-300'
+                                    : 'bg-cyan-100 text-cyan-800'
+                                : isPlatform
+                                    ? 'bg-slate-800 text-slate-400 group-hover:text-white'
+                                    : 'bg-slate-100 text-slate-500 group-hover:text-slate-800'"
+                            aria-hidden="true"
+                        >
+                            {{ item.shortcut || item.label?.charAt(0) || '?' }}
+                        </span>
+                        <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
+                            {{ item.label }}
+                        </span>
+                        <span
+                            v-if="item.badge && !collapsed"
+                            class="rounded-full px-2 py-0.5 text-xs"
+                            :class="isPlatform ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'"
+                        >
+                            {{ item.badge }}
+                        </span>
+                    </Link>
 
-                    <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
-                        {{ item.label }}
-                    </span>
-
-                    <span
-                        v-if="item.badge && !collapsed"
-                        class="rounded-full px-2 py-0.5 text-xs"
-                        :class="isPlatform
-                            ? 'bg-slate-700 text-slate-200'
-                            : 'bg-slate-100 text-slate-600'"
+                    <div
+                        v-else
+                        :title="collapsed ? item.label : undefined"
+                        aria-disabled="true"
+                        class="flex min-h-11 cursor-not-allowed items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 opacity-60"
+                        :class="collapsed ? 'justify-center' : 'gap-3'"
                     >
-                        {{ item.badge }}
-                    </span>
-                </Link>
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-xs font-bold text-slate-500" aria-hidden="true">
+                            {{ item.shortcut || item.label?.charAt(0) || '?' }}
+                        </span>
+                        <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
+                            {{ item.label }}
+                        </span>
+                        <span v-if="item.badge && !collapsed" class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-500">
+                            {{ item.badge }}
+                        </span>
+                    </div>
+                </template>
             </nav>
 
             <!-- Collapse button -->
