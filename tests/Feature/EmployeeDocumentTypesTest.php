@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\\Modules\\Tenants\\Actions\\RegisterCompanyAction;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Illuminate\\Support\\Facades\\DB;
+use App\Modules\Tenants\Actions\RegisterCompanyAction;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
