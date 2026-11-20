@@ -1,164 +1,265 @@
-
 <script setup>
+import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
-const stats = [
-    { label: 'Total Employees', value: null, description: 'Registered employees', icon: 'EM' },
-    { label: 'Present Today', value: null, description: 'Attendance overview', icon: 'PR' },
-    { label: 'Absent Today', value: null, description: 'Attendance overview', icon: 'AB' },
-    { label: 'Pending Leave Requests', value: null, description: 'Awaiting approval', icon: 'LV' },
-];
+const props = defineProps({
+    company: {
+        type: Object,
+        required: true,
+    },
+    stats: {
+        type: Object,
+        required: true,
+    },
+});
 
-const quickActions = [
-    { label: 'Add Employee', description: 'Create an employee profile', shortcut: '＋' },
-    { label: 'Review Attendance', description: 'View today’s attendance', shortcut: 'AT' },
-    { label: 'Leave Requests', description: 'Review pending requests', shortcut: 'LR' },
-    { label: 'View Reports', description: 'Explore company reports', shortcut: 'RP' },
+const isActive = computed(() => props.company.status === 'active');
+
+const formattedCreatedAt = computed(() => {
+    if (!props.company.createdAt) {
+        return '—';
+    }
+
+    const date = new Date(props.company.createdAt);
+
+    if (Number.isNaN(date.getTime())) {
+        return props.company.createdAt;
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    }).format(date);
+});
+
+const statCards = computed(() => [
+    {
+        label: 'Team Accounts',
+        value: Number(props.stats.teamAccounts ?? 0).toLocaleString(),
+        description: 'User accounts in this workspace',
+        shortcut: 'US',
+    },
+    {
+        label: 'Workspace Status',
+        value: isActive.value ? 'Active' : 'Suspended',
+        description: 'Current company access status',
+        shortcut: 'ST',
+        status: isActive.value ? 'success' : 'danger',
+    },
+    {
+        label: 'Workspace Created',
+        value: formattedCreatedAt.value,
+        description: 'Company registration date',
+        shortcut: 'DT',
+    },
+    {
+        label: 'Workspace Domain',
+        value: props.company.domain || '—',
+        description: 'Your company sign-in address',
+        shortcut: 'DM',
+        compact: true,
+    },
+]);
+
+const modules = [
+    {
+        name: 'Employee Management',
+        description: 'Employee profiles, employment details and documents',
+        shortcut: 'EM',
+    },
+    {
+        name: 'Attendance',
+        description: 'Check-in, shifts, working hours and overtime',
+        shortcut: 'AT',
+    },
+    {
+        name: 'Leave Management',
+        description: 'Leave policies, balances and approval workflows',
+        shortcut: 'LV',
+    },
+    {
+        name: 'Organization',
+        description: 'Departments, positions and reporting structure',
+        shortcut: 'OR',
+    },
+    {
+        name: 'Payroll',
+        description: 'Salary structures, payslips and payroll processing',
+        shortcut: 'PY',
+    },
+    {
+        name: 'Reports & Analytics',
+        description: 'Workforce insights and downloadable reports',
+        shortcut: 'RP',
+    },
 ];
 </script>
 
 <template>
-    <Head title="Company Dashboard" />
+    <Head title="Company Overview" />
 
-    <CompanyLayout
-        title="Dashboard"
-        subtitle="Company overview and workforce insights"
-    >
-        <!-- Welcome -->
-        <section class="mb-8">
-            <p class="mb-2 text-sm font-medium text-cyan-700">
-                COMPANY WORKSPACE
-            </p>
+    <CompanyLayout title="Overview" subtitle="Your company workspace">
+        <!-- Page heading -->
+        <section class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">
+                    COMPANY WORKSPACE
+                </p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                    Welcome back
+                </h1>
+                <p class="mt-2 text-sm text-slate-500">
+                    Here's what's happening in {{ company.name }}.
+                </p>
+            </div>
 
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                Welcome to Humexa
-            </h1>
-
-            <p class="mt-2 text-sm text-slate-500">
-                Here's an overview of your organization's activity.
-            </p>
-        </section>
-
-        <!-- KPI Cards -->
-        <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article
-                v-for="stat in stats"
-                :key="stat.label"
-                class="hx-card p-5"
+            <div
+                class="inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold"
+                :class="isActive
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : 'border-red-200 bg-red-50 text-red-700'"
             >
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-slate-500">
-                            {{ stat.label }}
-                        </p>
-
-                        <p class="mt-3 text-3xl font-bold text-slate-900">
-                            {{ stat.value ?? '—' }}
-                        </p>
-
-                        <p class="mt-2 text-xs text-slate-400">
-                            {{ stat.description }}
-                        </p>
-                    </div>
-
-                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-xs font-bold text-cyan-800">
-                        {{ stat.icon }}
-                    </span>
-                </div>
-            </article>
+                <span
+                    class="h-2 w-2 rounded-full"
+                    :class="isActive ? 'bg-emerald-500' : 'bg-red-500'"
+                />
+                {{ isActive ? 'Workspace active' : 'Workspace suspended' }}
+            </div>
         </section>
 
-        <!-- Main Grid -->
-        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <!-- Attendance -->
-            <article class="hx-card p-6 xl:col-span-2">
-                <div class="mb-6 flex items-center justify-between">
-                    <div>
-                        <h2 class="font-semibold text-slate-900">
-                            Attendance Overview
+        <!-- Company identity card -->
+        <section class="mb-7 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-[#12334A] px-5 py-6 sm:px-7 sm:py-8">
+                <div class="pointer-events-none absolute -end-12 -top-24 h-64 w-64 rounded-full border-[36px] border-cyan-400/10" />
+                <div class="pointer-events-none absolute end-24 -bottom-24 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
+
+                <div class="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+                    <div class="min-w-0">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
+                            YOUR ORGANIZATION
+                        </p>
+                        <h2 class="mt-2 truncate text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                            {{ company.name }}
                         </h2>
-
-                        <p class="mt-1 text-sm text-slate-500">
-                            Workforce attendance insights
+                        <p class="mt-2 break-all text-sm text-slate-300">
+                            {{ company.domain }}
                         </p>
                     </div>
 
-                    <span class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs text-slate-500">
-                        Today
-                    </span>
-                </div>
-
-                <div class="flex min-h-56 flex-col items-center justify-center text-center">
-                    <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-50 text-xl font-bold text-cyan-700">
-                        AT
+                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-2xl font-black text-cyan-200 shadow-xl backdrop-blur">
+                        {{ company.name?.charAt(0)?.toUpperCase() || 'H' }}
                     </div>
+                </div>
+            </div>
 
-                    <h3 class="font-medium text-slate-800">
-                        No attendance data yet
-                    </h3>
-
-                    <p class="mt-2 max-w-sm text-sm text-slate-500">
-                        Attendance insights will appear here once attendance records are available.
+            <div class="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <div class="px-5 py-4 sm:px-7">
+                    <p class="text-xs font-medium text-slate-500">Workspace status</p>
+                    <p class="mt-1 text-sm font-semibold capitalize" :class="isActive ? 'text-emerald-700' : 'text-red-700'">
+                        {{ company.status || 'Unknown' }}
                     </p>
                 </div>
-            </article>
-
-            <!-- Quick Actions -->
-            <article class="hx-card p-6">
-                <h2 class="font-semibold text-slate-900">
-                    Quick Actions
-                </h2>
-
-                <p class="mt-1 text-sm text-slate-500">
-                    Common workspace tasks
-                </p>
-
-                <div class="mt-5 space-y-3">
-                    <div
-                        v-for="action in quickActions"
-                        :key="action.label"
-                        class="flex items-center gap-3 rounded-xl border border-slate-100 p-3"
-                    >
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600">
-                            {{ action.shortcut }}
-                        </span>
-
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-slate-800">
-                                {{ action.label }}
-                            </p>
-
-                            <p class="mt-1 text-xs text-slate-500">
-                                {{ action.description }}
-                            </p>
-                        </div>
-                    </div>
+                <div class="px-5 py-4 sm:px-7">
+                    <p class="text-xs font-medium text-slate-500">Registered on</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-800">{{ formattedCreatedAt }}</p>
                 </div>
-            </article>
+                <div class="px-5 py-4 sm:px-7">
+                    <p class="text-xs font-medium text-slate-500">Workspace type</p>
+                    <p class="mt-1 text-sm font-semibold text-slate-800">Humexa HRMS</p>
+                </div>
+            </div>
         </section>
 
-        <!-- Recent Activity -->
-        <section class="mt-6">
-            <article class="hx-card p-6">
-                <h2 class="font-semibold text-slate-900">
-                    Recent Activity
-                </h2>
-
+        <!-- Workspace stats -->
+        <section class="mb-8">
+            <div class="mb-4">
+                <h2 class="text-base font-bold text-slate-900">Workspace at a glance</h2>
                 <p class="mt-1 text-sm text-slate-500">
-                    Latest updates from your organization
+                    Live information currently available for your company.
                 </p>
+            </div>
 
-                <div class="flex min-h-36 flex-col items-center justify-center text-center">
-                    <p class="text-sm font-medium text-slate-700">
-                        No recent activity
-                    </p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <article
+                    v-for="stat in statCards"
+                    :key="stat.label"
+                    class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                >
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-slate-500">{{ stat.label }}</p>
+                            <p
+                                class="mt-3 break-words font-bold tracking-tight"
+                                :class="[
+                                    stat.compact ? 'text-base' : 'text-2xl',
+                                    stat.status === 'success' ? 'text-emerald-700' : '',
+                                    stat.status === 'danger' ? 'text-red-700' : 'text-slate-900',
+                                ]"
+                            >
+                                {{ stat.value }}
+                            </p>
+                            <p class="mt-2 text-xs leading-5 text-slate-400">{{ stat.description }}</p>
+                        </div>
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-xs font-bold text-cyan-800">
+                            {{ stat.shortcut }}
+                        </span>
+                    </div>
+                    <div class="pointer-events-none absolute -bottom-8 -end-8 h-24 w-24 rounded-full bg-cyan-500/5 blur-2xl transition group-hover:bg-cyan-500/10" />
+                </article>
+            </div>
+        </section>
 
-                    <p class="mt-1 text-xs text-slate-500">
-                        New activities will appear here.
+        <!-- Modules -->
+        <section class="mb-8">
+            <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900">Your HR modules</h2>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Your company's HR tools, progressively rolling out.
                     </p>
                 </div>
-            </article>
+                <span class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500">
+                    More modules coming soon
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <article
+                    v-for="module in modules"
+                    :key="module.name"
+                    class="flex min-h-36 items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 opacity-80 shadow-sm"
+                >
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600">
+                        {{ module.shortcut }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h3 class="text-sm font-semibold text-slate-800">{{ module.name }}</h3>
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                                Coming soon
+                            </span>
+                        </div>
+                        <p class="mt-2 text-xs leading-5 text-slate-500">{{ module.description }}</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Empty state / roadmap -->
+        <section class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-6 sm:p-8">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-cyan-700 shadow-sm ring-1 ring-slate-200">
+                    HX
+                </div>
+                <div class="min-w-0">
+                    <h2 class="font-semibold text-slate-900">Your workspace is ready</h2>
+                    <p class="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
+                        Your company workspace is connected and secure. Employee, attendance, leave and payroll data will appear here as those modules are implemented and enabled.
+                    </p>
+                </div>
+            </div>
         </section>
     </CompanyLayout>
 </template>
