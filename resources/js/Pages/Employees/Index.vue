@@ -40,7 +40,10 @@ const paginationLinks = computed(() => props.employees.links || []);
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Employees</h1>
                 <p class="mt-2 text-sm text-slate-500">Manage employee profiles, employment status and organization assignments.</p>
             </div>
-            <Link href="/employees/create" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700">+ Add employee</Link>
+            <div class="flex flex-wrap gap-2">
+                <Link href="/employees/archived" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Archived employees</Link>
+                <Link href="/employees/create" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700">+ Add employee</Link>
+            </div>
         </section>
 
         <section class="mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
