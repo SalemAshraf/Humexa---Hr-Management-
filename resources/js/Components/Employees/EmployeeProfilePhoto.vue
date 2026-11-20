@@ -78,7 +78,8 @@ async function removePhoto() {
     errorMessage.value = '';
 
     try {
-        await window.axios.delete(`/employees/${props.employeeId}/profile-photo`);
+        // A dedicated POST endpoint avoids sharing DELETE semantics with employee archival.
+        await window.axios.post(`/employees/${props.employeeId}/profile-photo/remove`);
         releasePhotoUrl();
     } catch (error) {
         errorMessage.value = 'Unable to remove the profile photo. Please try again.';
@@ -108,10 +109,10 @@ onBeforeUnmount(releasePhotoUrl);
         </div>
 
         <div v-if="canUpdate" class="flex flex-wrap justify-center gap-2">
-            <button type="button" :disabled="uploading || deleting" class="rounded-lg bg-cyan-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60" @click="choosePhoto">
+            <button type="button" :disabled="uploading || deleting" class="rounded-lg bg-cyan-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60" @click.stop.prevent="choosePhoto">
                 {{ uploading ? 'Uploading…' : photoUrl ? 'Change photo' : 'Upload photo' }}
             </button>
-            <button v-if="photoUrl" type="button" :disabled="uploading || deleting" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60" @click="removePhoto">
+            <button v-if="photoUrl" type="button" :disabled="uploading || deleting" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60" @click.stop.prevent="removePhoto">
                 {{ deleting ? 'Removing…' : 'Remove' }}
             </button>
             <input ref="fileInput" type="file" accept="image/jpeg,image/png" class="hidden" @change="uploadPhoto">
