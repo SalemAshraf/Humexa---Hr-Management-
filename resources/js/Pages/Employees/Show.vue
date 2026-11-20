@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 import EmployeeProfilePhoto from '@/Components/Employees/EmployeeProfilePhoto.vue';
+import EmployeeRecordsPanel from '@/Components/Employees/EmployeeRecordsPanel.vue';
 
 const props = defineProps({
     employee: { type: Object, required: true },
@@ -16,6 +17,10 @@ const tabs = [
     { key: 'personal', label: 'Personal' },
     { key: 'organization', label: 'Organization' },
     { key: 'employment', label: 'Employment' },
+    { key: 'addresses', label: 'Addresses' },
+    { key: 'contacts', label: 'Emergency contacts' },
+    { key: 'identity', label: 'Identity' },
+    { key: 'documents', label: 'Documents' },
 ];
 
 const fullName = computed(() => [
@@ -214,5 +219,12 @@ function archiveEmployee() {
                 <div class="sm:col-span-2 lg:col-span-3"><dt class="text-xs font-medium text-slate-500">Termination reason</dt><dd class="mt-1 whitespace-pre-line text-sm font-semibold text-slate-800">{{ employee.termination_reason || '—' }}</dd></div>
             </dl>
         </section>
+
+        <EmployeeRecordsPanel
+            v-if="['addresses', 'contacts', 'identity', 'documents'].includes(activeTab)"
+            :employee-id="employee.id"
+            :can-update="canUpdate"
+            :section="activeTab"
+        />
     </CompanyLayout>
 </template>
