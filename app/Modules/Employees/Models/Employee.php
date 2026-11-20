@@ -35,6 +35,8 @@ class Employee extends Model
         self::STATUS_TERMINATED,
     ];
 
+    protected $hidden = ['tenant_id'];
+
     protected $fillable = [
         'employee_number',
         'user_id',
