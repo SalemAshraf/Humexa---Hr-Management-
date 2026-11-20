@@ -11,6 +11,8 @@ use App\Modules\Employees\Models\Employee;
 use App\Modules\Employees\Models\EmployeeDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -137,5 +139,47 @@ class EmployeeDocumentController extends Controller
         $documentRecord->delete();
 
         return back()->with('success', 'Employee document archived successfully.');
+    }
+
+    public function destroy(string $tenant, string $employee, string $document): RedirectResponse
+    {
+        $record = $this->employee();
+        $this->authorize('update', $record);
+
+        [$diskName, $filePath] = DB::transaction(function () use ($record, $document): array {
+            $documentRecord = $record->documents()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($document);
+
+            $diskName = $documentRecord->disk;
+            $filePath = $documentRecord->file_path;
+
+            $documentRecord->forceDelete();
+
+            return [$diskName, $filePath];
+        }, 3);
+
+        try {
+            $deleted = Storage::disk($diskName)->delete($filePath);
+            if (! $deleted) {
+                Log::warning('Employee document row deleted but private file cleanup failed.', [
+                    'tenant_id' => tenant()->getTenantKey(),
+                    'employee_id' => $record->getKey(),
+                    'document_id' => $document,
+                    'disk' => $diskName,
+                ]);
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Employee document row deleted but private file cleanup failed.', [
+                'tenant_id' => tenant()->getTenantKey(),
+                'employee_id' => $record->getKey(),
+                'document_id' => $document,
+                'disk' => $diskName,
+                'exception' => $exception::class,
+            ]);
+        }
+
+        return back()->with('success', 'Employee document permanently deleted.');
     }
 }
