@@ -10,7 +10,7 @@ class PositionRequest extends OrganizationItemRequest
 {
     public function rules(): array
     {
-        $positionId = $this->route('position')?->id;
+        $positionId = $this->route('position');
 
         return [
             'department_id' => ['required', 'integer', Rule::exists('departments', 'id')->where('tenant_id', $this->tenantId())->whereNull('deleted_at')],
