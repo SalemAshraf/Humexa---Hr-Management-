@@ -121,7 +121,7 @@ Route::domain('{tenant}.humexa.test')
                         Route::post('/', 'store')->name('store');
                         Route::get('/{document}/download', 'download')->whereNumber('document')->name('download');
                         Route::get('/{document}/preview', 'preview')->whereNumber('document')->name('preview');
-                        Route::delete('/{document}', 'destroy')->whereNumber('document')->name('destroy');
+                        Route::post('/{document}/archive', 'archive')->whereNumber('document')->name('archive');
                     });
             });
 
