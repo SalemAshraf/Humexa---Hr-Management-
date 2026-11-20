@@ -22,8 +22,8 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->unique(['id', 'tenant_id'], 'branches_id_tenant_unique');
-            $table->unique(['tenant_id', 'name'], 'branches_tenant_name_unique');
-            $table->unique(['tenant_id', 'code'], 'branches_tenant_code_unique');
+            $table->unique(['tenant_id', 'name', 'deleted_at'], 'branches_tenant_name_unique');
+            $table->unique(['tenant_id', 'code', 'deleted_at'], 'branches_tenant_code_unique');
             $table->index(['tenant_id', 'is_active']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
         });
@@ -40,8 +40,8 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->unique(['id', 'tenant_id'], 'departments_id_tenant_unique');
-            $table->unique(['tenant_id', 'name'], 'departments_tenant_name_unique');
-            $table->unique(['tenant_id', 'code'], 'departments_tenant_code_unique');
+            $table->unique(['tenant_id', 'name', 'deleted_at'], 'departments_tenant_name_unique');
+            $table->unique(['tenant_id', 'code', 'deleted_at'], 'departments_tenant_code_unique');
             $table->index(['tenant_id', 'branch_id', 'is_active']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreign(['branch_id', 'tenant_id'], 'departments_branch_tenant_foreign')
@@ -60,8 +60,8 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->unique(['tenant_id', 'department_id', 'name'], 'positions_department_name_unique');
-            $table->unique(['tenant_id', 'code'], 'positions_tenant_code_unique');
+            $table->unique(['tenant_id', 'department_id', 'name', 'deleted_at'], 'positions_department_name_unique');
+            $table->unique(['tenant_id', 'code', 'deleted_at'], 'positions_tenant_code_unique');
             $table->index(['tenant_id', 'department_id', 'is_active']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
             $table->foreign(['department_id', 'tenant_id'], 'positions_department_tenant_foreign')
