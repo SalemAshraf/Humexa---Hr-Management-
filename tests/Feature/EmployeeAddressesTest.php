@@ -75,15 +75,22 @@ test('tenant can create and list multiple employee addresses', function () {
     $employeeId = createAddressTestEmployee($this, $registration);
     $base = 'http://' . $registration['domain'] . '/employees/' . $employeeId . '/addresses';
 
-    $response = $this->post($base, employeeAddressPayload(['is_primary' => true]));
+    $tenantHome = $this->get('http://' . $registration['domain'] . '/');
+    $employeeRow = DB::table('employees')->where('id', $employeeId)->first();
+    $employeeShow = $this->get('http://' . $registration['domain'] . '/employees/' . $employeeId);
 
     dump([
-        'url' => $base,
-        'status' => $response->status(),
-        'content' => $response->getContent(),
+        'tenant_home_status' => $tenantHome->status(),
+        'tenant_home_body' => $tenantHome->getContent(),
+        'employee_show_status' => $employeeShow->status(),
+        'employee_row_tenant_id' => $employeeRow?->tenant_id,
+        'registered_tenant_id' => $registration['tenant']->id,
         'employee_id' => $employeeId,
-        'tenant_id' => $registration['tenant']->id,
+        'addresses_url' => $base,
     ]);
+
+    $response = $this->post($base, employeeAddressPayload(['is_primary' => true]));
+    dump(['address_post_status' => $response->status()]);
 
     $response->assertRedirect()->assertSessionHasNoErrors();
 
