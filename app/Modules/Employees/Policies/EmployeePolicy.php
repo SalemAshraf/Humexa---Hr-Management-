@@ -34,6 +34,11 @@ class EmployeePolicy
         return $this->ownsEmployee($user, $employee);
     }
 
+    public function restore(User $user, Employee $employee): bool
+    {
+        return $this->ownsEmployee($user, $employee);
+    }
+
     private function isCurrentTenantUser(User $user): bool
     {
         return tenancy()->initialized
