@@ -11,6 +11,7 @@ use App\Modules\Organization\Http\Requests\PositionRequest;
 use App\Modules\Organization\Models\Branch;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Organization\Models\Position;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -79,9 +80,10 @@ class OrganizationController extends Controller
         $record = Branch::query()->where('tenant_id', $tenantId)->findOrFail($branch);
 
         abort_if(
-            Department::query()->where('tenant_id', $tenantId)->where('branch_id', $record->id)->withTrashed()->exists(),
+            Department::query()->where('tenant_id', $tenantId)->where('branch_id', $record->id)->withTrashed()->exists()
+            || DB::table('employees')->where('tenant_id', $tenantId)->where('branch_id', $record->id)->exists(),
             409,
-            'Move or remove this branch departments before deleting the branch.'
+            'Reassign this branch departments and employees before archiving the branch.'
         );
 
         $record->delete();
@@ -115,9 +117,10 @@ class OrganizationController extends Controller
         $record = Department::query()->where('tenant_id', $tenantId)->findOrFail($department);
 
         abort_if(
-            Position::query()->where('tenant_id', $tenantId)->where('department_id', $record->id)->withTrashed()->exists(),
+            Position::query()->where('tenant_id', $tenantId)->where('department_id', $record->id)->withTrashed()->exists()
+            || DB::table('employees')->where('tenant_id', $tenantId)->where('department_id', $record->id)->exists(),
             409,
-            'Move or remove this department positions before deleting the department.'
+            'Reassign this department positions and employees before archiving the department.'
         );
 
         $record->delete();
@@ -147,7 +150,15 @@ class OrganizationController extends Controller
     public function destroyPosition(): RedirectResponse
     {
         $position = (string) request()->route('position');
-        $record = Position::query()->where('tenant_id', $this->tenantId())->findOrFail($position);
+        $tenantId = $this->tenantId();
+        $record = Position::query()->where('tenant_id', $tenantId)->findOrFail($position);
+
+        abort_if(
+            DB::table('employees')->where('tenant_id', $tenantId)->where('position_id', $record->id)->exists(),
+            409,
+            'Reassign employees from this position before archiving it.'
+        );
+
         $record->delete();
 
         return back()->with('success', 'Position archived successfully.');
