@@ -29,7 +29,7 @@ class CentralTenantLoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(
-            Str::lower($this->string('email')).'|'.$this->ip()
+            Str::lower((string) $this->input('email')).'|'.$this->ip()
         );
     }
 
