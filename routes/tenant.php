@@ -42,14 +42,27 @@ Route::domain('{tenant}.humexa.test')
                 Route::delete('/positions/{position}', 'destroyPosition')->whereNumber('position')->name('positions.destroy');
             });
 
-            Route::prefix('/employees')->name('employees.')->controller(EmployeeController::class)->group(function () {
-                Route::get('/', 'index')->name('index');
-                Route::get('/create', 'create')->name('create');
-                Route::post('/', 'store')->name('store');
-                Route::get('/{employee}/edit', 'edit')->whereNumber('employee')->name('edit');
-                Route::get('/{employee}', 'show')->whereNumber('employee')->name('show');
-                Route::put('/{employee}', 'update')->whereNumber('employee')->name('update');
-                Route::delete('/{employee}', 'destroy')->whereNumber('employee')->name('destroy');
+            Route::prefix('/employees')->name('employees.')->group(function () {
+                Route::controller(EmployeeController::class)->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/create', 'create')->name('create');
+                    Route::post('/', 'store')->name('store');
+                    Route::get('/{employee}/edit', 'edit')->whereNumber('employee')->name('edit');
+                    Route::get('/{employee}', 'show')->whereNumber('employee')->name('show');
+                    Route::put('/{employee}', 'update')->whereNumber('employee')->name('update');
+                    Route::delete('/{employee}', 'destroy')->whereNumber('employee')->name('destroy');
+                });
+
+                Route::prefix('/{employee}/addresses')
+                    ->whereNumber('employee')
+                    ->name('addresses.')
+                    ->controller(EmployeeAddressController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
+                        Route::put('/{address}', 'update')->whereNumber('address')->name('update');
+                        Route::delete('/{address}', 'destroy')->whereNumber('address')->name('destroy');
+                    });
             });
 
             Route::post('/logout', [TenantAuthController::class, 'destroy'])->name('tenant.logout');
