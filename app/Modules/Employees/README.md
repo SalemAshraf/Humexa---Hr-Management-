@@ -53,12 +53,12 @@ Recommended initial limits: profile photo 5 MB; employee documents 10 MB; PDF/JP
 - Form Requests validate organization and user ownership.
 - Reporting relationships are checked to prevent self-management and circular manager chains.
 - Archiving a manager with direct reports is blocked with HTTP 409.
-- Sensitive identity values must be masked in UI responses and excluded from logs.
+- Sensitive identity values must be masked in UI responses and excluded from logs. Identity API responses expose only the masked number; the encrypted value and HMAC blind index are hidden. A tenant-wide write lock serializes identity-number duplicate checks, while the database unique index remains the final integrity guard.
 - Document and photo downloads require tenant ownership and authorization checks.
 - Fine-grained Spatie permissions are a separate authorization phase.
 
 ## Routes
-The employee directory/profile routes and nested address endpoints are registered in routes/tenant.php under the authenticated tenant route group. Address endpoints are `GET/POST /employees/{employee}/addresses` and `PUT/DELETE /employees/{employee}/addresses/{address}`. Emergency-contact endpoints are `GET/POST /employees/{employee}/emergency-contacts` and `PUT/DELETE /employees/{employee}/emergency-contacts/{contact}`. Employee-owned records are resolved through the current tenant and parent employee relationship; list endpoints return a JSON `data` collection while mutations redirect back with a flash message. Emergency-contact priority is assigned sequentially by the backend on creation; clients cannot submit tenant IDs, employee IDs, or priority values.
+The employee directory/profile routes and nested address endpoints are registered in routes/tenant.php under the authenticated tenant route group. Address endpoints are `GET/POST /employees/{employee}/addresses` and `PUT/DELETE /employees/{employee}/addresses/{address}`. Emergency-contact endpoints are `GET/POST /employees/{employee}/emergency-contacts` and `PUT/DELETE /employees/{employee}/emergency-contacts/{contact}`. Identity-record endpoints are `GET/POST /employees/{employee}/identity-records`; POST creates or reactivates a current national ID/passport version while retaining the previous version as history. Re-saving the same normalized identity number updates its metadata without creating a duplicate. Employee-owned records are resolved through the current tenant and parent employee relationship; list endpoints return a JSON `data` collection while mutations redirect back with a flash message. Emergency-contact priority is assigned sequentially by the backend on creation; clients cannot submit tenant IDs, employee IDs, or priority values.
 
 ## Testing
 Pest feature tests must cover tenant isolation, composite constraints, current identity uniqueness, primary address uniqueness, emergency-contact ordering, upload validation, private file access, and rollback/failure cleanup.
