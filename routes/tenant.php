@@ -64,6 +64,17 @@ Route::domain('{tenant}.humexa.test')
                         Route::put('/{address}', 'update')->whereNumber('address')->name('update');
                         Route::delete('/{address}', 'destroy')->whereNumber('address')->name('destroy');
                     });
+
+                Route::prefix('/{employee}/emergency-contacts')
+                    ->whereNumber('employee')
+                    ->name('emergency-contacts.')
+                    ->controller(EmployeeEmergencyContactController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
+                        Route::put('/{contact}', 'update')->whereNumber('contact')->name('update');
+                        Route::delete('/{contact}', 'destroy')->whereNumber('contact')->name('destroy');
+                    });
             });
 
             Route::post('/logout', [TenantAuthController::class, 'destroy'])->name('tenant.logout');
