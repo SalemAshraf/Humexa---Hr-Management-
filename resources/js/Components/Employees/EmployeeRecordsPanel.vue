@@ -228,8 +228,8 @@ async function uploadDocument() {
         const fileInput = document.querySelector('[data-employee-document-file]');
         if (fileInput) fileInput.value = '';
         Object.assign(documentForm, { document_type_id: '', title: '', issue_date: '', expiry_date: '', notes: '' });
-        successMessage.value = 'Document uploaded successfully.';
         await loadSection();
+        successMessage.value = 'Document uploaded successfully.';
     } catch (error) { applyError(error); }
     finally { saving.value = false; }
 }
@@ -239,8 +239,8 @@ async function archiveDocument(item) {
     resetMessages();
     try {
         await window.axios.delete(endpoints.value.documents + '/' + item.id);
-        successMessage.value = 'Document archived. Its file and metadata are retained.';
         await loadSection();
+        successMessage.value = 'Document archived. Its file and metadata are retained.';
     } catch (error) { applyError(error); }
     finally { saving.value = false; }
 }
@@ -275,8 +275,8 @@ async function archiveType(item) {
     resetMessages();
     try {
         await window.axios.delete(endpoints.value.types + '/' + item.id);
-        successMessage.value = 'Document type archived.';
         await loadSection();
+        successMessage.value = 'Document type archived.';
     } catch (error) { applyError(error); }
     finally { saving.value = false; }
 }
