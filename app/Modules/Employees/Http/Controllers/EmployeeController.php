@@ -113,7 +113,7 @@ class EmployeeController extends Controller
             $request->user('tenant')?->getKey()
         );
 
-        return redirect()->route('employees.show', $employee->id)->with('success', 'Employee created successfully.');
+        return redirect('/employees/' . $employee->id)->with('success', 'Employee created successfully.');
     }
 
     public function show(string $employee): Response
@@ -156,7 +156,7 @@ class EmployeeController extends Controller
             $request->user('tenant')?->getKey()
         );
 
-        return redirect()->route('employees.show', $record->id)->with('success', 'Employee updated successfully.');
+        return redirect('/employees/' . $record->id)->with('success', 'Employee updated successfully.');
     }
 
     public function destroy(string $employee): RedirectResponse
@@ -172,6 +172,6 @@ class EmployeeController extends Controller
 
         $record->delete();
 
-        return redirect()->route('employees.index')->with('success', 'Employee archived successfully.');
+        return redirect('/employees')->with('success', 'Employee archived successfully.');
     }
 }
