@@ -157,6 +157,8 @@ test('organization parent records cannot be archived while child records exist',
     $departmentId = DB::table('departments')->where('tenant_id', $registration['tenant']->id)->value('id');
     $this->assertNotNull($departmentId, 'The department must be created before testing its archive restriction.');
 
+    $this->withoutExceptionHandling();
+
     $this->delete($base . '/branches/' . $branchId)->assertStatus(409);
 
     $this->post($base . '/positions', [
