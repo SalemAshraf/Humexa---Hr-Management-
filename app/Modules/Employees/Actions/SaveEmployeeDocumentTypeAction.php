@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\\Modules\\Employees\\Actions;
+namespace App\Modules\Employees\Actions;
 
-use App\\Modules\\Employees\\Models\\EmployeeDocumentType;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Str;
+use App\Modules\Employees\Models\EmployeeDocumentType;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SaveEmployeeDocumentTypeAction
 {
