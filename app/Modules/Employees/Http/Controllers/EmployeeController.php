@@ -87,9 +87,27 @@ class EmployeeController extends Controller
             $query->where('employment_status', $status);
         }
 
+        $branchId = $request->query('branch_id');
+        if ($branchId !== null && $branchId !== '') {
+            $request->validate([
+                'branch_id' => ['integer', Rule::exists('branches', 'id')->where('tenant_id', $this->tenantId())],
+            ]);
+            $query->where('branch_id', $branchId);
+        }
+
+        $departmentId = $request->query('department_id');
+        if ($departmentId !== null && $departmentId !== '') {
+            $request->validate([
+                'department_id' => ['integer', Rule::exists('departments', 'id')->where('tenant_id', $this->tenantId())],
+            ]);
+            $query->where('department_id', $departmentId);
+        }
+
         return Inertia::render('Employees/Index', [
             'employees' => $query->latest('id')->paginate(15)->withQueryString(),
-            'filters' => $request->only('search', 'status'),
+            'branches' => Branch::query()->where('tenant_id', $this->tenantId())->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'departments' => Department::query()->where('tenant_id', $this->tenantId())->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'filters' => $request->only('search', 'status', 'branch_id', 'department_id'),
             'summary' => [
                 'total' => $this->employeeQuery()->count(),
                 'active' => $this->employeeQuery()->where('employment_status', Employee::STATUS_ACTIVE)->count(),
