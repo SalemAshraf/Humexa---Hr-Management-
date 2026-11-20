@@ -10,11 +10,14 @@ use App\Modules\Users\Models\Role;
 use App\Modules\Users\Support\PlatformTeam;
 use Database\Seeders\PlatformAuthorizationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Modules\Tenants\Actions\SuspendTenantAction;
 use Spatie\Permission\PermissionRegistrar;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    $this->withoutVite();
+
     app(PermissionRegistrar::class)->setPermissionsTeamId(null);
 
     config([
@@ -107,11 +110,8 @@ test('super admin can view companies and suspend a company with an audit record'
 test('super admin can reactivate a company and audit the change', function () {
     assignPlatformSuperAdmin($this->platformUser);
 
-    $this->tenant->forceFill([
-        'status' => 'suspended',
-        'session_version' => 2,
-        'suspended_at' => now(),
-    ])->save();
+    // Use the real suspension action so the fixture reflects persisted business state.
+    app(SuspendTenantAction::class)->execute((string) $this->tenant->getKey());
 
     $this->actingAs($this->platformUser, 'platform')
         ->patch(route('platform.companies.activate', $this->tenant), [
