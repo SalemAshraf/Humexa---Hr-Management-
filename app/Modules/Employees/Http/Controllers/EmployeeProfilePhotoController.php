@@ -44,14 +44,19 @@ class EmployeeProfilePhotoController extends Controller
         $mime = (string) $storage->mimeType($path);
         abort_unless(in_array($mime, ['image/jpeg', 'image/png'], true), 404);
 
-        // JPEG and PNG are non-active image formats. Do not apply a document
-        // sandbox policy to the image response; some browsers may refuse to
-        // render the standalone image document when this policy is present.
-        return $storage->response($path, null, [
+        // Read the file while the tenant filesystem context is still active.
+        // A deferred StreamedResponse may execute after tenancy middleware has
+        // restored the central filesystem root, resulting in an empty body.
+        $contents = $storage->get($path);
+        abort_unless(is_string($contents) && $contents !== '', 404);
+
+        return response($contents, 200, [
             'Content-Type' => $mime,
+            'Content-Length' => (string) strlen($contents),
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
             'X-Content-Type-Options' => 'nosniff',
             'Cache-Control' => 'private, no-store',
-        ], 'inline');
+        ]);
     }
 
     public function store(
