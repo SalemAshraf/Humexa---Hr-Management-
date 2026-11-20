@@ -119,8 +119,9 @@ class EmployeeController extends Controller
         return redirect('/employees/' . $employee->id)->with('success', 'Employee created successfully.');
     }
 
-    public function show(string $employee): Response
+    public function show(): Response
     {
+        $employee = (string) request()->route('employee');
         $record = $this->employeeQuery()
             ->with([
                 'user:id,name,email',
@@ -137,8 +138,9 @@ class EmployeeController extends Controller
         return Inertia::render('Employees/Show', ['employee' => $record]);
     }
 
-    public function edit(string $employee): Response
+    public function edit(): Response
     {
+        $employee = (string) request()->route('employee');
         $record = $this->employeeQuery()->with(['user:id,name,email'])->findOrFail($employee);
         $this->authorize('update', $record);
 
@@ -148,8 +150,9 @@ class EmployeeController extends Controller
         ]);
     }
 
-    public function update(UpdateEmployeeRequest $request, string $employee, UpdateEmployeeAction $action): RedirectResponse
+    public function update(UpdateEmployeeRequest $request, UpdateEmployeeAction $action): RedirectResponse
     {
+        $employee = (string) $request->route('employee');
         $record = $this->employeeQuery()->findOrFail($employee);
         $this->authorize('update', $record);
 
@@ -162,8 +165,9 @@ class EmployeeController extends Controller
         return redirect('/employees/' . $record->id)->with('success', 'Employee updated successfully.');
     }
 
-    public function destroy(string $employee): RedirectResponse
+    public function destroy(): RedirectResponse
     {
+        $employee = (string) request()->route('employee');
         $record = $this->employeeQuery()->findOrFail($employee);
         $this->authorize('delete', $record);
 
