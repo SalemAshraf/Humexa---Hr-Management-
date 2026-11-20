@@ -10,7 +10,7 @@ class DepartmentRequest extends OrganizationItemRequest
 {
     public function rules(): array
     {
-        $departmentId = $this->route('department')?->id;
+        $departmentId = $this->route('department');
 
         return [
             'branch_id' => ['nullable', 'integer', Rule::exists('branches', 'id')->where('tenant_id', $this->tenantId())->whereNull('deleted_at')],
