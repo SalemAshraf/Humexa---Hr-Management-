@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
+use Spatie\Permission\Models\Permission;
 
 class PlatformTenantController extends Controller
 {
@@ -146,7 +147,11 @@ class PlatformTenantController extends Controller
             && $user !== null
             && $user->account_type === 'platform'
             && $user->tenant_id === null
-            && Permission::query()\n                ->where('name', $permission)\n                ->where('guard_name', 'platform')\n                ->exists()\n            && $user->hasPermissionTo($permission, 'platform'),
+            && Permission::query()
+                ->where('name', $permission)
+                ->where('guard_name', 'platform')
+                ->exists()
+            && $user->hasPermissionTo($permission, 'platform'),
             403
         );
     }
