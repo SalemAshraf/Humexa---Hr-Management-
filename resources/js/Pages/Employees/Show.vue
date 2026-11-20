@@ -26,7 +26,7 @@ const fullName = computed(() => [
 
 const statusLabel = (value) => (value || 'unknown')
     .replaceAll('_', ' ')
-    .replace(/\\b\\w/g, (letter) => letter.toUpperCase());
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const statusClasses = computed(() => {
     const styles = {
