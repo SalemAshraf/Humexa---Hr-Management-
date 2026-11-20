@@ -148,3 +148,28 @@ test('platform status endpoints reject invalid audit reasons', function () {
     expect(PlatformActivityLog::query()->count())->toBe(0);
     expect(Tenant::query()->findOrFail($this->tenant->id)->status)->toBe('active');
 });
+
+test('super admin can view the platform activity log page', function () {
+    assignPlatformSuperAdmin($this->platformUser);
+
+    PlatformActivityLog::query()->create([
+        'actor_id' => $this->platformUser->id,
+        'tenant_id' => $this->tenant->id,
+        'event' => 'company.suspended',
+        'old_status' => 'active',
+        'new_status' => 'suspended',
+        'reason' => 'Security review',
+        'ip_address' => '127.0.0.1',
+        'user_agent' => 'Pest Test',
+    ]);
+
+    $this->actingAs($this->platformUser, 'platform')
+        ->get(route('platform.activity-logs.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Platform/ActivityLogs/Index')
+            ->has('activity.data', 1)
+            ->where('activity.data.0.event', 'company.suspended')
+            ->where('activity.data.0.reason', 'Security review')
+        );
+});
