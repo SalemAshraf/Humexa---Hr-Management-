@@ -37,25 +37,33 @@ class PlatformTenantController extends Controller
                 'suspendedAt' => $tenant->getAttribute('suspended_at'),
             ]);
 
-        $activity = PlatformActivityLog::query()
-            ->with('actor:id,name,email')
-            ->latest()
-            ->limit(20)
-            ->get()
-            ->map(fn (PlatformActivityLog $log): array => [
-                'id' => $log->id,
-                'tenantId' => $log->tenant_id,
-                'event' => $log->event,
-                'oldStatus' => $log->old_status,
-                'newStatus' => $log->new_status,
-                'reason' => $log->reason,
-                'actor' => $log->actor?->name ?? 'Deleted platform user',
-                'createdAt' => $log->created_at?->toDateTimeString(),
-            ]);
+        $canViewActivityLogs = $this->hasPlatformPermission(
+            $request,
+            'platform.activity-logs.view'
+        );
+
+        $activity = $canViewActivityLogs
+            ? PlatformActivityLog::query()
+                ->with('actor:id,name,email')
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn (PlatformActivityLog $log): array => [
+                    'id' => $log->id,
+                    'tenantId' => $log->tenant_id,
+                    'event' => $log->event,
+                    'oldStatus' => $log->old_status,
+                    'newStatus' => $log->new_status,
+                    'reason' => $log->reason,
+                    'actor' => $log->actor?->name ?? 'Deleted platform user',
+                    'createdAt' => $log->created_at?->toDateTimeString(),
+                ])
+            : collect();
 
         return Inertia::render('Platform/Companies/Index', [
             'companies' => $companies,
             'activity' => $activity,
+            'canViewActivityLogs' => $canViewActivityLogs,
         ]);
     }
 
@@ -142,8 +150,16 @@ class PlatformTenantController extends Controller
     ): void {
         $user = $request->user('platform');
 
-        abort_unless(
-            ! tenancy()->initialized
+        abort_unless($this->hasPlatformPermission($request, $permission), 403);
+    }
+
+    private function hasPlatformPermission(
+        Request $request,
+        string $permission
+    ): bool {
+        $user = $request->user('platform');
+
+        return ! tenancy()->initialized
             && $user !== null
             && $user->account_type === 'platform'
             && $user->tenant_id === null
@@ -151,8 +167,6 @@ class PlatformTenantController extends Controller
                 ->where('name', $permission)
                 ->where('guard_name', 'platform')
                 ->exists()
-            && $user->hasPermissionTo($permission, 'platform'),
-            403
-        );
+            && $user->hasPermissionTo($permission, 'platform');
     }
 }
