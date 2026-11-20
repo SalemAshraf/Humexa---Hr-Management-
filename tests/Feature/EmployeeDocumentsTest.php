@@ -162,6 +162,32 @@ test('archiving a document preserves its metadata and private file for authorize
     $this->get($base . '/' . $document->id . '/download')->assertOk();
 });
 
+test('permanently deleting a document removes only its row and private file, not its employee', function () {
+    Storage::fake('local');
+
+    $registration = registerEmployeeDocumentTenant('Employee Documents Permanent Delete', 'employee-documents-permanent-delete@example.test');
+    actAsEmployeeDocumentTenant($this, $registration);
+
+    $employeeId = createEmployeeDocumentTestEmployee($this, $registration);
+    $typeId = createEmployeeDocumentType($this, $registration);
+    $base = 'http://' . $registration['domain'] . '/employees/' . $employeeId . '/documents';
+
+    $this->post($base, employeeDocumentPayload($typeId))->assertRedirect();
+
+    $document = DB::table('employee_documents')->first();
+    Storage::disk('local')->assertExists($document->file_path);
+
+    $this->post($base . '/' . $document->id . '/delete')->assertRedirect();
+
+    $this->assertDatabaseMissing('employee_documents', ['id' => $document->id]);
+    $this->assertDatabaseHas('employees', [
+        'id' => $employeeId,
+        'tenant_id' => $registration['tenant']->id,
+        'deleted_at' => null,
+    ]);
+    Storage::disk('local')->assertMissing($document->file_path);
+});
+
 test('tenant cannot access another tenants employee documents', function () {
     Storage::fake('local');
 
@@ -187,6 +213,7 @@ test('tenant cannot access another tenants employee documents', function () {
     $this->get($intruderBase . '/' . $documentId . '/download')->assertNotFound();
     $this->get($intruderBase . '/' . $documentId . '/preview')->assertNotFound();
     $this->post($intruderBase . '/' . $documentId . '/archive')->assertNotFound();
+    $this->post($intruderBase . '/' . $documentId . '/delete')->assertNotFound();
 
     $this->assertDatabaseHas('employee_documents', [
         'id' => $documentId,
