@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Modules\Users\Http\Controllers\PlatformAuthController;
 use Inertia\Inertia;
 use App\Modules\Tenants\Http\Controllers\PlatformDashboardController;
+use App\Modules\Tenants\Http\Controllers\PlatformTenantController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -50,8 +51,17 @@ Route::prefix('platform')->name('platform.')->group(function () {
         ->name('login.store');
 
     Route::middleware(['auth:platform', 'platform.user'])->group(function () {
-       Route::get('/dashboard', PlatformDashboardController::class)
-    ->name('dashboard');
+        Route::get('/dashboard', PlatformDashboardController::class)
+            ->name('dashboard');
+
+        Route::get('/companies', [PlatformTenantController::class, 'index'])
+            ->name('companies.index');
+
+        Route::patch('/companies/{tenant}/suspend', [PlatformTenantController::class, 'suspend'])
+            ->name('companies.suspend');
+
+        Route::patch('/companies/{tenant}/activate', [PlatformTenantController::class, 'activate'])
+            ->name('companies.activate');
 
         Route::post('/logout', [PlatformAuthController::class, 'destroy'])
             ->name('logout');
