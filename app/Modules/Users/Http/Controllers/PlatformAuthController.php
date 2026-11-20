@@ -34,7 +34,7 @@ class PlatformAuthController extends Controller
 
         // Never honor a shared session's intended URL here: it may belong to a tenant
         // portal because central and tenant subdomains share the same session cookie.
-        return redirect()->route('platform.dashboard', absolute: false);
+        return redirect('/platform/dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse
