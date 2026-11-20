@@ -80,11 +80,14 @@ test('profile photo is optional and tenant can upload view replace and remove it
 
     Storage::disk('local')->assertExists($firstPath);
 
-    $this->get($base)
+    $photoResponse = $this->get($base);
+
+    $photoResponse
         ->assertOk()
         ->assertHeader('Content-Type', 'image/png')
         ->assertHeader('X-Content-Type-Options', 'nosniff')
-        ->assertHeader('Cache-Control', 'no-store, private');
+        ->assertHeader('Cache-Control', 'no-store, private')
+        ->assertContent(Storage::disk('local')->get($firstPath));
 
     $this->post($base, ['photo' => tinyEmployeePng('replacement.png')])
         ->assertRedirect()
