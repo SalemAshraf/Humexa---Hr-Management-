@@ -11,6 +11,7 @@ use App\Modules\Organization\Http\Controllers\OrganizationController;
 use App\Modules\Employees\Http\Controllers\EmployeeController;
 use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
+use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.humexa.test')
@@ -75,6 +76,15 @@ Route::domain('{tenant}.humexa.test')
                         Route::post('/', 'store')->name('store');
                         Route::put('/{contact}', 'update')->whereNumber('contact')->name('update');
                         Route::delete('/{contact}', 'destroy')->whereNumber('contact')->name('destroy');
+                    });
+
+                Route::prefix('/{employee}/identity-records')
+                    ->whereNumber('employee')
+                    ->name('identity-records.')
+                    ->controller(EmployeeIdentityRecordController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
                     });
             });
 
