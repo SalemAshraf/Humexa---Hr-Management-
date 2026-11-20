@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\\Database\\Migrations\\Migration;
+use Illuminate\\Database\\Schema\\Blueprint;
+use Illuminate\\Support\\Facades\\Schema;
 
 return new class extends Migration
 {
@@ -35,9 +35,11 @@ return new class extends Migration
                 ->references('id')->on('tenants')
                 ->cascadeOnUpdate()->restrictOnDelete();
 
+            // MySQL cannot cascade updates to employee_id because primary_employee_id
+            // is a stored generated column derived from it. Employee IDs are immutable.
             $table->foreign(['employee_id', 'tenant_id'], 'employee_addresses_employee_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
     }
 
