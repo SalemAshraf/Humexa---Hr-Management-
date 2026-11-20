@@ -12,7 +12,6 @@ use App\Modules\Organization\Models\Branch;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Organization\Models\Position;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -56,7 +55,7 @@ class OrganizationController extends Controller
 
     public function storeBranch(BranchRequest $request): RedirectResponse
     {
-        Branch::query()->create([
+        Branch::query()->forceCreate([
             ...$request->validated(),
             'tenant_id' => $this->tenantId(),
         ]);
@@ -77,7 +76,7 @@ class OrganizationController extends Controller
         $record = Branch::query()->where('tenant_id', $this->tenantId())->findOrFail($branch);
 
         abort_if(
-            Department::query()->where('tenant_id', $this->tenantId())->where('branch_id', $record->id)->exists(),
+            Department::query()->where('tenant_id', $this->tenantId())->where('branch_id', $record->id)->withTrashed()->exists(),
             409,
             'Move or remove this branch departments before deleting the branch.'
         );
@@ -89,7 +88,7 @@ class OrganizationController extends Controller
 
     public function storeDepartment(DepartmentRequest $request): RedirectResponse
     {
-        Department::query()->create([
+        Department::query()->forceCreate([
             ...$request->validated(),
             'tenant_id' => $this->tenantId(),
         ]);
@@ -110,7 +109,7 @@ class OrganizationController extends Controller
         $record = Department::query()->where('tenant_id', $this->tenantId())->findOrFail($department);
 
         abort_if(
-            Position::query()->where('tenant_id', $this->tenantId())->where('department_id', $record->id)->exists(),
+            Position::query()->where('tenant_id', $this->tenantId())->where('department_id', $record->id)->withTrashed()->exists(),
             409,
             'Move or remove this department positions before deleting the department.'
         );
@@ -122,7 +121,7 @@ class OrganizationController extends Controller
 
     public function storePosition(PositionRequest $request): RedirectResponse
     {
-        Position::query()->create([
+        Position::query()->forceCreate([
             ...$request->validated(),
             'tenant_id' => $this->tenantId(),
         ]);
