@@ -146,7 +146,7 @@ class PlatformTenantController extends Controller
             && $user !== null
             && $user->account_type === 'platform'
             && $user->tenant_id === null
-            && $user->hasPermissionTo($permission, 'platform'),
+            && Permission::query()\n                ->where('name', $permission)\n                ->where('guard_name', 'platform')\n                ->exists()\n            && $user->hasPermissionTo($permission, 'platform'),
             403
         );
     }
