@@ -143,7 +143,13 @@ test('archiving a document preserves its metadata and private file for authorize
 
     $document = DB::table('employee_documents')->first();
 
-    $this->delete($base . '/' . $document->id)->assertRedirect();
+    $this->post($base . '/' . $document->id . '/archive')->assertRedirect();
+
+    $this->assertDatabaseHas('employees', [
+        'id' => $employeeId,
+        'tenant_id' => $registration['tenant']->id,
+        'deleted_at' => null,
+    ]);
 
     $this->assertSoftDeleted('employee_documents', ['id' => $document->id]);
     Storage::disk('local')->assertExists($document->file_path);
@@ -180,7 +186,7 @@ test('tenant cannot access another tenants employee documents', function () {
     $this->getJson($intruderBase)->assertOk()->assertJsonCount(0, 'data');
     $this->get($intruderBase . '/' . $documentId . '/download')->assertNotFound();
     $this->get($intruderBase . '/' . $documentId . '/preview')->assertNotFound();
-    $this->delete($intruderBase . '/' . $documentId)->assertNotFound();
+    $this->post($intruderBase . '/' . $documentId . '/archive')->assertNotFound();
 
     $this->assertDatabaseHas('employee_documents', [
         'id' => $documentId,
