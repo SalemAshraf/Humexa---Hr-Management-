@@ -47,6 +47,6 @@ class EmployeeDocument extends Model
 
     public function getIsExpiredAttribute(): bool
     {
-        return $this->expiry_date !== null && $this->expiry_date->isPast();
+        return $this->expiry_date !== null && $this->expiry_date->lt(today());
     }
 }
