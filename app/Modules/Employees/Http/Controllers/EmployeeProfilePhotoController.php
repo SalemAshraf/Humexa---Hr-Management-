@@ -44,10 +44,12 @@ class EmployeeProfilePhotoController extends Controller
         $mime = (string) $storage->mimeType($path);
         abort_unless(in_array($mime, ['image/jpeg', 'image/png'], true), 404);
 
+        // JPEG and PNG are non-active image formats. Do not apply a document
+        // sandbox policy to the image response; some browsers may refuse to
+        // render the standalone image document when this policy is present.
         return $storage->response($path, null, [
             'Content-Type' => $mime,
             'X-Content-Type-Options' => 'nosniff',
-            'Content-Security-Policy' => 'sandbox',
             'Cache-Control' => 'private, no-store',
         ], 'inline');
     }
