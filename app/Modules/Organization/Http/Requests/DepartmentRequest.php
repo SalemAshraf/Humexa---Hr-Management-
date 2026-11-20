@@ -13,7 +13,7 @@ class DepartmentRequest extends OrganizationItemRequest
         $departmentId = $this->route('department');
 
         return [
-            'branch_id' => ['nullable', 'integer', Rule::exists('branches', 'id')->where('tenant_id', $this->tenantId())->whereNull('deleted_at')],
+            'branch_id' => ['nullable', 'integer', Rule::exists('branches', 'id')->where('tenant_id', $this->tenantId())],
             'name' => ['required', 'string', 'max:150', Rule::unique('departments', 'name')->where('tenant_id', $this->tenantId())->whereNull('deleted_at')->ignore($departmentId)],
             'code' => ['nullable', 'string', 'max:50', Rule::unique('departments', 'code')->where('tenant_id', $this->tenantId())->whereNull('deleted_at')->ignore($departmentId)],
             'description' => ['nullable', 'string', 'max:2000'],
