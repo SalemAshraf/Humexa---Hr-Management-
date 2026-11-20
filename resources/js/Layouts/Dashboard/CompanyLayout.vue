@@ -19,7 +19,7 @@ const {
 
 const navigationItems = [
     { label: 'Overview', href: '/dashboard', shortcut: 'OV' },
-    { label: 'Employees', shortcut: 'EM', disabled: true, badge: 'Soon' },
+    { label: 'Employees', href: '/employees', shortcut: 'EM' },
     { label: 'Organization', href: '/organization', shortcut: 'OR' },
     { label: 'Attendance', shortcut: 'AT', disabled: true, badge: 'Soon' },
     { label: 'Leaves', shortcut: 'LE', disabled: true, badge: 'Soon' },
