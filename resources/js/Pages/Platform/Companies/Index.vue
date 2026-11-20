@@ -128,7 +128,10 @@ function changeStatus(company, action) {
                                 {{ company.createdAt || '—' }}
                             </td>
                             <td class="px-3 py-4">
-                                <div class="flex min-w-48 flex-col gap-2">
+                                <div
+                                    v-if="(company.status === 'active' && canSuspendCompanies) || (company.status === 'suspended' && canActivateCompanies)"
+                                    class="flex min-w-48 flex-col gap-2"
+                                >
                                     <input
                                         v-model="reasons[company.id]"
                                         type="text"
