@@ -9,6 +9,7 @@ use App\Http\Requests\Auth\CentralTenantLoginRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -35,7 +36,7 @@ class AuthenticatedSessionController extends Controller
      * Authenticate a tenant account from the central login page and hand
      * the authenticated session off to that tenant's own subdomain.
      */
-    public function store(CentralTenantLoginRequest $request): RedirectResponse
+    public function store(CentralTenantLoginRequest $request): SymfonyResponse
     {
         $validated = $request->validated();
         $throttleKey = $request->throttleKey();
@@ -103,7 +104,7 @@ class AuthenticatedSessionController extends Controller
 
         $scheme = $request->isSecure() ? 'https' : 'http';
 
-        return redirect()->away($scheme.'://'.$domain.'/dashboard');
+        return Inertia::location($scheme.'://'.$domain.'/dashboard');
     }
 
     /**
