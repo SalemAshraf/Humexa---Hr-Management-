@@ -63,6 +63,9 @@ Route::prefix('platform')->name('platform.')->group(function () {
         Route::patch('/companies/{tenant}/activate', [PlatformTenantController::class, 'activate'])
             ->name('companies.activate');
 
+        Route::get('/activity-logs', [PlatformTenantController::class, 'activityLogs'])
+            ->name('activity-logs.index');
+
         Route::post('/logout', [PlatformAuthController::class, 'destroy'])
             ->name('logout');
     });
