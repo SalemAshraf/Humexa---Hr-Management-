@@ -14,15 +14,17 @@ class UpdateEmployeeAction
         return DB::transaction(function () use ($employee, $data, $actorId) {
             $previousStatus = $employee->employment_status;
             $nextStatus = $data['employment_status'] ?? $previousStatus;
+            $reason = $data['status_change_reason'] ?? null;
 
             $employee->update($data);
 
             if ($nextStatus !== $previousStatus) {
-                $employee->employmentHistories()->create([
+                $employee->employmentHistories()->forceCreate([
+                    'tenant_id' => $employee->tenant_id,
                     'previous_status' => $previousStatus,
                     'new_status' => $nextStatus,
                     'effective_date' => now()->toDateString(),
-                    'reason' => $data['status_change_reason'] ?? null,
+                    'reason' => $reason,
                     'changed_by_user_id' => $actorId,
                 ]);
             }
