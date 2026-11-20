@@ -118,6 +118,35 @@ class EmployeeController extends Controller
         ]);
     }
 
+    public function archived(): Response
+    {
+        $this->authorize('viewAny', Employee::class);
+
+        $employees = Employee::withTrashed()
+            ->where('tenant_id', $this->tenantId())
+            ->whereNotNull('deleted_at')
+            ->with(['branch:id,name', 'department:id,name', 'position:id,name'])
+            ->latest('deleted_at')
+            ->paginate(15);
+
+        return Inertia::render('Employees/Archived', [
+            'employees' => $employees,
+        ]);
+    }
+
+    public function restore(string $employee): RedirectResponse
+    {
+        $record = Employee::withTrashed()
+            ->where('tenant_id', $this->tenantId())
+            ->whereNotNull('deleted_at')
+            ->findOrFail($employee);
+
+        $this->authorize('restore', $record);
+        $record->restore();
+
+        return redirect('/employees/archived')->with('success', 'Employee restored successfully.');
+    }
+
     public function create(): Response
     {
         $this->authorize('create', Employee::class);
