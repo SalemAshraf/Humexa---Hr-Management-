@@ -59,6 +59,7 @@ function createAddressTestEmployee($test, array $registration): int
 
     return (int) DB::table('employees')
         ->where('tenant_id', $registration['tenant']->id)
+        ->latest('id')
         ->value('id');
 }
 
