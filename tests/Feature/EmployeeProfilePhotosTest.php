@@ -122,8 +122,14 @@ test('tenant cannot view or change another tenants employee profile photo', func
     $this->get($otherBase)->assertNotFound();
     $this->delete($otherBase)->assertNotFound();
 
-    Storage::disk('local')->assertExists($storedPath);
     expect(DB::table('employees')->where('id', $employeeId)->value('profile_photo_path'))->toBe($storedPath);
+
+    // The local disk root is tenant-suffixed, so switch back to the owner context
+    // before asserting that the owner's private file still exists.
+    tenancy()->end();
+    tenancy()->initialize($owner['tenant']);
+
+    Storage::disk('local')->assertExists($storedPath);
 });
 
 test('profile photo upload rejects unsupported and oversized files', function () {
