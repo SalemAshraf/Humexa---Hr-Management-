@@ -118,6 +118,15 @@ test('tenant can upload list preview and download a private employee document', 
     $this->get($base . '/' . $document->id . '/download')
         ->assertOk()
         ->assertHeader('Content-Disposition');
+
+    $this->delete('http://' . $registration['domain'] . '/employee-document-types/' . $typeId)
+        ->assertRedirect();
+
+    $this->getJson($base)
+        ->assertOk()
+        ->assertJsonPath('data.0.document_type_name', 'Employment Contract');
+
+    $this->get($base . '/' . $document->id . '/download')->assertOk();
 });
 
 test('archiving a document preserves its metadata and private file for authorized access', function () {
