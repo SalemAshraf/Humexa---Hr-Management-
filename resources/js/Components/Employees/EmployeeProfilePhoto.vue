@@ -61,9 +61,7 @@ async function uploadPhoto(event) {
     errorMessage.value = '';
 
     try {
-        await window.axios.post(`/employees/${props.employeeId}/profile-photo`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await window.axios.post(`/employees/${props.employeeId}/profile-photo`, formData);
         await loadPhoto();
     } catch (error) {
         errorMessage.value = error.response?.data?.errors?.photo?.[0]
