@@ -191,7 +191,11 @@ function isActive(item) {
                         class="flex min-h-11 cursor-not-allowed items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 opacity-60"
                         :class="collapsed ? 'justify-center' : 'gap-3'"
                     >
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-800 text-xs font-bold text-slate-500" aria-hidden="true">
+                        <span
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+                            :class="isPlatform ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-400'"
+                            aria-hidden="true"
+                        >
                             {{ item.shortcut || item.label?.charAt(0) || '?' }}
                         </span>
                         <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
