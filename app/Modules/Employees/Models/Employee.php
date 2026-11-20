@@ -26,36 +26,19 @@ class Employee extends Model
     public const STATUS_TERMINATED = 'terminated';
 
     public const STATUSES = [
-        self::STATUS_DRAFT,
-        self::STATUS_PROBATION,
-        self::STATUS_ACTIVE,
-        self::STATUS_ON_LEAVE,
-        self::STATUS_SUSPENDED,
-        self::STATUS_RESIGNED,
+        self::STATUS_DRAFT, self::STATUS_PROBATION, self::STATUS_ACTIVE,
+        self::STATUS_ON_LEAVE, self::STATUS_SUSPENDED, self::STATUS_RESIGNED,
         self::STATUS_TERMINATED,
     ];
 
     protected $hidden = ['tenant_id'];
 
     protected $fillable = [
-        'employee_number',
-        'user_id',
-        'first_name',
-        'middle_name',
-        'last_name',
-        'work_email',
-        'phone',
-        'date_of_birth',
-        'gender',
-        'hire_date',
-        'probation_end_date',
-        'employment_status',
-        'termination_date',
-        'termination_reason',
-        'branch_id',
-        'department_id',
-        'position_id',
-        'manager_id',
+        'employee_number', 'user_id', 'first_name', 'middle_name', 'last_name',
+        'work_email', 'personal_email', 'phone', 'alternate_phone',
+        'date_of_birth', 'gender', 'nationality', 'marital_status', 'profile_photo_path',
+        'hire_date', 'probation_end_date', 'employment_status', 'termination_date',
+        'termination_reason', 'branch_id', 'department_id', 'position_id', 'manager_id',
     ];
 
     protected function casts(): array
@@ -68,47 +51,42 @@ class Employee extends Model
         ];
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function branch(): BelongsTo
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class);
-    }
-
-    public function position(): BelongsTo
-    {
-        return $this->belongsTo(Position::class);
-    }
-
-    public function manager(): BelongsTo
-    {
-        return $this->belongsTo(self::class, 'manager_id');
-    }
-
-    public function directReports(): HasMany
-    {
-        return $this->hasMany(self::class, 'manager_id');
-    }
+    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function branch(): BelongsTo { return $this->belongsTo(Branch::class); }
+    public function department(): BelongsTo { return $this->belongsTo(Department::class); }
+    public function position(): BelongsTo { return $this->belongsTo(Position::class); }
+    public function manager(): BelongsTo { return $this->belongsTo(self::class, 'manager_id'); }
+    public function directReports(): HasMany { return $this->hasMany(self::class, 'manager_id'); }
 
     public function employmentHistories(): HasMany
     {
         return $this->hasMany(EmployeeEmploymentHistory::class)->orderByDesc('id');
     }
 
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(EmployeeAddress::class)->orderByDesc('is_primary')->orderBy('id');
+    }
+
+    public function emergencyContacts(): HasMany
+    {
+        return $this->hasMany(EmployeeEmergencyContact::class)->orderBy('priority');
+    }
+
+    public function identityRecords(): HasMany
+    {
+        return $this->hasMany(EmployeeIdentityRecord::class)->orderByDesc('is_current')->orderByDesc('id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(EmployeeDocument::class)->latest('id');
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim(implode(' ', array_filter([
-            $this->first_name,
-            $this->middle_name,
-            $this->last_name,
+            $this->first_name, $this->middle_name, $this->last_name,
         ])));
     }
 }
