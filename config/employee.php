@@ -19,6 +19,7 @@ return [
     'document_disk' => env('EMPLOYEE_DOCUMENT_DISK', 'local'),
 
     'profile_photo_max_kb' => 5120,
+    'allowed_profile_photo_mimes' => ['jpg', 'jpeg', 'png'],
     'document_max_kb' => 10240,
     'allowed_document_mimes' => ['pdf', 'jpg', 'jpeg', 'png'],
 ];
