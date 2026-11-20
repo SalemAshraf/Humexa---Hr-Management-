@@ -113,7 +113,7 @@ test('tenant can upload list preview and download a private employee document', 
         ->assertOk()
         ->assertHeader('Content-Security-Policy', 'sandbox')
         ->assertHeader('X-Content-Type-Options', 'nosniff')
-        ->assertHeader('Cache-Control', 'private, no-store');
+        ->assertHeader('Cache-Control', 'no-store, private');
 
     $this->get($base . '/' . $document->id . '/download')
         ->assertOk()
