@@ -70,6 +70,10 @@ test('platform account without explicit tenant permissions cannot access company
         ->assertForbidden();
 
     $this->actingAs($this->platformUser, 'platform')
+        ->get(route('platform.dashboard'))
+        ->assertForbidden();
+
+    $this->actingAs($this->platformUser, 'platform')
         ->patch(route('platform.companies.suspend', $this->tenant))
         ->assertForbidden();
 
