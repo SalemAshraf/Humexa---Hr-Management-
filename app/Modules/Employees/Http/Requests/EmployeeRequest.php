@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Employees\Http\Requests;
 
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Organization\Models\Department;
+use App\Modules\Organization\Models\Position;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -42,24 +44,26 @@ abstract class EmployeeRequest extends FormRequest
             $managerId = $this->input('manager_id');
             $userId = $this->input('user_id');
 
-            if ($departmentId && $branchId) {
-                $departmentBranchId = \App\Modules\Organization\Models\Department::query()
+            if ($departmentId) {
+                $departmentBranchId = Department::query()
                     ->where('tenant_id', $tenantId)
                     ->whereKey($departmentId)
                     ->value('branch_id');
 
-                if ($departmentBranchId !== null && (string) $departmentBranchId !== (string) $branchId) {
-                    $validator->errors()->add('department_id', 'The selected department does not belong to the selected branch.');
+                if ($departmentBranchId !== null && (
+                    ! $branchId || (string) $departmentBranchId !== (string) $branchId
+                )) {
+                    $validator->errors()->add('branch_id', 'The selected department belongs to a different branch.');
                 }
             }
 
-            if ($positionId && $departmentId) {
-                $positionDepartmentId = \App\Modules\Organization\Models\Position::query()
+            if ($positionId) {
+                $positionDepartmentId = Position::query()
                     ->where('tenant_id', $tenantId)
                     ->whereKey($positionId)
                     ->value('department_id');
 
-                if ((string) $positionDepartmentId !== (string) $departmentId) {
+                if (! $departmentId || (string) $positionDepartmentId !== (string) $departmentId) {
                     $validator->errors()->add('position_id', 'The selected position must belong to the selected department.');
                 }
             }
@@ -69,9 +73,9 @@ abstract class EmployeeRequest extends FormRequest
             }
 
             if ($userId) {
-                $alreadyLinked = \App\Modules\Employees\Models\Employee::query()
+                $alreadyLinked = Employee::query()
                     ->where('user_id', $userId)
-                    ->when($this->employeeId(), fn ($query, $id) => $query->whereKeyNot($id))
+                    ->when($this->employeeId(), fn ($query, $id) => $query->where('id', '!=', $id))
                     ->exists();
 
                 if ($alreadyLinked) {
@@ -98,7 +102,9 @@ abstract class EmployeeRequest extends FormRequest
             'user_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('users', 'id')->where('tenant_id', $tenantId)->where('account_type', 'tenant'),
+                Rule::exists('users', 'id')
+                    ->where('tenant_id', $tenantId)
+                    ->where('account_type', 'tenant'),
             ],
             'first_name' => ['required', 'string', 'max:100'],
             'middle_name' => ['nullable', 'string', 'max:100'],
@@ -123,7 +129,7 @@ abstract class EmployeeRequest extends FormRequest
             'manager_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('employees', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at')->ignore($employeeId),
+                Rule::exists('employees', 'id')->where('tenant_id', $tenantId)->whereNull('deleted_at'),
             ],
             'status_change_reason' => ['nullable', 'string', 'max:5000'],
         ];
