@@ -19,9 +19,13 @@ const form = useForm({
     middle_name: props.employee?.middle_name || '',
     last_name: props.employee?.last_name || '',
     work_email: props.employee?.work_email || '',
+    personal_email: props.employee?.personal_email || '',
     phone: props.employee?.phone || '',
+    alternate_phone: props.employee?.alternate_phone || '',
     date_of_birth: props.employee?.date_of_birth?.slice(0, 10) || '',
     gender: props.employee?.gender || '',
+    nationality: props.employee?.nationality || '',
+    marital_status: props.employee?.marital_status || '',
     hire_date: props.employee?.hire_date?.slice(0, 10) || '',
     probation_end_date: props.employee?.probation_end_date?.slice(0, 10) || '',
     employment_status: props.employee?.employment_status || 'draft',
@@ -72,6 +76,14 @@ function submit() {
                     <input v-model="form.phone" maxlength="30" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm">
                     <span v-if="form.errors.phone" class="mt-1 block text-xs text-red-600">{{ form.errors.phone }}</span>
                 </label>
+                <label class="text-sm font-medium text-slate-700">Alternate phone
+                    <input v-model="form.alternate_phone" maxlength="30" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm">
+                    <span v-if="form.errors.alternate_phone" class="mt-1 block text-xs text-red-600">{{ form.errors.alternate_phone }}</span>
+                </label>
+                <label class="text-sm font-medium text-slate-700">Personal email
+                    <input v-model="form.personal_email" type="email" maxlength="190" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm">
+                    <span v-if="form.errors.personal_email" class="mt-1 block text-xs text-red-600">{{ form.errors.personal_email }}</span>
+                </label>
                 <label class="text-sm font-medium text-slate-700">Date of birth
                     <input v-model="form.date_of_birth" type="date" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm">
                     <span v-if="form.errors.date_of_birth" class="mt-1 block text-xs text-red-600">{{ form.errors.date_of_birth }}</span>
@@ -81,6 +93,16 @@ function submit() {
                         <option value="">Not specified</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option><option value="prefer_not_to_say">Prefer not to say</option>
                     </select>
                     <span v-if="form.errors.gender" class="mt-1 block text-xs text-red-600">{{ form.errors.gender }}</span>
+                </label>
+                <label class="text-sm font-medium text-slate-700">Nationality
+                    <input v-model="form.nationality" maxlength="100" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm">
+                    <span v-if="form.errors.nationality" class="mt-1 block text-xs text-red-600">{{ form.errors.nationality }}</span>
+                </label>
+                <label class="text-sm font-medium text-slate-700">Marital status
+                    <select v-model="form.marital_status" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm">
+                        <option value="">Not specified</option><option value="single">Single</option><option value="married">Married</option><option value="divorced">Divorced</option><option value="widowed">Widowed</option><option value="other">Other</option>
+                    </select>
+                    <span v-if="form.errors.marital_status" class="mt-1 block text-xs text-red-600">{{ form.errors.marital_status }}</span>
                 </label>
             </div>
         </section>
