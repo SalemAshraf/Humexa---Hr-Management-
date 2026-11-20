@@ -58,7 +58,7 @@ Recommended initial limits: profile photo 5 MB; employee documents 10 MB; PDF/JP
 - Fine-grained Spatie permissions are a separate authorization phase.
 
 ## Routes
-The initial employee directory/profile routes are documented in routes/tenant.php. Phase 2 resource routes must remain nested under the authenticated tenant route group and use explicit tenant-scoped lookups.
+The employee directory/profile routes and nested address endpoints are registered in routes/tenant.php under the authenticated tenant route group. Address endpoints are `GET/POST /employees/{employee}/addresses` and `PUT/DELETE /employees/{employee}/addresses/{address}`. Employee and address records are resolved through the current tenant and parent employee relationship; the list endpoint returns a JSON `data` collection while mutations redirect back with a flash message.
 
 ## Testing
 Pest feature tests must cover tenant isolation, composite constraints, current identity uniqueness, primary address uniqueness, emergency-contact ordering, upload validation, private file access, and rollback/failure cleanup.
