@@ -89,7 +89,7 @@ abstract class EmployeeRequest extends FormRequest
             }
 
             if ($userId) {
-                $alreadyLinked = Employee::query()
+                $alreadyLinked = Employee::withTrashed()
                     ->where('user_id', $userId)
                     ->when($this->employeeId(), fn ($query, $id) => $query->where('id', '!=', $id))
                     ->exists();
