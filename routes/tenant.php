@@ -9,6 +9,7 @@ use App\Modules\Users\Http\Controllers\TenantAuthController;
 use App\Modules\Tenants\Http\Controllers\TenantDashboardController;
 use App\Modules\Organization\Http\Controllers\OrganizationController;
 use App\Modules\Employees\Http\Controllers\EmployeeController;
+use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.humexa.test')
