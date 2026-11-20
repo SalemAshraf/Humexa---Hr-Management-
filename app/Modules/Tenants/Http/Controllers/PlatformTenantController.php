@@ -41,6 +41,14 @@ class PlatformTenantController extends Controller
             $request,
             'platform.activity-logs.view'
         );
+        $canSuspendCompanies = $this->hasPlatformPermission(
+            $request,
+            'tenants.suspend'
+        );
+        $canActivateCompanies = $this->hasPlatformPermission(
+            $request,
+            'tenants.activate'
+        );
 
         $activity = $canViewActivityLogs
             ? PlatformActivityLog::query()
@@ -64,6 +72,8 @@ class PlatformTenantController extends Controller
             'companies' => $companies,
             'activity' => $activity,
             'canViewActivityLogs' => $canViewActivityLogs,
+            'canSuspendCompanies' => $canSuspendCompanies,
+            'canActivateCompanies' => $canActivateCompanies,
         ]);
     }
 
