@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\\Feature\\Auth;
+namespace Tests\Feature\Auth;
 
-use App\\Models\\User;
-use App\\Modules\\Tenants\\Actions\\RegisterCompanyAction;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Tests\\TestCase;
+use App\Models\User;
+use App\Modules\Tenants\Actions\RegisterCompanyAction;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
@@ -75,7 +75,7 @@ class AuthenticationTest extends TestCase
      * used by company registration. A generic User factory record is not a
      * valid tenant login account.
      *
-     * @return array{tenant: \\App\\Models\\Tenant, user: User, domain: string}
+     * @return array{tenant: \App\Models\Tenant, user: User, domain: string}
      */
     private function createTenantAccount(): array
     {
