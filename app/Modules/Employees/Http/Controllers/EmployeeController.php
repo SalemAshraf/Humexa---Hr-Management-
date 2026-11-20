@@ -119,7 +119,7 @@ class EmployeeController extends Controller
         return redirect('/employees/' . $employee->id)->with('success', 'Employee created successfully.');
     }
 
-    public function show(): Response
+    public function show(Request $request): Response
     {
         $employee = (string) request()->route('employee');
         $record = $this->employeeQuery()
@@ -135,7 +135,10 @@ class EmployeeController extends Controller
 
         $this->authorize('view', $record);
 
-        return Inertia::render('Employees/Show', ['employee' => $record]);
+        return Inertia::render('Employees/Show', [
+            'employee' => $record,
+            'canUpdate' => $request->user('tenant')?->can('update', $record) ?? false,
+        ]);
     }
 
     public function edit(): Response
