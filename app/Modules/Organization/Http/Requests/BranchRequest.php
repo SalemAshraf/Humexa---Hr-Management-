@@ -10,7 +10,7 @@ class BranchRequest extends OrganizationItemRequest
 {
     public function rules(): array
     {
-        $branchId = $this->route('branch')?->id;
+        $branchId = $this->route('branch');
 
         return [
             'name' => ['required', 'string', 'max:150', Rule::unique('branches', 'name')->where('tenant_id', $this->tenantId())->whereNull('deleted_at')->ignore($branchId)],
