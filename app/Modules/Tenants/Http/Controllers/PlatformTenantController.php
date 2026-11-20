@@ -148,8 +148,6 @@ class PlatformTenantController extends Controller
         Request $request,
         string $permission
     ): void {
-        $user = $request->user('platform');
-
         abort_unless($this->hasPlatformPermission($request, $permission), 403);
     }
 
