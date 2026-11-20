@@ -31,9 +31,8 @@ Route::post('/login', [TenantAuthController::class, 'store'])
 
 // Protected tenant routes
 Route::middleware(['auth:tenant', 'tenant.user'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Company/Dashboard');
-    })->name('tenant.dashboard');
+    Route::get('/dashboard', TenantDashboardController::class)
+        ->name('tenant.dashboard');
 
     Route::post('/logout', [TenantAuthController::class, 'destroy'])
         ->name('tenant.logout');
