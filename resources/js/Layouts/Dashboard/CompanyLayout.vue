@@ -18,7 +18,7 @@ const {
 } = useSidebar();
 
 const navigationItems = [
-    { label: 'Overview', href: route('tenant.dashboard', {}, false), shortcut: 'OV' },
+    { label: 'Overview', href: '/dashboard', shortcut: 'OV' },
     { label: 'Employees', shortcut: 'EM', disabled: true, badge: 'Soon' },
     { label: 'Organization', shortcut: 'OR', disabled: true, badge: 'Soon' },
     { label: 'Attendance', shortcut: 'AT', disabled: true, badge: 'Soon' },
@@ -64,7 +64,7 @@ function handleSidebarToggle() {
                 :title="title"
                 :subtitle="subtitle"
                 theme="company"
-                :logout-url="route('tenant.logout', {}, false)"
+                :logout-url="'/logout'"
                 :collapsed="isCollapsed"
                 :direction="direction"
                 @toggle-sidebar="handleSidebarToggle"
