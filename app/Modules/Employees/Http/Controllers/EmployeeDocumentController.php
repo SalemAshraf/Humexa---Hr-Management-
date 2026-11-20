@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Employees\Actions\UploadEmployeeDocumentAction;
 use App\Modules\Employees\Http\Requests\EmployeeDocumentRequest;
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Employees\Models\EmployeeDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,7 @@ class EmployeeDocumentController extends Controller
             ->findOrFail((string) request()->route('employee'));
     }
 
-    private function document(Employee $employee)
+    private function document(Employee $employee): EmployeeDocument
     {
         return $employee->documents()
             ->withTrashed()
