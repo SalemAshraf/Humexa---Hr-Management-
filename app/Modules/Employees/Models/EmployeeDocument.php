@@ -37,7 +37,7 @@ class EmployeeDocument extends Model
 
     public function documentType(): BelongsTo
     {
-        return $this->belongsTo(EmployeeDocumentType::class, 'document_type_id');
+        return $this->belongsTo(EmployeeDocumentType::class, 'document_type_id')->withTrashed();
     }
 
     public function uploadedBy(): BelongsTo
