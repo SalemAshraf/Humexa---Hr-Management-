@@ -143,9 +143,15 @@ test('employee status changes are recorded in employment history', function () {
 
     $this->put($base . '/' . $employee->id, employeePayload([
         'employment_status' => 'active',
+        'employee_number' => 'EMP-MANUAL-2',
         'hire_date' => '2026-11-01',
         'status_change_reason' => 'Probation completed.',
     ]))->assertRedirect()->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('employees', [
+        'id' => $employee->id,
+        'employee_number' => 'EMP-MANUAL-2',
+    ]);
 
     $this->assertDatabaseHas('employee_employment_histories', [
         'tenant_id' => $registration['tenant']->id,
@@ -246,4 +252,64 @@ test('organization records assigned to employees cannot be archived', function (
     $this->delete($base . '/organization/branches/' . $branchId)->assertStatus(409);
     $this->delete($base . '/organization/departments/' . $departmentId)->assertStatus(409);
     $this->delete($base . '/organization/positions/' . $positionId)->assertStatus(409);
+});
+
+
+test('tenant can link an employee to one of its own user accounts', function () {
+    $registration = registerEmployeeTenant('Employees Account Link', 'employees-account-link@example.test');
+    actAsEmployeeTenant($this, $registration);
+
+    $this->post('http://' . $registration['domain'] . '/employees', employeePayload([
+        'user_id' => $registration['user']->id,
+    ]))->assertRedirect()->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('employees', [
+        'tenant_id' => $registration['tenant']->id,
+        'user_id' => $registration['user']->id,
+    ]);
+});
+
+test('non-draft employees require a hire date and terminated employees require a termination date', function () {
+    $registration = registerEmployeeTenant('Employees Required Dates', 'employees-required-dates@example.test');
+    actAsEmployeeTenant($this, $registration);
+
+    $base = 'http://' . $registration['domain'] . '/employees';
+
+    $this->post($base, employeePayload([
+        'employment_status' => 'active',
+    ]))->assertSessionHasErrors('hire_date');
+
+    $this->post($base, employeePayload([
+        'employment_status' => 'terminated',
+        'hire_date' => '2026-10-01',
+    ]))->assertSessionHasErrors('termination_date');
+
+    $this->assertDatabaseCount('employees', 0);
+});
+
+test('employee reporting relationships cannot create a manager cycle', function () {
+    $registration = registerEmployeeTenant('Employees Manager Cycle', 'employees-manager-cycle@example.test');
+    actAsEmployeeTenant($this, $registration);
+
+    $base = 'http://' . $registration['domain'] . '/employees';
+
+    $this->post($base, employeePayload(['first_name' => 'Manager A']))->assertRedirect();
+    $this->post($base, employeePayload(['first_name' => 'Manager B']))->assertRedirect();
+
+    $employees = DB::table('employees')->where('tenant_id', $registration['tenant']->id)->orderBy('id')->get();
+
+    $this->put($base . '/' . $employees[0]->id, employeePayload([
+        'first_name' => 'Manager A',
+        'manager_id' => $employees[1]->id,
+    ]))->assertRedirect()->assertSessionHasNoErrors();
+
+    $this->put($base . '/' . $employees[1]->id, employeePayload([
+        'first_name' => 'Manager B',
+        'manager_id' => $employees[0]->id,
+    ]))->assertSessionHasErrors('manager_id');
+
+    $this->assertDatabaseHas('employees', [
+        'id' => $employees[1]->id,
+        'manager_id' => null,
+    ]);
 });
