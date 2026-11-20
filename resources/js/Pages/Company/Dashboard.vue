@@ -80,11 +80,6 @@ const modules = [
         shortcut: 'LV',
     },
     {
-        name: 'Organization',
-        description: 'Departments, positions and reporting structure',
-        shortcut: 'OR',
-    },
-    {
         name: 'Payroll',
         description: 'Salary structures, payslips and payroll processing',
         shortcut: 'PY',
