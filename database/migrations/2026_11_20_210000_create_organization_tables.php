@@ -25,7 +25,7 @@ return new class extends Migration
             $table->unique(['tenant_id', 'name'], 'branches_tenant_name_unique');
             $table->unique(['tenant_id', 'code'], 'branches_tenant_code_unique');
             $table->index(['tenant_id', 'is_active']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('departments', function (Blueprint $table) {
@@ -43,7 +43,7 @@ return new class extends Migration
             $table->unique(['tenant_id', 'name', 'deleted_at'], 'departments_tenant_name_unique');
             $table->unique(['tenant_id', 'code', 'deleted_at'], 'departments_tenant_code_unique');
             $table->index(['tenant_id', 'branch_id', 'is_active']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['branch_id', 'tenant_id'], 'departments_branch_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('branches')
                 ->cascadeOnUpdate()->restrictOnDelete();
@@ -63,7 +63,7 @@ return new class extends Migration
             $table->unique(['tenant_id', 'department_id', 'name'], 'positions_department_name_unique');
             $table->unique(['tenant_id', 'code', 'deleted_at'], 'positions_tenant_code_unique');
             $table->index(['tenant_id', 'department_id', 'is_active']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['department_id', 'tenant_id'], 'positions_department_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('departments')
                 ->cascadeOnUpdate()->restrictOnDelete();
