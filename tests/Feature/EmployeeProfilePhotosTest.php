@@ -99,9 +99,11 @@ test('profile photo is optional and tenant can upload view replace and remove it
     Storage::disk('local')->assertMissing($firstPath);
     Storage::disk('local')->assertExists($secondPath);
 
-    $this->delete($base)->assertRedirect()->assertSessionHasNoErrors();
+    $this->post($base . '/remove')->assertRedirect()->assertSessionHasNoErrors();
 
-    expect(DB::table('employees')->where('id', $employeeId)->value('profile_photo_path'))->toBeNull();
+    expect(DB::table('employees')->where('id', $employeeId)->value('profile_photo_path'))->toBeNull()
+        ->and(DB::table('employees')->where('id', $employeeId)->value('deleted_at'))->toBeNull()
+        ->and(DB::table('employees')->where('id', $employeeId)->exists())->toBeTrue();
     Storage::disk('local')->assertMissing($secondPath);
     $this->get($base)->assertNotFound();
 });
@@ -123,7 +125,7 @@ test('tenant cannot view or change another tenants employee profile photo', func
     $otherBase = 'http://' . $other['domain'] . '/employees/' . $employeeId . '/profile-photo';
 
     $this->get($otherBase)->assertNotFound();
-    $this->delete($otherBase)->assertNotFound();
+    $this->post($otherBase . '/remove')->assertNotFound();
 
     expect(DB::table('employees')->where('id', $employeeId)->value('profile_photo_path'))->toBe($storedPath);
 
