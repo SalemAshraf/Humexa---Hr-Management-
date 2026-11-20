@@ -36,6 +36,27 @@ test('company administrator can sign in from the central login and is redirected
         ->and($result['user']->fresh()->account_type)->toBe(User::ACCOUNT_TYPE_TENANT);
 });
 
+
+test('central company login uses an Inertia location response for cross-subdomain navigation', function () {
+    app(RegisterCompanyAction::class)->execute(
+        companyName: 'Acme Company',
+        adminName: 'Acme Admin',
+        email: 'admin@acme.test',
+        password: 'StrongPassword123!'
+    );
+
+    $this->withHeaders([
+        'X-Inertia' => 'true',
+        'X-Requested-With' => 'XMLHttpRequest',
+    ])->post('/login', [
+        'email' => 'admin@acme.test',
+        'password' => 'StrongPassword123!',
+    ])
+        ->assertStatus(409)
+        ->assertHeader('X-Inertia-Location', 'http://acme-company.humexa.test/dashboard')
+        ->assertSessionHas('tenant_session_version', 1);
+});
+
 test('central company login rejects invalid credentials', function () {
     app(RegisterCompanyAction::class)->execute(
         companyName: 'Acme Company',
