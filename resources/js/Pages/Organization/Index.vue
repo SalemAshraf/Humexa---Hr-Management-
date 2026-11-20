@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
@@ -9,6 +9,7 @@ const props = defineProps({
     positions: { type: Array, default: () => [] },
     summary: { type: Object, default: () => ({}) },
 });
+const page = usePage();
 const tab = ref('branches');
 const editing = ref({ type: null, id: null });
 const branch = useForm({ name: '', code: '', city: '', address: '', is_active: true });
@@ -55,6 +56,7 @@ const tabItems = [
 <template>
     <Head title="Organization" />
     <CompanyLayout title="Organization" subtitle="Manage your company structure">
+        <div v-if="page.props.flash?.success" class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">{{ page.props.flash.success }}</div>
         <section class="mb-7">
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">COMPANY STRUCTURE</p>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Organization</h1>
