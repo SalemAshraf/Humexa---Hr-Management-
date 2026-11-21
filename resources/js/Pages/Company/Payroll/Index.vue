@@ -118,7 +118,7 @@ const flash = computed(() => window.history.state?.props?.flash);
                         <select v-model="runForm.month" class="mt-1 rounded-lg border-slate-300 text-sm"><option v-for="m in 12" :key="m" :value="m">{{ monthName(m) }}</option></select>
                     </label>
                     <label class="text-xs font-medium text-slate-500">Year<input v-model="runForm.year" type="number" class="mt-1 w-24 rounded-lg border-slate-300 text-sm" /></label>
-                    <button class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!rules?.confirmed || runForm.processing">Create run</button>
+                    <button class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!rules?.confirmed || runForm.processing">Create run</button>
                 </form>
                 <p v-if="abilities.manage && !rules?.confirmed" class="mt-2 text-xs text-amber-700">Confirm the rules first.</p>
                 <ul class="mt-4 divide-y divide-slate-100">
