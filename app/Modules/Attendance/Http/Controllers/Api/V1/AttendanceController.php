@@ -54,21 +54,31 @@ class AttendanceController extends Controller
         $employee = $this->employee($request);
         $date = now()->toDateString();
 
-        $record = AttendanceRecord::query()
+        $openSession = AttendanceSession::query()
             ->where('tenant_id', tenant('id'))
             ->where('employee_id', $employee->id)
-            ->whereDate('attendance_date', $date)
-            ->with(['sessions.breaks'])
+            ->whereNotNull('check_in_at')
+            ->whereNull('check_out_at')
+            ->with(['breaks', 'attendanceRecord.sessions.breaks'])
+            ->latest('id')
             ->first();
 
-        $hasOpenSession = $record?->sessions->contains(
-            fn (AttendanceSession $session) => $session->check_in_at && ! $session->check_out_at
-        ) ?? false;
+        $record = $openSession?->attendanceRecord;
+
+        if (! $record) {
+            $record = AttendanceRecord::query()
+                ->where('tenant_id', tenant('id'))
+                ->where('employee_id', $employee->id)
+                ->whereDate('attendance_date', $date)
+                ->with(['sessions.breaks'])
+                ->first();
+        }
 
         return response()->json(['data' => [
             'date' => $date,
             'record' => $record,
-            'state' => ! $record ? 'not_checked_in' : ($hasOpenSession ? 'checked_in' : 'checked_out'),
+            'active_session' => $openSession,
+            'state' => $openSession ? 'checked_in' : ($record ? 'checked_out' : 'not_checked_in'),
         ]]);
     }
 
