@@ -117,6 +117,8 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::get('/', 'index')->name('index');
                 Route::post('/', 'store')->name('store');
                 Route::put('/{account}/role', 'updateRole')->whereNumber('account')->name('role');
+                Route::put('/{account}/active', 'setActive')->whereNumber('account')->name('active');
+                Route::put('/{account}/reset-access', 'resetAccess')->whereNumber('account')->name('reset');
             });
 
             Route::prefix('/leave')->middleware('tenant.can:leave.view')->name('leave.')->controller(LeaveController::class)->group(function () {

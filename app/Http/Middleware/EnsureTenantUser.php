@@ -29,6 +29,19 @@ class EnsureTenantUser
             403
         );
 
+        if ($user->disabled_at !== null) {
+            \Illuminate\Support\Facades\Auth::guard('tenant')->logout();
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+            if ($request->expectsJson()) {
+                abort(403, 'This account is deactivated.');
+            }
+
+            return redirect('/login')->with('status', 'This account is deactivated. Ask your company owner.');
+        }
+
         return $next($request);
     }
 }

@@ -32,7 +32,7 @@ class PortalLoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         if (! Auth::guard($guard)->attempt(
-            $this->only('email', 'password'),
+            [...$this->only('email', 'password'), 'disabled_at' => null],
             $this->boolean('remember')
         )) {
             RateLimiter::hit($this->throttleKey());

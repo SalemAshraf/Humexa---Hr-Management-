@@ -32,6 +32,7 @@ class TenantTeamController extends Controller
                 'name' => $u->name,
                 'email' => $u->email,
                 'role' => $u->getRoleNames()->first(),
+                'is_active' => $u->disabled_at === null,
                 'is_you' => $u->id === $request->user('tenant')->id,
             ]);
 
@@ -86,6 +87,65 @@ class TenantTeamController extends Controller
         $target->syncRoles([$data['role']]);
 
         return back()->with('success', 'Role updated.');
+    }
+
+    public function setActive(Request $request): RedirectResponse
+    {
+        $actor = $this->actor($request);
+        $target = $this->target($request);
+        $active = $request->boolean('active');
+
+        if (! $active) {
+            if ($target->id === $actor->id) {
+                throw ValidationException::withMessages(['account' => 'You cannot deactivate your own account.']);
+            }
+            $this->guardLastOwner($target);
+        }
+
+        $target->forceFill(['disabled_at' => $active ? null : now()])->save();
+
+        if (! $active) {
+            $target->tokens()->delete();
+            \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $target->id)->delete();
+        }
+
+        return back()->with('success', $active ? 'Account reactivated.' : 'Account deactivated. Sessions and app tokens were ended.');
+    }
+
+    /** Owner picks a new starting password. The person must replace it at next sign-in. */
+    public function resetAccess(Request $request): RedirectResponse
+    {
+        $actor = $this->actor($request);
+        $target = $this->target($request);
+        $data = $request->validate(['password' => ['required', 'string', 'min:12', 'max:100']]);
+
+        if ($target->id === $actor->id) {
+            throw ValidationException::withMessages(['password' => 'Change your own password from your profile.']);
+        }
+
+        $target->forceFill(['password' => $data['password'], 'must_change_password' => true])->save();
+        $target->tokens()->delete();
+        \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $target->id)->delete();
+
+        return back()->with('success', 'Access reset. Share the starting password privately. It must be changed at first sign-in.');
+    }
+
+    private function target(Request $request): User
+    {
+        return User::query()
+            ->where('tenant_id', $this->tenantId())
+            ->where('account_type', User::ACCOUNT_TYPE_TENANT)
+            ->findOrFail((int) $request->route('account'));
+    }
+
+    private function guardLastOwner(User $target): void
+    {
+        if ($target->hasRole(TenantRoleCatalog::OWNER)) {
+            $owners = User::query()->where('tenant_id', $this->tenantId())->whereNull('disabled_at')->role(TenantRoleCatalog::OWNER)->count();
+            if ($owners <= 1) {
+                throw ValidationException::withMessages(['account' => 'A company must keep at least one active Owner.']);
+            }
+        }
     }
 
     private function tenantId(): string

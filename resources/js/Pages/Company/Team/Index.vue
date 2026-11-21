@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
@@ -9,6 +10,10 @@ defineProps({
 
 const form = useForm({ name: '', email: '', password: '', role: 'Employee' });
 const submit = () => form.post('/team', { preserveScroll: true, onSuccess: () => form.reset('name', 'email', 'password') });
+const setActive = (a, active) => router.put(`/team/${a.id}/active`, { active }, { preserveScroll: true });
+const resetFor = ref(null);
+const resetForm = useForm({ password: '' });
+const resetAccess = (a) => resetForm.put(`/team/${a.id}/reset-access`, { preserveScroll: true, onSuccess: () => { resetFor.value = null; resetForm.reset(); } });
 const changeRole = (account, role) => router.put(`/team/${account.id}/role`, { role }, { preserveScroll: true });
 const label = (p) => p.replace('.', ' · ');
 </script>
@@ -32,14 +37,26 @@ const label = (p) => p.replace('.', ' · ');
 
         <section class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <ul class="divide-y divide-slate-100">
-                <li v-for="a in accounts" :key="a.id" class="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <li v-for="a in accounts" :key="a.id" class="flex flex-col gap-2 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                     <div>
                         <p class="font-semibold text-slate-800">{{ a.name }} <span v-if="a.is_you" class="ml-1 rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold text-cyan-800">You</span></p>
                         <p class="text-xs text-slate-500">{{ a.email }}</p>
                     </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                    <span v-if="!a.is_active" class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Deactivated</span>
+                    <template v-if="!a.is_you">
+                        <button class="text-xs font-semibold text-cyan-700" @click="resetFor = resetFor === a.id ? null : a.id">Reset access</button>
+                        <button class="text-xs font-semibold" :class="a.is_active ? 'text-red-600' : 'text-emerald-700'" @click="setActive(a, !a.is_active)">{{ a.is_active ? 'Deactivate' : 'Reactivate' }}</button>
+                    </template>
                     <select :value="a.role" :disabled="a.is_you" class="rounded-lg border-slate-300 text-sm disabled:bg-slate-50" @change="changeRole(a, $event.target.value)">
                         <option v-for="r in roles" :key="r.name" :value="r.name">{{ r.name }}</option>
                     </select>
+                    </div>
+                    <form v-if="resetFor === a.id" class="flex w-full flex-wrap items-center gap-2 sm:basis-full" @submit.prevent="resetAccess(a)">
+                        <input v-model="resetForm.password" type="password" minlength="12" placeholder="New starting password (12+ characters)" class="min-w-0 flex-1 rounded-lg border-slate-300 text-sm" required />
+                        <button class="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white">Set password</button>
+                        <span v-if="resetForm.errors.password" class="w-full text-xs text-red-600">{{ resetForm.errors.password }}</span>
+                    </form>
                 </li>
             </ul>
         </section>

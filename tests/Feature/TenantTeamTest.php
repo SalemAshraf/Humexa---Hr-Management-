@@ -118,3 +118,40 @@ test('the company owner who registered is not forced to change password and mobi
     $this->postJson("{$this->base}/api/v1/auth/login", ['email' => 'field@tenant-test.example', 'password' => 'StartingPass123', 'device_name' => 'phone'])
         ->assertForbidden();
 });
+
+test('owner deactivates and reactivates an account, and a deactivated account cannot get in', function () {
+    $owner = $this->reg['user'];
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr-off@tenant-test.example');
+
+    ($this->as)($owner)->put("{$this->base}/team/{$hr->id}/active", ['active' => false])->assertSessionHasNoErrors();
+    expect($hr->fresh()->disabled_at)->not->toBeNull();
+
+    // an already-open session is refused at the next request
+    ($this->as)($hr->fresh())->get("{$this->base}/dashboard")->assertRedirect('/login');
+
+    // a fresh password sign-in is refused
+    $this->post("{$this->base}/login", ['email' => 'hr-off@tenant-test.example', 'password' => 'StrongPassword123!'])->assertSessionHasErrors('email');
+
+    ($this->as)($owner)->put("{$this->base}/team/{$hr->id}/active", ['active' => true]);
+    expect($hr->fresh()->disabled_at)->toBeNull();
+
+    // guards: not yourself, not another company's account, not an HR admin
+    ($this->as)($owner)->put("{$this->base}/team/{$owner->id}/active", ['active' => false])->assertSessionHasErrors('account');
+    ($this->as)($hr)->put("{$this->base}/team/{$owner->id}/active", ['active' => false])->assertForbidden();
+});
+
+test('owner resets access: new password is forced to change and old app tokens end', function () {
+    $owner = $this->reg['user'];
+    $emp = ($this->mk)(TenantRoleCatalog::EMPLOYEE, 'emp-reset@tenant-test.example');
+    $emp->createToken('phone', ['attendance:mobile']);
+
+    ($this->as)($owner)->put("{$this->base}/team/{$emp->id}/reset-access", ['password' => 'short'])->assertSessionHasErrors('password');
+    ($this->as)($owner)->put("{$this->base}/team/{$emp->id}/reset-access", ['password' => 'BrandNewStart123!'])->assertSessionHasNoErrors();
+
+    $emp = $emp->fresh();
+    expect($emp->must_change_password)->toBeTrue()
+        ->and(\Illuminate\Support\Facades\Hash::check('BrandNewStart123!', $emp->password))->toBeTrue()
+        ->and($emp->tokens()->count())->toBe(0);
+
+    ($this->as)($owner)->put("{$this->base}/team/{$owner->id}/reset-access", ['password' => 'BrandNewStart123!'])->assertSessionHasErrors('password');
+});
