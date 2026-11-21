@@ -25,6 +25,7 @@ use App\Modules\Recruitment\Http\Controllers\RecruitmentController;
 use App\Modules\Performance\Http\Controllers\PerformanceController;
 use App\Modules\Payroll\Http\Controllers\PayrollController;
 use App\Modules\Reports\Http\Controllers\ReportsController;
+use App\Modules\Settings\Http\Controllers\SettingsController;
 use App\Modules\Notifications\Http\Controllers\NotificationsController;
 use App\Modules\Search\Http\Controllers\SearchController;
 use App\Http\Middleware\EnsureTenantActive;
@@ -102,6 +103,11 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::prefix('/reports')->middleware('tenant.can:reports.view')->name('reports.')->controller(ReportsController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/export', 'export')->name('export');
+            });
+
+            Route::prefix('/settings')->middleware('tenant.can:settings.manage')->name('settings.')->controller(SettingsController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::put('/', 'update')->name('update');
             });
 
             Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');

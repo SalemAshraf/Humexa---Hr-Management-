@@ -34,7 +34,7 @@ const allNavigationItems = [
     { label: 'Reports', permission: 'reports.view', href: '/reports', shortcut: 'RP' },
     { label: 'Notifications', href: '/notifications', shortcut: 'NO' },
     { label: 'Team & roles', permission: 'roles.manage', href: '/team', shortcut: 'TR' },
-    { label: 'Settings', shortcut: 'SE', disabled: true, badge: 'Soon' },
+    { label: 'Settings', permission: 'settings.manage', href: '/settings', shortcut: 'SE' },
 ];
 
 const navigationItems = computed(() => allNavigationItems.filter((item) => allowed(item.permission)));
