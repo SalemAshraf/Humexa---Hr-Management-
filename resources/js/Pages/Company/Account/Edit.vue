@@ -1,10 +1,10 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({ account: { type: Object, required: true } });
 
-const form = useForm({ name: props.account.name, locale: props.account.locale });
+const form = useForm({ name: props.account.name, locale: usePage().props.locale ?? props.account.locale });
 const save = () => form.put('/account', { preserveScroll: true, onSuccess: () => window.location.reload() });
 </script>
 

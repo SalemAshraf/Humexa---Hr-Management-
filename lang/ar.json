@@ -76,5 +76,19 @@
  "Change password": "تغيير كلمة المرور",
  "Your account was updated.": "تم تحديث حسابك.",
  "Workspace active": "مساحة العمل نشطة",
- "Workspace suspended": "مساحة العمل موقوفة"
+ "Workspace suspended": "مساحة العمل موقوفة",
+ "Jan": "يناير",
+ "Feb": "فبراير",
+ "Mar": "مارس",
+ "Apr": "أبريل",
+ "May": "مايو",
+ "Jun": "يونيو",
+ "Jul": "يوليو",
+ "Aug": "أغسطس",
+ "Sep": "سبتمبر",
+ "Oct": "أكتوبر",
+ "Nov": "نوفمبر",
+ "Dec": "ديسمبر",
+ "{n} hires": "{n} تعيين",
+ "{n} exits": "{n} خروج"
 }

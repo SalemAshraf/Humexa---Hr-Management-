@@ -56,6 +56,9 @@ const formattedCreatedAt = computed(() => {
     }).format(date);
 });
 
+// The server sends "Sep 2026"; only the month name is translated.
+const monthLabel = (label) => String(label).replace(/^[A-Z][a-z]{2}/, (mon) => t(mon));
+
 const kpis = computed(() => {
     const list = [];
     const h = props.analytics?.headcount;
@@ -153,10 +156,10 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
                     <div class="flex items-end gap-3">
                         <div v-for="m in headcount.monthly" :key="m.month" class="flex flex-1 flex-col items-center gap-1">
                             <div class="flex h-24 w-full items-end justify-center gap-1">
-                                <div class="w-3 rounded-t bg-emerald-500" :style="{ height: (m.hires / maxMonthly) * 100 + '%', minHeight: m.hires ? '4px' : '0' }" :title="m.hires + ' hires'" />
-                                <div class="w-3 rounded-t bg-slate-800" :style="{ height: (m.exits / maxMonthly) * 100 + '%', minHeight: m.exits ? '4px' : '0' }" :title="m.exits + ' exits'" />
+                                <div class="w-3 rounded-t bg-emerald-500" :style="{ height: (m.hires / maxMonthly) * 100 + '%', minHeight: m.hires ? '4px' : '0' }" :title="t('{n} hires', { n: m.hires })" />
+                                <div class="w-3 rounded-t bg-slate-800" :style="{ height: (m.exits / maxMonthly) * 100 + '%', minHeight: m.exits ? '4px' : '0' }" :title="t('{n} exits', { n: m.exits })" />
                             </div>
-                            <span class="text-[10px] text-slate-500">{{ m.month }}</span>
+                            <span class="text-[10px] text-slate-500">{{ monthLabel(m.month) }}</span>
                         </div>
                     </div>
                     <p class="mt-2 text-xs text-slate-500">
