@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
+    canViewRecords: { type: Boolean, default: false },
     date: { type: String, required: true },
     stats: { type: Object, required: true },
     policy: { type: Object, required: true },
@@ -78,13 +79,21 @@ const formattedDate = computed(() => new Intl.DateTimeFormat(undefined, {
             </div>
         </section>
 
+        <section v-if="canViewRecords" class="mb-7 flex flex-col justify-between gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="font-semibold text-cyan-950">Employee attendance records</h2>
+                <p class="mt-1 text-sm text-cyan-800">Your account has permission to view detailed attendance records.</p>
+            </div>
+            <a href="/attendance/records" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">View records</a>
+        </section>
+
         <section class="rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
             <div class="flex items-start gap-3">
                 <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-sm font-bold text-amber-700">i</span>
                 <div>
                     <h2 class="font-semibold text-amber-900">Employee-level details are not enabled yet</h2>
                     <p class="mt-1 text-sm leading-6 text-amber-800">
-                        This first dashboard stage shows company-level totals and policy only. Individual attendance records, manual edits, and approval actions will be enabled after a dedicated tenant permission is defined and assigned to the appropriate HR roles.
+                        This overview shows company-level totals and policy. Detailed employee records are available only to tenant users assigned the attendance.view permission. Manual edits and approval actions remain separate protected workflows.
                     </p>
                 </div>
             </div>
