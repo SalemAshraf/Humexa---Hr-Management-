@@ -12,7 +12,6 @@ use App\Modules\Employees\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rules\File;
-use Inertia\Response as InertiaResponse;
 
 class AttendanceController extends Controller
 {
@@ -58,7 +57,7 @@ class AttendanceController extends Controller
     public function checkOut(Request $request, AttendanceMobileAction $action)
     {
         $employee=$this->employee($request);
-        $data=$request->validate(['latitude'=>'nullable|numeric|between:-90,90','longitude'=>'nullable|numeric|between:-180,180','accuracy'=>'nullable|integer|min:0','client_timestamp'=>'nullable|date','selfie'=>['nullable',File::image()->max(5*1024)]);
+        $data=$request->validate(['latitude'=>'nullable|numeric|between:-90,90','longitude'=>'nullable|numeric|between:-180,180','accuracy'=>'nullable|integer|min:0','client_timestamp'=>'nullable|date','selfie'=>['nullable',File::image()->max(5*1024)]]);
         $record=$action->record($employee,'check_out',$data,$request->file('selfie'));
         return response()->json(['message'=>'Check-out recorded.','data'=>$record]);
     }
