@@ -76,6 +76,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::post('/reviews', 'storeReview')->name('reviews.store');
                 Route::put('/reviews/{review}', 'updateReview')->whereNumber('review')->name('reviews.update');
                 Route::post('/reviews/{review}/finalize', 'finalize')->whereNumber('review')->name('reviews.finalize');
+                Route::post('/reviews/{review}/reopen', 'reopen')->whereNumber('review')->name('reviews.reopen');
                 Route::delete('/reviews/{review}', 'destroyReview')->whereNumber('review')->name('reviews.destroy');
             });
 

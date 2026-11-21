@@ -46,6 +46,7 @@ const drafts = reactive({});
 const edit = (r) => { drafts[r.id] = { rating: r.rating ?? '', strengths: r.strengths ?? '', improvements: r.improvements ?? '', goals: r.goals ?? '' }; open.value = open.value === r.id ? null : r.id; };
 const save = (r, status) => router.put(`/performance/reviews/${r.id}`, { ...drafts[r.id], rating: drafts[r.id].rating || null, status }, { preserveScroll: true, onSuccess: () => { open.value = null; } });
 const finalize = (r) => confirm(`Finalize the review for ${r.employee}? It cannot be edited afterwards.`) && router.post(`/performance/reviews/${r.id}/finalize`, {}, { preserveScroll: true });
+const reopen = (r) => confirm(`Send the review for ${r.employee} back to draft so the manager can change it?`) && router.post(`/performance/reviews/${r.id}/reopen`, {}, { preserveScroll: true });
 const removeReview = (r) => confirm(`Delete the review for ${r.employee}?`) && router.delete(`/performance/reviews/${r.id}`, { preserveScroll: true });
 
 </script>
@@ -130,7 +131,8 @@ const removeReview = (r) => confirm(`Delete the review for ${r.employee}?`) && r
                             <div class="flex items-center gap-3 text-xs font-semibold">
                                 <button v-if="r.can_edit" class="text-cyan-700" @click="edit(r)">{{ open === r.id ? 'Close' : 'Write review' }}</button>
                                 <button v-if="abilities.manage && r.status === 'submitted' && selected.status === 'open'" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white" @click="finalize(r)">Finalize</button>
-                                <button v-if="abilities.manage && r.status !== 'finalized'" class="text-red-600" @click="removeReview(r)">Delete</button>
+                                <button v-if="abilities.manage && r.status === 'submitted' && selected.status === 'open'" class="text-slate-600" @click="reopen(r)">Send back</button>
+                                <button v-if="abilities.manage && r.status === 'draft'" class="text-red-600" @click="removeReview(r)">Delete</button>
                             </div>
                         </div>
                         <dl v-if="r.strengths || r.improvements || r.goals" class="mt-3 grid grid-cols-1 gap-2 text-xs text-slate-600 md:grid-cols-3">

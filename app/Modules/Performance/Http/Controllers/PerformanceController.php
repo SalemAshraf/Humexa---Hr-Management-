@@ -168,14 +168,31 @@ class PerformanceController extends Controller
         return back()->with('success', 'Review finalized.');
     }
 
+    public function reopen(Request $request): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+        $this->requireManage($request);
+        $review = $this->review($tenantId, $request);
+
+        if ($review->status !== PerformanceReview::SUBMITTED) {
+            return back()->withErrors(['status' => 'Only a submitted review can be sent back to draft.']);
+        }
+
+        abort_unless(ReviewCycle::where('tenant_id', $tenantId)->whereKey($review->review_cycle_id)->value('status') === 'open', 422, 'This cycle is closed.');
+
+        $review->update(['status' => PerformanceReview::DRAFT]);
+
+        return back()->with('success', 'Review sent back to draft for changes.');
+    }
+
     public function destroyReview(Request $request): RedirectResponse
     {
         $tenantId = $this->tenantId();
         $this->requireManage($request);
         $review = $this->review($tenantId, $request);
 
-        if ($review->status === PerformanceReview::FINALIZED) {
-            return back()->withErrors(['status' => 'A finalized review cannot be deleted.']);
+        if ($review->status !== PerformanceReview::DRAFT) {
+            return back()->withErrors(['status' => 'Only a draft review can be deleted. Send a submitted review back to draft first, or keep it as the record.']);
         }
 
         $review->delete();

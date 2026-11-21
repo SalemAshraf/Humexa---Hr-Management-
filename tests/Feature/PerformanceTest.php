@@ -64,12 +64,28 @@ test('hr runs a cycle, a manager reviews only direct reports, hr finalizes', fun
     expect($review->fresh()->status)->toBe('finalized');
     ($this->as)($mgr)->put("{$this->base}/performance/reviews/{$review->id}", ['rating' => 1, 'status' => 'draft'])->assertStatus(422);
     ($this->as)($hr)->delete("{$this->base}/performance/reviews/{$review->id}")->assertSessionHasErrors('status');
+    ($this->as)($hr)->post("{$this->base}/performance/reviews/{$review->id}/reopen")->assertSessionHasErrors('status');
+    expect($review->fresh()->status)->toBe('finalized');
     ($this->as)($hr)->delete("{$this->base}/performance/cycles/{$cycle->id}")->assertSessionHasErrors('cycle');
 
     ($this->as)($hr)->put("{$this->base}/performance/cycles/{$cycle->id}", ['name' => '2026 H2', 'starts_on' => '2026-07-01', 'ends_on' => '2026-12-31', 'status' => 'closed'])->assertRedirect();
     ($this->as)($hr)->post("{$this->base}/performance/reviews", ['review_cycle_id' => $cycle->id, 'employee_id' => $stranger->id])->assertStatus(422);
 
     ($this->as)($mgr)->get("{$this->base}/performance")->assertOk()->assertInertia(fn ($p) => $p->where('abilities.manage', false)->where('scope', 'direct_reports'));
+});
+
+test('a submitted review can be sent back by hr but not deleted', function () {
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr-perf3@tenant-test.example');
+    $e = emp($this, 'Sub');
+    $cycle = ReviewCycle::create(['tenant_id' => $this->tid, 'name' => 'C', 'starts_on' => '2026-01-01', 'ends_on' => '2026-12-31', 'status' => 'open']);
+    $r = PerformanceReview::create(['tenant_id' => $this->tid, 'review_cycle_id' => $cycle->id, 'employee_id' => $e->id, 'status' => 'submitted', 'rating' => 3]);
+
+    ($this->as)($hr)->delete("{$this->base}/performance/reviews/{$r->id}")->assertSessionHasErrors('status');
+    expect(PerformanceReview::find($r->id))->not->toBeNull();
+    ($this->as)($hr)->post("{$this->base}/performance/reviews/{$r->id}/reopen")->assertRedirect();
+    expect($r->fresh()->status)->toBe('draft');
+    ($this->as)($hr)->delete("{$this->base}/performance/reviews/{$r->id}")->assertRedirect();
+    expect(PerformanceReview::find($r->id))->toBeNull();
 });
 
 test('employees cannot open performance and other companies stay hidden', function () {
