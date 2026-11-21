@@ -19,6 +19,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeDocumentController;
 use App\Modules\Employees\Http\Controllers\EmployeeProfilePhotoController;
 use App\Modules\Leave\Http\Controllers\LeaveController;
 use App\Modules\Users\Http\Controllers\TenantTeamController;
+use App\Modules\Users\Http\Controllers\TenantPasswordController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.'.config('humexa.tenant_domain'))
@@ -36,7 +37,10 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
         Route::get('/login', [TenantAuthController::class, 'create'])->name('tenant.login');
         Route::post('/login', [TenantAuthController::class, 'store'])->name('tenant.login.store');
 
-        Route::middleware(['auth:tenant', 'tenant.user'])->group(function () {
+        Route::middleware(['auth:tenant', 'tenant.user', 'tenant.password'])->group(function () {
+            Route::get('/password/change', [TenantPasswordController::class, 'create'])->name('tenant.password.edit');
+            Route::post('/password/change', [TenantPasswordController::class, 'update'])->name('tenant.password.update');
+
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
             Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');

@@ -54,10 +54,10 @@ class TenantTeamController extends Controller
         ]);
 
         $user = new User(['name' => trim($data['name']), 'email' => strtolower(trim($data['email'])), 'password' => $data['password']]);
-        $user->forceFill(['tenant_id' => $tenantId, 'account_type' => User::ACCOUNT_TYPE_TENANT])->save();
+        $user->forceFill(['tenant_id' => $tenantId, 'account_type' => User::ACCOUNT_TYPE_TENANT, 'must_change_password' => true])->save();
         $user->assignRole($data['role']);
 
-        return back()->with('success', 'Account created. Share the password with the person through a private channel.');
+        return back()->with('success', 'Account created. The person must choose their own password at first sign-in. Share the starting password privately.');
     }
 
     public function updateRole(Request $request): RedirectResponse

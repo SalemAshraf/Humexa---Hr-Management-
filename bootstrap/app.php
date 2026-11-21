@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant.active' => \App\Http\Middleware\EnsureTenantActive::class,
             'tenant.user' => \App\Http\Middleware\EnsureTenantUser::class,
+            'tenant.password' => \App\Http\Middleware\EnsurePasswordChanged::class,
             'tenant.can' => \App\Http\Middleware\EnsureTenantPermission::class,
             'platform.user' => \App\Http\Middleware\EnsurePlatformUser::class,
             'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,

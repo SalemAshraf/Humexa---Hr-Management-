@@ -77,3 +77,44 @@ test('owner cannot demote themselves or the last owner, and cannot touch another
     ($this->as)($owner)->get("{$this->base}/team")->assertOk()
         ->assertInertia(fn ($p) => $p->has('accounts', 2));
 });
+
+test('accounts created by an owner are forced to change their starting password before anything else', function () {
+    ($this->as)($this->reg['user'])->post("{$this->base}/team", ['name' => 'New HR', 'email' => 'newhr@tenant-test.example', 'password' => 'StartingPass123', 'role' => 'HR Admin'])
+        ->assertSessionHasNoErrors();
+    $new = User::where('email', 'newhr@tenant-test.example')->first();
+    expect($new->must_change_password)->toBeTrue();
+
+    foreach (['/dashboard', '/employees', '/leave', '/team'] as $path) {
+        ($this->as)($new)->get($this->base . $path)->assertRedirect('/password/change');
+    }
+    ($this->as)($new)->get("{$this->base}/password/change")->assertOk();
+    ($this->as)($new)->getJson("{$this->base}/employees")->assertForbidden();
+
+    // Wrong current password, reuse and short passwords are rejected.
+    ($this->as)($new)->post("{$this->base}/password/change", ['current_password' => 'nope', 'password' => 'BrandNewPass456!', 'password_confirmation' => 'BrandNewPass456!'])->assertSessionHasErrors('current_password');
+    ($this->as)($new)->post("{$this->base}/password/change", ['current_password' => 'StartingPass123', 'password' => 'StartingPass123', 'password_confirmation' => 'StartingPass123'])->assertSessionHasErrors('password');
+    ($this->as)($new)->post("{$this->base}/password/change", ['current_password' => 'StartingPass123', 'password' => 'short', 'password_confirmation' => 'short'])->assertSessionHasErrors('password');
+    expect($new->fresh()->must_change_password)->toBeTrue();
+
+    ($this->as)($new)->post("{$this->base}/password/change", ['current_password' => 'StartingPass123', 'password' => 'BrandNewPass456!', 'password_confirmation' => 'BrandNewPass456!'])
+        ->assertRedirect('/dashboard');
+    $fresh = $new->fresh();
+    expect($fresh->must_change_password)->toBeFalse()->and(\Illuminate\Support\Facades\Hash::check('BrandNewPass456!', $fresh->password))->toBeTrue();
+
+    ($this->as)($fresh)->get("{$this->base}/leave")->assertOk();
+});
+
+test('the company owner who registered is not forced to change password and mobile login waits for the change', function () {
+    expect($this->reg['user']->fresh()->must_change_password)->toBeFalse();
+    ($this->as)($this->reg['user'])->get("{$this->base}/dashboard")->assertOk();
+
+    ($this->as)($this->reg['user'])->post("{$this->base}/team", ['name' => 'Field Staff', 'email' => 'field@tenant-test.example', 'password' => 'StartingPass123', 'role' => 'Employee']);
+    $staff = User::where('email', 'field@tenant-test.example')->first();
+    $emp = app(\App\Modules\Employees\Actions\CreateEmployeeAction::class)->execute(
+        data: ['first_name' => 'Field', 'last_name' => 'Staff', 'employment_status' => 'active'], tenantId: $this->tid, actorId: null,
+    );
+    \App\Modules\Employees\Models\Employee::query()->whereKey($emp->id)->update(['user_id' => $staff->id]);
+
+    $this->postJson("{$this->base}/api/v1/auth/login", ['email' => 'field@tenant-test.example', 'password' => 'StartingPass123', 'device_name' => 'phone'])
+        ->assertForbidden();
+});
