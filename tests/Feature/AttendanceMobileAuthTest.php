@@ -154,3 +154,57 @@ test('mobile login cannot authenticate a user from another tenant', function () 
 
     $this->assertDatabaseCount('personal_access_tokens', 0);
 });
+
+
+test('attendance API rejects missing tokens and tokens without the mobile ability', function () {
+    $registration = createAttendanceMobileAuthTenant(
+        'Mobile Auth Ability Guard',
+        'mobile-auth-ability@example.test',
+    );
+
+    $url = 'http://' . $registration['domain'] . '/api/v1/attendance/policy';
+
+    $this->getJson($url)->assertUnauthorized();
+
+    $wrongAbilityToken = $registration['user']
+        ->createToken('Wrong Ability Device', ['profile:read'])
+        ->plainTextToken;
+
+    $this->withToken($wrongAbilityToken)
+        ->getJson($url)
+        ->assertForbidden();
+});
+
+test('attendance mobile token accesses protected API and logout revokes only the current token', function () {
+    $registration = createAttendanceMobileAuthTenant(
+        'Mobile Auth Token Lifecycle',
+        'mobile-auth-lifecycle@example.test',
+    );
+
+    linkAttendanceMobileAuthEmployee($registration);
+
+    $token = $registration['user']
+        ->createToken('Lifecycle Device', ['attendance:mobile']);
+
+    $plainTextToken = $token->plainTextToken;
+    $policyUrl = 'http://' . $registration['domain'] . '/api/v1/attendance/policy';
+    $logoutUrl = 'http://' . $registration['domain'] . '/api/v1/auth/logout';
+
+    $this->withToken($plainTextToken)
+        ->getJson($policyUrl)
+        ->assertOk()
+        ->assertJsonStructure(['data' => ['mobile_checkin_enabled']]);
+
+    $this->withToken($plainTextToken)
+        ->postJson($logoutUrl)
+        ->assertOk()
+        ->assertJsonPath('message', 'Token revoked.');
+
+    $this->assertDatabaseMissing('personal_access_tokens', [
+        'id' => $token->accessToken->getKey(),
+    ]);
+
+    $this->withToken($plainTextToken)
+        ->getJson($policyUrl)
+        ->assertUnauthorized();
+});
