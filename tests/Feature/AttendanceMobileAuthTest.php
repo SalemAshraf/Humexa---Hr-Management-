@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\\Models\\User;
-use App\\Modules\\Employees\\Actions\\CreateEmployeeAction;
-use App\\Modules\\Tenants\\Actions\\RegisterCompanyAction;
-use Illuminate\\Foundation\\Testing\\RefreshDatabase;
-use Laravel\\Sanctum\\PersonalAccessToken;
+use App\Models\User;
+use App\Modules\Employees\Actions\CreateEmployeeAction;
+use App\Modules\Tenants\Actions\RegisterCompanyAction;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\PersonalAccessToken;
 
 uses(RefreshDatabase::class);
 
