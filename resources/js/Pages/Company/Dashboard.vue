@@ -89,6 +89,7 @@ const modules = [
         name: 'Employee Management',
         description: 'Employee profiles, employment details and documents',
         shortcut: 'EM',
+        href: '/employees',
     },
     {
         name: 'Attendance',
@@ -100,6 +101,7 @@ const modules = [
         name: 'Leave Management',
         description: 'Leave policies, balances and approval workflows',
         shortcut: 'LV',
+        href: '/leave',
     },
     {
         name: 'Payroll',

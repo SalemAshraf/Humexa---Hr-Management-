@@ -17,6 +17,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
 use App\Modules\Employees\Http\Controllers\EmployeeDocumentTypeController;
 use App\Modules\Employees\Http\Controllers\EmployeeDocumentController;
 use App\Modules\Employees\Http\Controllers\EmployeeProfilePhotoController;
+use App\Modules\Leave\Http\Controllers\LeaveController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.'.config('humexa.tenant_domain'))
@@ -38,6 +39,15 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
             Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
+
+            Route::prefix('/leave')->middleware('tenant.can:leave.view')->name('leave.')->controller(LeaveController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/types', 'storeType')->middleware('tenant.can:leave.manage')->name('types.store');
+                Route::put('/types/{type}', 'updateType')->whereNumber('type')->middleware('tenant.can:leave.manage')->name('types.update');
+                Route::post('/requests', 'storeRequest')->middleware('tenant.can:leave.manage')->name('requests.store');
+                Route::post('/requests/{leaveRequest}/review', 'review')->whereNumber('leaveRequest')->middleware('tenant.can:leave.approve')->name('requests.review');
+                Route::post('/requests/{leaveRequest}/cancel', 'cancel')->whereNumber('leaveRequest')->middleware('tenant.can:leave.manage')->name('requests.cancel');
+            });
 
             Route::prefix('/employee-document-types')
                 ->middleware('tenant.can:employees.manage')

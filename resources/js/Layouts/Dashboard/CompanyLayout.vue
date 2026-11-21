@@ -22,7 +22,7 @@ const navigationItems = [
     { label: 'Employees', href: '/employees', shortcut: 'EM' },
     { label: 'Organization', href: '/organization', shortcut: 'OR' },
     { label: 'Attendance', href: '/attendance', shortcut: 'AT' },
-    { label: 'Leaves', shortcut: 'LE', disabled: true, badge: 'Soon' },
+    { label: 'Leaves', href: '/leave', shortcut: 'LE' },
     { label: 'Payroll', shortcut: 'PA', disabled: true, badge: 'Soon' },
     { label: 'Recruitment', shortcut: 'RE', disabled: true, badge: 'Soon' },
     { label: 'Performance', shortcut: 'PE', disabled: true, badge: 'Soon' },
