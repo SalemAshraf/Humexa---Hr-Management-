@@ -62,13 +62,16 @@ Route::domain('{tenant}.humexa.test')
 
             Route::prefix('/employees')->name('employees.')->group(function () {
                 Route::controller(EmployeeController::class)->group(function () {
+                    Route::get('/', 'index')->name('index');
                     Route::get('/archived', 'archived')->name('archived');
                     Route::post('/{employee}/restore', 'restore')->whereNumber('employee')->name('restore');
                     Route::get('/create', 'create')->name('create');
+                    Route::post('/', 'store')->name('store');
                     Route::get('/{employee}/edit', 'edit')->whereNumber('employee')->name('edit');
                     Route::get('/{employee}', 'show')->whereNumber('employee')->name('show');
                     Route::put('/{employee}', 'update')->whereNumber('employee')->name('update');
                     Route::delete('/{employee}', 'destroy')->whereNumber('employee')->name('destroy');
+                });
 
                 Route::prefix('/{employee}/addresses')
                     ->whereNumber('employee')
@@ -82,28 +85,48 @@ Route::domain('{tenant}.humexa.test')
                     });
 
                 Route::prefix('/{employee}/emergency-contacts')
+                    ->whereNumber('employee')
                     ->name('emergency-contacts.')
                     ->controller(EmployeeEmergencyContactController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
                         Route::put('/{contact}', 'update')->whereNumber('contact')->name('update');
                         Route::delete('/{contact}', 'destroy')->whereNumber('contact')->name('destroy');
+                    });
 
                 Route::prefix('/{employee}/identity-records')
+                    ->whereNumber('employee')
                     ->name('identity-records.')
                     ->controller(EmployeeIdentityRecordController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
+                    });
 
                 Route::prefix('/{employee}/profile-photo')
+                    ->whereNumber('employee')
                     ->name('profile-photo.')
                     ->controller(EmployeeProfilePhotoController::class)
+                    ->group(function () {
                         Route::get('/', 'show')->name('show');
+                        Route::post('/', 'store')->name('store');
                         Route::post('/remove', 'destroy')->name('remove');
+                    });
 
                 Route::prefix('/{employee}/documents')
+                    ->whereNumber('employee')
                     ->name('documents.')
                     ->controller(EmployeeDocumentController::class)
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::post('/', 'store')->name('store');
                         Route::get('/{document}/download', 'download')->whereNumber('document')->name('download');
                         Route::get('/{document}/preview', 'preview')->whereNumber('document')->name('preview');
                         Route::post('/{document}/archive', 'archive')->whereNumber('document')->name('archive');
                         Route::post('/{document}/delete', 'destroy')->whereNumber('document')->name('delete');
+                    });
+            });
 
             Route::post('/logout', [TenantAuthController::class, 'destroy'])->name('tenant.logout');
         });
