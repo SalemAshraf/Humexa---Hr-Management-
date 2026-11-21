@@ -258,3 +258,65 @@ test('fixture-backed: a manager cannot change or delete real records and nothing
         ->and($run->fresh()->status)->toBe('draft')
         ->and($this->reg['user']->fresh()->disabled_at)->toBeNull();
 });
+
+test('fixture-backed: another company owner cannot touch this company records by real id', function () {
+    $emp = app(CreateEmployeeAction::class)->execute(data: ['first_name' => 'Tenant', 'last_name' => 'A', 'employment_status' => 'active', 'hire_date' => '2026-01-05'], tenantId: $this->tid, actorId: null);
+    $req = LeaveRequest::create(['tenant_id' => $this->tid, 'employee_id' => $emp->id, 'leave_type_id' => $this->annual->id, 'start_date' => '2026-12-06', 'end_date' => '2026-12-06', 'days' => 1, 'status' => 'pending']);
+    $job = \App\Modules\Recruitment\Models\JobOpening::create(['tenant_id' => $this->tid, 'title' => 'A job', 'employment_type' => 'full_time', 'positions' => 1, 'status' => 'open']);
+    $cand = \App\Modules\Recruitment\Models\Candidate::create(['tenant_id' => $this->tid, 'job_opening_id' => $job->id, 'name' => 'Cand', 'stage' => 'applied']);
+    $cycle = \App\Modules\Performance\Models\ReviewCycle::create(['tenant_id' => $this->tid, 'name' => 'Cycle', 'starts_on' => '2026-01-01', 'ends_on' => '2026-12-31', 'status' => 'draft']);
+    $review = \App\Modules\Performance\Models\PerformanceReview::create(['tenant_id' => $this->tid, 'review_cycle_id' => $cycle->id, 'employee_id' => $emp->id, 'status' => 'draft']);
+    \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+    $run = PayrollRun::create(['tenant_id' => $this->tid, 'year' => 2026, 'month' => 11, 'rule_set_id' => 0, 'status' => 'draft']);
+    \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+    $slip = Payslip::create(['tenant_id' => $this->tid, 'payroll_run_id' => $run->id, 'employee_id' => $emp->id, 'gross' => 1000, 'net_pay' => 900]);
+
+    $other = app(RegisterCompanyAction::class)->execute(companyName: 'Intruder Co', adminName: 'Intruder', email: 'intruder@tenant-test.example', password: 'StrongPassword123!');
+    $ob = 'http://' . $other['domain'];
+    $as = fn () => $this->actingAs($other['user'], 'tenant')->withSession(['tenant_session_version' => 1]);
+
+    $attempts = [
+        ['GET', "/employees/{$emp->id}"], ['PUT', "/employees/{$emp->id}", ['first_name' => 'X', 'middle_name' => 'M', 'last_name' => 'Y', 'employment_status' => 'draft']], ['DELETE', "/employees/{$emp->id}"],
+        ['PUT', "/leave/types/{$this->annual->id}", ['name' => 'X', 'annual_days' => 1]], ['DELETE', "/leave/types/{$this->annual->id}"],
+        ['POST', "/leave/requests/{$req->id}/review", ['decision' => 'approve']], ['POST', "/leave/requests/{$req->id}/cancel"],
+        ['PUT', "/leave/requests/{$req->id}", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-12-07', 'end_date' => '2026-12-07']],
+        ['PUT', "/recruitment/jobs/{$job->id}", ['title' => 'X', 'employment_type' => 'full_time', 'positions' => 1, 'status' => 'open']], ['DELETE', "/recruitment/jobs/{$job->id}"],
+        ['POST', "/recruitment/candidates/{$cand->id}/move", ['stage' => 'offer']], ['POST', "/recruitment/candidates/{$cand->id}/hire"], ['DELETE', "/recruitment/candidates/{$cand->id}"],
+        ['PUT', "/performance/cycles/{$cycle->id}", ['name' => 'X', 'starts_on' => '2026-01-01', 'ends_on' => '2026-12-31', 'status' => 'open']], ['DELETE', "/performance/cycles/{$cycle->id}"],
+        ['POST', "/performance/reviews/{$review->id}/finalize"], ['DELETE', "/performance/reviews/{$review->id}"],
+        ['GET', "/payroll/runs/{$run->id}"], ['GET', "/payroll/runs/{$run->id}/export"], ['POST', "/payroll/runs/{$run->id}/approve"], ['DELETE', "/payroll/runs/{$run->id}"], ['POST', "/payroll/runs/{$run->id}/recalculate"],
+        ['POST', "/payroll/employees/{$emp->id}/compensation", ['basic_salary' => 1, 'effective_from' => '2026-01-01']],
+    ];
+    foreach ($attempts as $a) {
+        $res = $as()->call($a[0], $ob . $a[1], $a[2] ?? []);
+        expect($res->getStatusCode())->toBeIn([403, 404], "{$a[0]} {$a[1]} => {$res->getStatusCode()}");
+    }
+
+    expect(Employee::find($emp->id)->first_name)->toBe('Tenant')
+        ->and(LeaveType::find($this->annual->id))->not->toBeNull()
+        ->and($req->fresh()->status)->toBe('pending')
+        ->and(\App\Modules\Recruitment\Models\Candidate::find($cand->id)->employee_id)->toBeNull()
+        ->and(\App\Modules\Performance\Models\PerformanceReview::find($review->id)->status)->toBe('draft')
+        ->and($run->fresh()->status)->toBe('draft')
+        ->and(Payslip::find($slip->id))->not->toBeNull();
+});
+
+test('mobile token stops working when the account is deactivated or unlinked', function () {
+    [$u, $emp] = ($this->account)('mob@tenant-test.example', 'Mob');
+    $plain = $u->createToken('phone', ['attendance:mobile'])->plainTextToken;
+    $api = 'http://' . $this->reg['domain'] . '/api/v1/attendance/status';
+
+    $this->withToken($plain)->getJson($api)->assertOk();
+
+    ($this->as)($this->reg['user'])->put("{$this->base}/team/{$u->id}/active", ['active' => false])->assertSessionHasNoErrors();
+    $this->app['auth']->forgetGuards();
+    $this->withToken($plain)->getJson($api)->assertStatus(401);
+
+    // reactivate, new token, then unlink the employee: old token dies and a fresh one cannot reach the data
+    ($this->as)($this->reg['user'])->put("{$this->base}/team/{$u->id}/active", ['active' => true]);
+    $plain2 = $u->fresh()->createToken('phone', ['attendance:mobile'])->plainTextToken;
+    $this->app['auth']->forgetGuards();
+    ($this->as)($this->reg['user'])->put("{$this->base}/employees/{$emp->id}", ['first_name' => 'Mob', 'middle_name' => '', 'last_name' => 'Self', 'employment_status' => 'active', 'hire_date' => '2026-01-05', 'user_id' => ''])->assertSessionHasNoErrors();
+    $this->app['auth']->forgetGuards();
+    $this->withToken($plain2)->getJson($api)->assertStatus(401);
+});
