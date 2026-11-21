@@ -132,3 +132,33 @@ test('a manager sees attendance only for direct reports, HR sees everyone, and a
     ($this->as)($this->reg['user'])->get("{$this->base}/attendance/records")->assertInertia(fn ($p) => $p->has('records.data', 2));
     ($this->as)($mgrUser)->get("{$this->base}/attendance/requests")->assertForbidden();
 });
+
+test('route audit: a permissionless account is refused on every company route except its own space', function () {
+    [$u] = ($this->account)('audit@tenant-test.example', 'Audit');
+    $allowed = ['/', 'login', 'logout', 'password/change', 'dashboard', 'me', 'me/leave', 'me/leave/{leaveRequest}/cancel', 'notifications', 'search'];
+
+    $checked = 0;
+    $leaks = [];
+    foreach (app('router')->getRoutes() as $route) {
+        $domain = (string) $route->getDomain();
+        $uri = $route->uri();
+        if (! str_contains($domain, '{tenant}') || str_starts_with($uri, 'api/') || str_contains($uri, 'v1/')) {
+            continue;
+        }
+        $path = '/' . ltrim($uri, '/');
+        $key = trim($path, '/') ?: '/';
+        if (in_array($key, $allowed, true)) {
+            continue;
+        }
+        $url = $this->base . preg_replace('/\{[^}]+\}/', '1', $path);
+        foreach (array_diff($route->methods(), ['HEAD']) as $method) {
+            $res = ($this->as)($u)->call($method, $url);
+            $checked++;
+            if (! in_array($res->getStatusCode(), [302, 401, 403, 404, 405, 419], true) || ($res->getStatusCode() === 302 && ! str_contains((string) $res->headers->get('Location'), '/login') && ! str_contains((string) $res->headers->get('Location'), '/me'))) {
+                $leaks[] = "$method $path => " . $res->getStatusCode();
+            }
+        }
+    }
+
+    expect($checked)->toBeGreaterThan(60)->and($leaks)->toBe([]);
+});
