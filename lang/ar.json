@@ -838,5 +838,10 @@
  "JPG or PNG · Maximum 5 MB": "JPG أو PNG · الحد الأقصى 5 ميجابايت",
  "Change photo": "تغيير الصورة",
  "Upload photo": "رفع صورة",
- "Removing…": "جارٍ الإزالة…"
+ "Removing…": "جارٍ الإزالة…",
+ "My attendance (last 30 records)": "حضوري (آخر 30 سجلًا)",
+ "{h}h {m}m": "{h}س {m}د",
+ "organization": "الهيكل التنظيمي",
+ "HR Admin": "مسؤول الموارد البشرية",
+ "users": "المستخدمون"
 }

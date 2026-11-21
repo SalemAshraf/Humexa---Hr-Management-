@@ -1,4 +1,5 @@
 <script setup>
+import { t } from '@/lib/i18n';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
@@ -23,7 +24,7 @@ const statusStyles = {
     rejected: 'bg-red-50 text-red-700',
     cancelled: 'bg-slate-100 text-slate-500',
 };
-const hours = (m) => `${Math.floor((m ?? 0) / 60)}h ${String((m ?? 0) % 60).padStart(2, '0')}m`;
+const hours = (m) => t('{h}h {m}m', { h: Math.floor((m ?? 0) / 60), m: String((m ?? 0) % 60).padStart(2, '0') });
 const money = (v) => `EGP ${Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 </script>
 
@@ -76,7 +77,7 @@ const money = (v) => `EGP ${Number(v).toLocaleString('en-US', { minimumFractionD
                     <li v-for="r in requests" :key="r.id" class="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="font-semibold text-slate-800">{{ r.type }} · {{ $t('{n} day(s)', { n: r.days }) }}</p>
-                            <p class="text-xs text-slate-500">{{ r.start_date }} to {{ r.end_date }}<span v-if="r.review_note"> · {{ r.review_note }}</span></p>
+                            <p class="text-xs text-slate-500">{{ r.start_date }} {{ $t('to') }} {{ r.end_date }}<span v-if="r.review_note"> · {{ r.review_note }}</span></p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="statusStyles[r.status]">{{ $t(r.status) }}</span>
@@ -87,7 +88,7 @@ const money = (v) => `EGP ${Number(v).toLocaleString('en-US', { minimumFractionD
             </section>
 
             <section class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <h2 class="p-4 text-base font-bold text-slate-900">My attendance (last 30 records)</h2>
+                <h2 class="p-4 text-base font-bold text-slate-900">{{ $t('My attendance (last 30 records)') }}</h2>
                 <p v-if="!attendance.length" class="px-4 pb-4 text-sm text-slate-500">{{ $t('No attendance records yet.') }}</p>
                 <ul class="divide-y divide-slate-100">
                     <li v-for="a in attendance" :key="a.date" class="flex items-center justify-between p-4 text-sm">
