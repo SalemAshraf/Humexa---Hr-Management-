@@ -32,82 +32,12 @@ class TenantAttendanceDashboardController extends Controller
 
         $today = now()->toDateString();
 
-        $employees = Employee::query()
-            ->where('tenant_id', $tenantId)
-            ->whereNotIn('employment_status', [
-                Employee::STATUS_RESIGNED,
-                Employee::STATUS_TERMINATED,
-            ])
-            ->with('department:id,name')
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->paginate(15)
-            ->withQueryString();
-
-        $employeeIds = $employees->getCollection()->modelKeys();
-
-        $records = AttendanceRecord::query()
-            ->where('tenant_id', $tenantId)
-            ->whereDate('attendance_date', $today)
-            ->whereIn('employee_id', $employeeIds)
-            ->with(['sessions.breaks'])
-            ->get()
-            ->keyBy('employee_id');
-
-        $openSessions = AttendanceSession::query()
-            ->where('tenant_id', $tenantId)
-            ->whereIn('employee_id', $employeeIds)
-            ->whereNotNull('check_in_at')
-            ->whereNull('check_out_at')
-            ->with('breaks')
-            ->get()
-            ->keyBy('employee_id');
-
-        $employees->through(function (Employee $employee) use ($records, $openSessions): array {
-            $record = $records->get($employee->id);
-            $activeSession = $openSessions->get($employee->id);
-            $sessions = collect($record?->sessions ?? []);
-
-            if ($activeSession && ! $sessions->contains('id', $activeSession->id)) {
-                $sessions->push($activeSession);
-            }
-
-            $sessions = $sessions->sortBy('check_in_at')->values();
-
-            return [
-                'id' => $employee->id,
-                'employee_number' => $employee->employee_number,
-                'name' => $employee->full_name,
-                'department' => $employee->department?->name,
-                'employment_status' => $employee->employment_status,
-                'attendance' => [
-                    'state' => $activeSession
-                        ? 'checked_in'
-                        : ($record ? 'checked_out' : 'not_recorded'),
-                    'worked_minutes' => (int) ($record?->total_worked_minutes ?? 0),
-                    'break_minutes' => (int) ($record?->total_break_minutes ?? 0),
-                    'sessions' => $sessions->map(fn (AttendanceSession $session): array => [
-                        'id' => $session->id,
-                        'session_number' => $session->session_number,
-                        'check_in_at' => $session->check_in_at?->toIso8601String(),
-                        'check_out_at' => $session->check_out_at?->toIso8601String(),
-                        'worked_minutes' => (int) $session->worked_minutes,
-                        'break_minutes' => (int) $session->break_minutes,
-                        'active_break' => $session->breaks->contains(
-                            fn ($break): bool => $break->ended_at === null
-                        ),
-                    ])->values(),
-                ],
-            ];
-        });
-
         $policy = AttendancePolicy::query()
             ->where('tenant_id', $tenantId)
             ->first();
 
         return Inertia::render('Company/Attendance/Index', [
             'date' => $today,
-            'employees' => $employees,
             'stats' => [
                 'total_employees' => Employee::query()
                     ->where('tenant_id', $tenantId)
