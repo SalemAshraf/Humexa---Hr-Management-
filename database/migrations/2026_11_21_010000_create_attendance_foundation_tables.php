@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->unsignedInteger('minimum_break_minutes')->default(0);
             $table->timestamps();
             $table->unique('tenant_id');
+            $table->unique(['id', 'tenant_id'], 'attendance_policies_id_tenant_unique');
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
         });
 
@@ -39,6 +40,7 @@ return new class extends Migration {
             $table->unsignedInteger('radius_meters')->default(150);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            $table->unique(['id', 'tenant_id'], 'attendance_locations_id_tenant_unique');
             $table->index(['tenant_id', 'is_active']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->cascadeOnUpdate()->restrictOnDelete();
@@ -60,6 +62,7 @@ return new class extends Migration {
             $table->unsignedInteger('overtime_minutes')->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->unique(['id', 'tenant_id'], 'attendance_records_id_tenant_unique');
             $table->unique(['tenant_id', 'employee_id', 'attendance_date'], 'attendance_daily_unique');
             $table->index(['tenant_id', 'attendance_date', 'status']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
@@ -154,6 +157,7 @@ return new class extends Migration {
             $table->timestamp('last_synced_at')->nullable();
             $table->json('configuration')->nullable();
             $table->timestamps();
+            $table->unique(['id', 'tenant_id'], 'attendance_devices_id_tenant_unique');
             $table->unique(['tenant_id', 'device_identifier']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->cascadeOnUpdate()->restrictOnDelete();
