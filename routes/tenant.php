@@ -111,6 +111,11 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             });
 
             Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+            Route::prefix('/me')->name('me.')->controller(\App\Modules\SelfService\Http\Controllers\SelfServiceController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/leave', 'storeLeave')->middleware('throttle:20,1')->name('leave.store');
+                Route::post('/leave/{leaveRequest}/cancel', 'cancelLeave')->whereNumber('leaveRequest')->name('leave.cancel');
+            });
             Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
             Route::prefix('/team')->middleware('tenant.can:roles.manage')->name('team.')->controller(TenantTeamController::class)->group(function () {

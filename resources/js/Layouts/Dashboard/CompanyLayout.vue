@@ -24,6 +24,7 @@ const allowed = (permission) => !permission || !!page.props.can?.[permission];
 
 const allNavigationItems = [
     { label: 'Overview', href: '/dashboard', shortcut: 'OV' },
+    { label: 'My space', href: '/me', shortcut: 'ME' },
     { label: 'Employees', permission: 'employees.view', href: '/employees', shortcut: 'EM' },
     { label: 'Organization', permission: 'employees.view', href: '/organization', shortcut: 'OR' },
     { label: 'Attendance', permission: 'attendance.view', href: '/attendance', shortcut: 'AT' },

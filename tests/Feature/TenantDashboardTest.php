@@ -99,9 +99,5 @@ test('dashboard analytics count only this company and respect permissions', func
     $this->actingAs($employee, 'tenant')
         ->withSession(['tenant_session_version' => 1])
         ->get($url)
-        ->assertInertia(fn ($page) => $page
-            ->where('analytics.headcount', null)
-            ->where('analytics.attendance', null)
-            ->where('analytics.leave', null)
-        );
+        ->assertRedirect('/me'); // no company analytics payload is built for a self-service account
 });

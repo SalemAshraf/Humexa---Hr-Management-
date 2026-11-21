@@ -13,7 +13,7 @@ use Inertia\Response as InertiaResponse;
 
 class TenantDashboardController extends Controller
 {
-    public function __invoke(Request $request, WorkforceAnalytics $analytics): InertiaResponse
+    public function __invoke(Request $request, WorkforceAnalytics $analytics): InertiaResponse|\Illuminate\Http\RedirectResponse
     {
         abort_unless(tenancy()->initialized, 404);
 
@@ -27,6 +27,11 @@ class TenantDashboardController extends Controller
             && hash_equals((string) $tenant->getTenantKey(), (string) $user->tenant_id),
             403
         );
+
+        // Self-service accounts hold no company-wide permission, so their home is My space.
+        if ($user->getAllPermissions()->isEmpty()) {
+            return redirect('/me');
+        }
 
         $teamAccounts = User::query()
             ->where('tenant_id', $tenant->getTenantKey())

@@ -63,7 +63,8 @@ test('an employee role account cannot open company-wide employee or organization
     getAs($this, $employee, '/employees')->assertForbidden();
     getAs($this, $employee, '/organization')->assertForbidden();
     getAs($this, $employee, '/employee-document-types')->assertForbidden();
-    getAs($this, $employee, '/dashboard')->assertOk();
+    getAs($this, $employee, '/dashboard')->assertRedirect('/me');
+    getAs($this, $employee, '/me')->assertOk();
 });
 
 test('a manager can view employees but cannot create them', function () {
