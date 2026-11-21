@@ -142,6 +142,7 @@ class EmployeeController extends Controller
             ->findOrFail($employee);
 
         $this->authorize('restore', $record);
+        app(\App\Modules\Plans\Services\PlanLimits::class)->assertCanAddEmployee($this->tenantId());
         $record->restore();
 
         return redirect('/employees/archived')->with('success', 'Employee restored successfully.');

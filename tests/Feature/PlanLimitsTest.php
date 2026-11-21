@@ -70,3 +70,20 @@ it('blocks new sign-in accounts at the limit', function () {
 
     expect(fn () => app(PlanLimits::class)->assertCanAddAccount($id))->toThrow(PlanLimitReached::class);
 });
+
+it('counts archived employees as not used but blocks restoring them past the limit', function () {
+    $id = (string) $this->tenant->getKey();
+    $action = app(CreateEmployeeAction::class);
+    $keep = $action->execute(planEmployee($id, 'k'), $id, null);
+    $gone = $action->execute(planEmployee($id, 'g'), $id, null);
+    $gone->delete();
+
+    $active = Employee::query()->where('tenant_id', $id)->count();
+    $plan = Plan::query()->create(['name' => 'Restore', 'max_employees' => $active, 'is_active' => true]);
+    $this->tenant->setAttribute('plan_id', $plan->id);
+    $this->tenant->save();
+
+    // At the limit, a restore would add an employee, so the same check applies.
+    expect(fn () => app(PlanLimits::class)->assertCanAddEmployee($id))->toThrow(PlanLimitReached::class);
+    expect($keep->fresh())->not->toBeNull();
+});
