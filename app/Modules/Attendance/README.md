@@ -51,5 +51,6 @@ Selfies use the private local disk path under `tenants/{tenant}/attendance/selfi
 - Selfie validation, retention, and privacy policy must be confirmed.
 - Overtime, break and correction approval workflows need completion and authorization tests.
 - Fingerprint adapters need vendor/model-specific requirements and credentials strategy. Mobile OS biometric checks must remain on-device; raw biometric data must not be sent to Humexa.
-- OpenAPI specification and integration tests remain to be added.
-- Database migrations and all attendance workflows remain unexecuted/unverified in the local project environment.
+- OpenAPI specification and end-to-end integration tests remain to be added.
+- The attendance foundation migration has been applied in the current development database, and the created tables plus selected composite foreign keys were inspected. Each environment must still run its own migrations.
+- Model-casting tests cover policy, daily summary, and session attributes; check-in/check-out, tenant isolation, break concurrency, and device ingestion still require integration tests.
