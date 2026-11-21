@@ -1,7 +1,7 @@
 ﻿
 <script setup>
-import { computed } from 'vue';
-import { usePage, Link } from '@inertiajs/vue3';
+import { computed, onMounted, onBeforeUnmount } from 'vue';
+import { usePage, Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     title: {
@@ -38,6 +38,16 @@ const page = usePage();
 const isPlatform = computed(() => props.theme === 'platform');
 
 const user = computed(() => page.props.auth?.user ?? null);
+const attention = computed(() => Number(page.props.attention_count ?? 0));
+
+const onKey = (event) => {
+    if (!isPlatform.value && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        router.visit('/search');
+    }
+};
+onMounted(() => window.addEventListener('keydown', onKey));
+onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <template>
@@ -89,8 +99,9 @@ const user = computed(() => page.props.auth?.user ?? null);
         <!-- Right section -->
         <div class="flex shrink-0 items-center gap-2 sm:gap-4">
             <!-- Search -->
-            <button
-                type="button"
+            <component
+                :is="isPlatform ? 'button' : Link"
+                v-bind="isPlatform ? { type: 'button' } : { href: '/search' }"
                 class="hidden h-10 items-center gap-2 rounded-xl border px-3 text-sm transition-colors md:flex"
                 :class="isPlatform
                     ? 'border-slate-700 text-slate-400 hover:bg-slate-800'
@@ -117,11 +128,12 @@ const user = computed(() => page.props.auth?.user ?? null);
                 >
                     Ctrl K
                 </kbd>
-            </button>
+            </component>
 
             <!-- Notifications -->
-            <button
-                type="button"
+            <component
+                :is="isPlatform ? 'button' : Link"
+                v-bind="isPlatform ? { type: 'button' } : { href: '/notifications' }"
                 class="relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors"
                 :class="isPlatform
                     ? 'text-slate-300 hover:bg-slate-800'
@@ -143,10 +155,15 @@ const user = computed(() => page.props.auth?.user ?? null);
                 </svg>
 
                 <span
-                    class="absolute end-2 top-2 h-2 w-2 rounded-full bg-cyan-500 ring-2"
-                    :class="isPlatform ? 'ring-[#111C2E]' : 'ring-white'"
+                    v-if="isPlatform"
+                    class="absolute end-2 top-2 h-2 w-2 rounded-full bg-cyan-500 ring-2 ring-[#111C2E]"
                 />
-            </button>
+                <span
+                    v-else-if="attention > 0"
+                    class="absolute -end-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-600 px-1 text-[11px] font-bold text-white ring-2 ring-white"
+                    data-testid="attention-count"
+                >{{ attention > 99 ? '99+' : attention }}</span>
+            </component>
 
             <!-- User -->
             <div

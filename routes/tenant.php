@@ -22,6 +22,9 @@ use App\Modules\Leave\Http\Controllers\LeaveController;
 use App\Modules\Users\Http\Controllers\TenantTeamController;
 use App\Modules\Users\Http\Controllers\TenantPasswordController;
 use App\Modules\Recruitment\Http\Controllers\RecruitmentController;
+use App\Modules\Performance\Http\Controllers\PerformanceController;
+use App\Modules\Notifications\Http\Controllers\NotificationsController;
+use App\Modules\Search\Http\Controllers\SearchController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.'.config('humexa.tenant_domain'))
@@ -64,6 +67,20 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::post('/candidates/{candidate}/hire', 'hire')->whereNumber('candidate')->name('candidates.hire');
                 Route::delete('/candidates/{candidate}', 'destroyCandidate')->whereNumber('candidate')->name('candidates.destroy');
             });
+
+            Route::prefix('/performance')->middleware('tenant.can:performance.view')->name('performance.')->controller(PerformanceController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/cycles', 'storeCycle')->name('cycles.store');
+                Route::put('/cycles/{cycle}', 'updateCycle')->whereNumber('cycle')->name('cycles.update');
+                Route::delete('/cycles/{cycle}', 'destroyCycle')->whereNumber('cycle')->name('cycles.destroy');
+                Route::post('/reviews', 'storeReview')->name('reviews.store');
+                Route::put('/reviews/{review}', 'updateReview')->whereNumber('review')->name('reviews.update');
+                Route::post('/reviews/{review}/finalize', 'finalize')->whereNumber('review')->name('reviews.finalize');
+                Route::delete('/reviews/{review}', 'destroyReview')->whereNumber('review')->name('reviews.destroy');
+            });
+
+            Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+            Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
             Route::prefix('/team')->middleware('tenant.can:roles.manage')->name('team.')->controller(TenantTeamController::class)->group(function () {
                 Route::get('/', 'index')->name('index');

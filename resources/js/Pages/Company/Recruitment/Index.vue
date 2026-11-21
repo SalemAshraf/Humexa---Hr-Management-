@@ -57,6 +57,14 @@ const saveCandidate = () => candForm.post('/recruitment/candidates', {
     onSuccess: () => { candForm.reset('name', 'email', 'phone', 'source', 'rating', 'expected_salary', 'notes'); showCandidateForm.value = false; },
 });
 
+const editingCand = ref(null);
+const editForm = useForm({ name: '', email: '', phone: '', source: '', rating: '', expected_salary: '', notes: '' });
+const startEdit = (c) => {
+    editingCand.value = editingCand.value === c.id ? null : c.id;
+    editForm.defaults({ name: c.name, email: c.email ?? '', phone: c.phone ?? '', source: c.source ?? '', rating: c.rating ?? '', expected_salary: c.expected_salary ?? '', notes: c.notes ?? '' }).reset();
+};
+const saveEdit = (c) => editForm.put(`/recruitment/candidates/${c.id}`, { preserveScroll: true, onSuccess: () => { editingCand.value = null; } });
+
 const move = (c, stage) => router.post(`/recruitment/candidates/${c.id}/move`, { stage }, { preserveScroll: true });
 const hire = (c) => confirm(`Create a draft employee record for ${c.name}?`) && router.post(`/recruitment/candidates/${c.id}/hire`);
 const removeCandidate = (c) => confirm(`Delete ${c.name}?`) && router.delete(`/recruitment/candidates/${c.id}`, { preserveScroll: true });
@@ -190,7 +198,7 @@ const errors = computed(() => Object.values({ ...jobForm.errors, ...candForm.err
                 <button v-if="filters.job || filters.stage" class="text-xs font-semibold text-cyan-700" @click="router.get('/recruitment')">Clear filters</button>
             </div>
             <ul class="divide-y divide-slate-100">
-                <li v-for="c in candidates.data" :key="c.id" class="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
+                <li v-for="c in candidates.data" :key="c.id" class="flex flex-col gap-3 p-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
                     <div class="min-w-0">
                         <p class="font-semibold text-slate-800">{{ c.name }} <span class="ml-1 rounded-full px-2 py-0.5 text-xs font-semibold capitalize" :class="stageStyles[c.stage]">{{ label(c.stage) }}</span></p>
                         <p class="truncate text-xs text-slate-500">{{ c.job?.title }}<span v-if="c.email"> · {{ c.email }}</span><span v-if="c.phone"> · {{ c.phone }}</span><span v-if="c.source"> · {{ c.source }}</span></p>
@@ -202,8 +210,20 @@ const errors = computed(() => Object.values({ ...jobForm.errors, ...candForm.err
                         </select>
                         <button v-if="c.stage === 'offer' && abilities.hire" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="hire(c)">Hire</button>
                         <a v-if="c.employee_id" :href="`/employees/${c.employee_id}`" class="text-xs font-semibold text-cyan-700">View employee</a>
+                        <button class="text-xs font-semibold text-cyan-700" @click="startEdit(c)">{{ editingCand === c.id ? 'Close' : 'Edit' }}</button>
                         <button v-if="!c.employee_id" class="text-xs font-semibold text-red-600" @click="removeCandidate(c)">Delete</button>
                     </div>
+                    <form v-if="editingCand === c.id" class="grid w-full grid-cols-1 gap-3 md:grid-cols-4 lg:basis-full" @submit.prevent="saveEdit(c)">
+                        <label class="text-xs font-medium text-slate-500 md:col-span-2">Full name<input v-model="editForm.name" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
+                        <label class="text-xs font-medium text-slate-500">Email<input v-model="editForm.email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500">Phone<input v-model="editForm.phone" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500">Source<input v-model="editForm.source" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500">Rating (1-5)<input v-model="editForm.rating" type="number" min="1" max="5" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500">Expected salary<input v-model="editForm.expected_salary" type="number" min="0" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500 md:col-span-4">Notes<textarea v-model="editForm.notes" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea></label>
+                        <p v-for="(m, k) in editForm.errors" :key="k" class="text-xs text-red-600 md:col-span-4">{{ m }}</p>
+                        <div class="md:col-span-4"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="editForm.processing">Save changes</button></div>
+                    </form>
                 </li>
                 <li v-if="!candidates.data.length" class="p-8 text-center text-sm text-slate-500">No candidates match this view.</li>
             </ul>

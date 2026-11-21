@@ -37,6 +37,16 @@ class HandleInertiaRequests extends Middleware
                     ->mapWithKeys(fn ($permission) => [$permission => $user->can($permission)]);
             },
 
+            'attention_count' => function () use ($request) {
+                $user = $request->user('tenant');
+
+                if (! $user instanceof \App\Models\User || ! tenancy()->initialized) {
+                    return 0;
+                }
+
+                return app(\App\Modules\Notifications\Services\AttentionService::class)->total($user, (string) tenant()->getTenantKey());
+            },
+
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),
                 'success' => fn () => $request->session()->get('success'),
