@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\\Support\\Facades\\DB;
+use Illuminate\Support\Facades\DB;
 
 test('attendance tests use the dedicated test database', function () {
     $database = DB::selectOne('SELECT DATABASE() AS database_name');
