@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\\Modules\\Attendance\\Models\\AttendancePolicy;
-use App\\Modules\\Attendance\\Models\\AttendanceRecord;
-use App\\Modules\\Attendance\\Models\\AttendanceSession;
+use App\Modules\Attendance\Models\AttendancePolicy;
+use App\Modules\Attendance\Models\AttendanceRecord;
+use App\Modules\Attendance\Models\AttendanceSession;
 
 test('attendance policy model casts policy flags and limits', function () {
     $policy = new AttendancePolicy([
@@ -27,7 +27,7 @@ test('attendance record casts its date and summary values', function () {
         'total_break_minutes' => '30',
     ]);
 
-    expect($record->attendance_date)->toBeInstanceOf(\\Illuminate\\Support\\Carbon::class)
+    expect($record->attendance_date)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
         ->and($record->total_worked_minutes)->toBe(480)
         ->and($record->total_break_minutes)->toBe(30);
 });
@@ -40,8 +40,8 @@ test('attendance session casts check-in and check-out timestamps', function () {
         'session_number' => '1',
     ]);
 
-    expect($session->check_in_at)->toBeInstanceOf(\\Illuminate\\Support\\Carbon::class)
-        ->and($session->check_out_at)->toBeInstanceOf(\\Illuminate\\Support\\Carbon::class)
+    expect($session->check_in_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
+        ->and($session->check_out_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
         ->and($session->worked_minutes)->toBe(510)
         ->and($session->session_number)->toBe(1);
 });
