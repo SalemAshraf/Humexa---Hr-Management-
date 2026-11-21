@@ -105,6 +105,7 @@ const flash = computed(() => window.history.state?.props?.flash);
 
             <details class="mt-4 text-sm text-slate-600">
                 <summary class="cursor-pointer font-semibold text-slate-700">{{ $t('Sources and open questions') }}</summary>
+                <p v-if="$page.props.locale === 'ar' || $page.props.dir === 'rtl'" class="mt-2 text-xs font-semibold text-slate-700">{{ $t('The sources and open questions below are recorded in English.') }}</p>
                 <p class="mt-2 whitespace-pre-line text-xs">{{ rules.sources }}</p>
                 <p class="mt-3 text-xs font-semibold text-amber-700">{{ $t('Not settled') }}</p>
                 <p class="whitespace-pre-line text-xs">{{ rules.open_questions }}</p>

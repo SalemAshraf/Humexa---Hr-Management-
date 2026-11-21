@@ -84,7 +84,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                         <g v-for="(point,index) in chartPoints" :key="index">
                             <circle :cx="point.x" :cy="point.y" r="4" fill="#78d9ae"/>
                             <text :x="point.x" :y="point.y-10" text-anchor="middle" fill="#dbe5ef" font-size="11" font-weight="600">{{ point.count }}</text>
-                            <text :x="point.x" y="180" text-anchor="middle" fill="#64748b" font-size="10">{{ point.label }}</text>
+                            <text :x="point.x" y="180" text-anchor="middle" fill="#64748b" font-size="10">{{ $t(point.label) }}</text>
                         </g>
                     </svg>
                 </div>
@@ -125,7 +125,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                         <tbody>
                             <tr v-for="company in recentCompanies" :key="company.id" class="border-b border-slate-800/70 last:border-0">
                                 <td class="px-2 py-3 font-semibold text-slate-200">{{ company.companyName }}</td>
-                                <td class="px-2 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-semibold capitalize" :class="company.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : company.status === 'suspended' ? 'bg-rose-400/10 text-rose-300' : 'bg-amber-400/10 text-amber-300'">{{ company.status.replace('_',' ') }}</span></td>
+                                <td class="px-2 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-semibold capitalize" :class="company.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : company.status === 'suspended' ? 'bg-rose-400/10 text-rose-300' : 'bg-amber-400/10 text-amber-300'">{{ $t(company.status.replace('_',' ')) }}</span></td>
                                 <td class="px-2 py-3 text-xs text-slate-400">{{ company.createdAt || '—' }}</td>
                                 <td class="px-2 py-3 text-xs text-slate-400">{{ company.domains.join(', ') || '—' }}</td>
                             </tr>

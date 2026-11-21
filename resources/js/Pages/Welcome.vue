@@ -238,7 +238,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
         <main>
             <!-- Hero -->
             <section class="mx-auto grid max-w-6xl items-center gap-14 px-6 pb-24 pt-16 lg:grid-cols-[1fr_1.05fr] lg:gap-16 lg:px-8 lg:pb-32 lg:pt-24">
-                <div>
+                <div class="min-w-0">
                     <h1 class="max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-[56px]">
                         <span class="hero-in block" style="--d: 0ms">{{ $t('HR for your whole company,') }}</span>
                         <span class="hero-in block" style="--d: 120ms">{{ $t('in one place.') }}</span>
@@ -255,7 +255,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                 </div>
 
                 <!-- Product preview -->
-                <div class="hero-in relative" style="--d: 300ms">
+                <div class="hero-in relative min-w-0" style="--d: 300ms">
                     <div class="overflow-hidden rounded-xl border border-[#DDE3EC] bg-white shadow-[0_20px_50px_-20px_rgba(15,27,51,0.25)]">
                         <div class="flex items-center justify-between border-b border-[#E6EBF2] px-5 py-3.5">
                             <span class="flex items-center gap-2 text-sm font-bold">
@@ -267,22 +267,22 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                         </div>
 
                         <div class="overflow-x-auto">
-                            <table class="w-full min-w-[420px] text-left text-sm">
+                            <table class="w-full min-w-[420px] text-start text-sm">
                                 <caption class="sr-only">{{ $t('Sample attendance list') }}</caption>
                                 <thead>
                                     <tr class="text-xs text-[#6B7894]">
                                         <th scope="col" class="px-5 py-3 font-semibold">{{ $t('Employee') }}</th>
                                         <th scope="col" class="px-3 py-3 font-semibold">{{ $t('Department') }}</th>
                                         <th scope="col" class="px-3 py-3 font-semibold">{{ $t('Status') }}</th>
-                                        <th scope="col" class="px-5 py-3 text-right font-semibold">{{ $t('Check-in') }}</th>
+                                        <th scope="col" class="px-5 py-3 text-end font-semibold">{{ $t('Check-in') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-[#EEF1F6]">
                                     <tr v-for="(e, i) in employees" :key="e.name" class="hero-in transition-colors hover:bg-[#F6F8FB]" :style="{ '--d': `${700 + i * 120}ms` }">
-                                        <td class="px-5 py-3 font-semibold">{{ e.name }}</td>
-                                        <td class="px-3 py-3 text-[#4A5875]">{{ e.dept }}</td>
+                                        <td class="px-5 py-3 font-semibold">{{ $t(e.name) }}</td>
+                                        <td class="px-3 py-3 text-[#4A5875]">{{ $t(e.dept) }}</td>
                                         <td class="px-3 py-3">
-                                            <span :class="['rounded-full px-2.5 py-1 text-xs font-semibold', statusStyle[e.status]]">{{ e.status }}</span>
+                                            <span :class="['rounded-full px-2.5 py-1 text-xs font-semibold', statusStyle[e.status]]">{{ $t(e.status) }}</span>
                                         </td>
                                         <td class="px-5 py-3 text-right tabular-nums text-[#4A5875]">{{ e.time }}</td>
                                     </tr>
@@ -346,8 +346,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons[f.icon]" /></svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-bold">{{ f.title }}</h3>
-                                <p class="mt-1.5 max-w-lg text-[15px] leading-7 text-[#4A5875]">{{ f.description }}</p>
+                                <h3 class="text-base font-bold">{{ $t(f.title) }}</h3>
+                                <p class="mt-1.5 max-w-lg text-[15px] leading-7 text-[#4A5875]">{{ $t(f.description) }}</p>
                             </div>
                         </div></li>
                     </ul>
@@ -365,7 +365,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                 <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF0FD] text-[#1F4FD8]">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>
                                 </span>
-                                <span class="leading-7 text-[#4A5875]">{{ point }}</span>
+                                <span class="leading-7 text-[#4A5875]">{{ $t(point) }}</span>
                             </li>
                         </ul>
                     </div>
@@ -429,8 +429,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                 <ol class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
                     <li v-for="(s, i) in steps" :key="s.title" v-reveal="i * 120"><div class="group border-t-2 border-[#0F1B33] pt-6 transition-colors duration-300 hover:border-[#1F4FD8]">
                         <span class="text-sm font-bold text-[#1F4FD8]">Step {{ i + 1 }}</span>
-                        <h3 class="mt-3 text-lg font-bold">{{ s.title }}</h3>
-                        <p class="mt-2 text-[15px] leading-7 text-[#4A5875]">{{ s.description }}</p>
+                        <h3 class="mt-3 text-lg font-bold">{{ $t(s.title) }}</h3>
+                        <p class="mt-2 text-[15px] leading-7 text-[#4A5875]">{{ $t(s.description) }}</p>
                     </div></li>
                 </ol>
             </section>
@@ -448,7 +448,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                             <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#1F4FD8]">
                                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>
                             </span>
-                            <span class="leading-7 text-[#E3E9F5]">{{ p }}</span>
+                            <span class="leading-7 text-[#E3E9F5]">{{ $t(p) }}</span>
                         </li>
                     </ul>
                 </div>
@@ -461,10 +461,10 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                 <div class="mt-10 divide-y divide-[#DDE3EC] border-y border-[#DDE3EC]">
                     <details v-for="(item, i) in faqs" :key="item.q" v-reveal="i * 80" class="group py-5">
                         <summary :class="['flex cursor-pointer list-none items-center justify-between gap-6 rounded text-base font-bold [&::-webkit-details-marker]:hidden', focusRing]">
-                            {{ item.q }}
+                            {{ $t(item.q) }}
                             <span class="text-xl leading-none text-[#6B7894] transition-transform group-open:rotate-45" aria-hidden="true">+</span>
                         </summary>
-                        <p class="mt-3 max-w-xl leading-7 text-[#4A5875]">{{ item.a }}</p>
+                        <p class="mt-3 max-w-xl leading-7 text-[#4A5875]">{{ $t(item.a) }}</p>
                     </details>
                 </div>
             </section>
