@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
@@ -69,36 +69,18 @@ const kpis = computed(() => {
     return list;
 });
 
-const modules = [
-    {
-        name: 'Employee Management',
-        description: 'Employee profiles, employment details and documents',
-        shortcut: 'EM',
-        href: '/employees',
-    },
-    {
-        name: 'Attendance',
-        description: 'Check-in, shifts, working hours and overtime',
-        shortcut: 'AT',
-        href: '/attendance',
-    },
-    {
-        name: 'Leave Management',
-        description: 'Leave policies, balances and approval workflows',
-        shortcut: 'LV',
-        href: '/leave',
-    },
-    {
-        name: 'Payroll',
-        description: 'Salary structures, payslips and payroll processing',
-        shortcut: 'PY',
-    },
-    {
-        name: 'Reports & Analytics',
-        description: 'Workforce insights and downloadable reports',
-        shortcut: 'RP',
-    },
+const page = usePage();
+const allModules = [
+    { name: 'Employee Management', description: 'Employee profiles, employment details and documents', shortcut: 'EM', href: '/employees', permission: 'employees.view' },
+    { name: 'Attendance', description: 'Check-in, shifts, working hours and overtime', shortcut: 'AT', href: '/attendance', permission: 'attendance.view' },
+    { name: 'Leave Management', description: 'Leave policies, balances and approval workflows', shortcut: 'LV', href: '/leave', permission: 'leave.view' },
+    { name: 'Recruitment', description: 'Openings, candidates and hiring stages', shortcut: 'RE', href: '/recruitment', permission: 'recruitment.view' },
+    { name: 'Performance', description: 'Review cycles, ratings and goals', shortcut: 'PE', href: '/performance', permission: 'performance.view' },
+    { name: 'Payroll estimator', description: 'Experimental salary estimates. Not verified for real payroll.', shortcut: 'PA', href: '/payroll', permission: 'payroll.view', note: 'Experimental' },
+    { name: 'Reports', description: 'Workforce numbers for a period, with CSV download', shortcut: 'RP', href: '/reports', permission: 'reports.view' },
+    { name: 'Document expiry', description: 'Employee documents that expired or expire soon', shortcut: 'DX', href: '/documents/expiry', permission: 'employees.manage' },
 ];
+const modules = computed(() => allModules.filter((m) => !m.permission || !!page.props.can?.[m.permission]));
 </script>
 
 <template>
@@ -213,12 +195,9 @@ const modules = [
                 <div>
                     <h2 class="text-base font-bold text-slate-900">Your HR modules</h2>
                     <p class="mt-1 text-sm text-slate-500">
-                        Your company's HR tools, progressively rolling out.
+                        The tools your role can open.
                     </p>
                 </div>
-                <span class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500">
-                    More modules coming soon
-                </span>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -236,8 +215,8 @@ const modules = [
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <h3 class="text-sm font-semibold text-slate-800">{{ module.name }}</h3>
-                            <span v-if="!module.href" class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                                Coming soon
+                            <span v-if="module.note" class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                                {{ module.note }}
                             </span>
                             <span v-else class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                                 Available
