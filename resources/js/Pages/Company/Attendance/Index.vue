@@ -69,7 +69,7 @@ function latestSession(employee) {
 
         <section class="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Active employees</p>
+                <p class="text-sm font-medium text-slate-500">Employees in scope</p>
                 <p class="mt-3 text-3xl font-bold tracking-tight text-slate-900">{{ stats.total_employees }}</p>
                 <p class="mt-2 text-xs text-slate-400">Employees excluding resigned and terminated</p>
             </article>
