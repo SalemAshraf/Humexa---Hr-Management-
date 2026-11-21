@@ -47,6 +47,7 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
             </div>
         </section>
 
+                <p v-if="run.year >= 2027" class="mb-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" data-testid="insurance-2027-note"><b>Rates may be out of date for {{ run.year }}.</b> Press reports citing an unpublished insurance authority memo say the pension share rises by 0.5 point for the employee and 0.5 point for the employer from January 2027, and the insurable wage limits change. This rule set still uses the 2026 values. Check the official notice and update the rules before relying on this estimate.</p>
                 <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"><b>Experimental estimator.</b> These figures are not verified payroll and must not be used to pay staff. The Egypt values are unverified starting points, the tax method is simplified, and some levies are not included. Amounts are in EGP.</p>
 
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ m }}</p>
