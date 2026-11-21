@@ -40,7 +40,7 @@ class AttendanceWorkflowController extends Controller
             ->firstOrFail();
     }
 
-    public function startBreak(Request $request, AttendanceMobileAction $action)
+    public function startBreak(Request $request)
     {
         $employee = $this->employee($request);
         $data = $request->validate(['attendance_session_id' => 'required|integer']);
