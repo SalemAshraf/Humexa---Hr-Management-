@@ -95,7 +95,7 @@ return new class extends Migration {
             $table->foreign(['attendance_record_id', 'tenant_id', 'employee_id'], 'attendance_sessions_daily_record_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
                 ->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'], 'attendance_child_employee_fk')
+            $table->foreign(['employee_id', 'tenant_id'], 'attendance_sessions_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
@@ -117,10 +117,10 @@ return new class extends Migration {
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'employee_id', 'occurred_at']);
-            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'attendance_session_child_fk')
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'attendance_events_session_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
                 ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])
+            $table->foreign(['employee_id', 'tenant_id'], 'attendance_events_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['location_id', 'tenant_id'], 'attendance_events_location_fk')
@@ -156,16 +156,16 @@ return new class extends Migration {
             $table->text('review_note')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'status']);
-            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'])
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'attendance_corrections_session_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
                 ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])
+            $table->foreign(['employee_id', 'tenant_id'], 'attendance_corrections_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['requested_by_user_id', 'tenant_id'], 'attendance_corrections_requester_fk')
                 ->references(['id', 'tenant_id'])->on('users')
                 ->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['reviewed_by_user_id', 'tenant_id'], 'attendance_reviewed_by_user_fk')
+            $table->foreign(['reviewed_by_user_id', 'tenant_id'], 'attendance_corrections_reviewer_fk')
                 ->references(['id', 'tenant_id'])->on('users')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
@@ -183,13 +183,13 @@ return new class extends Migration {
             $table->text('review_note')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'status']);
-            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'])
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'overtime_requests_session_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
                 ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])
+            $table->foreign(['employee_id', 'tenant_id'], 'overtime_requests_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['reviewed_by_user_id', 'tenant_id'])
+            $table->foreign(['reviewed_by_user_id', 'tenant_id'], 'overtime_requests_reviewer_fk')
                 ->references(['id', 'tenant_id'])->on('users')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
