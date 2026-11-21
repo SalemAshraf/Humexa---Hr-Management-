@@ -25,7 +25,7 @@ class SettingsController extends Controller
 
         return Inertia::render('Company/Settings/Index', [
             'settings' => [
-                'display_name' => $s?->display_name ?? tenant('name') ?? '',
+                'display_name' => $s?->display_name ?? (string) (tenant()->company_name ?? ''),
                 'timezone' => $s?->timezone ?? 'Africa/Cairo',
                 'currency' => $s?->currency ?? 'EGP',
                 'work_start' => substr((string) ($s?->work_start ?? '09:00'), 0, 5),

@@ -31,7 +31,8 @@ test('hr saves settings, others are refused, bad values are rejected', function 
     $mgr = ($this->mk)(TenantRoleCatalog::MANAGER, 'mgr-set@tenant-test.example');
     $ok = ['display_name' => 'Nile Co', 'timezone' => 'Africa/Cairo', 'currency' => 'egp', 'work_start' => '08:30', 'work_end' => '16:30', 'contact_email' => 'hr@nile.example', 'contact_phone' => '0100'];
 
-    ($this->as)($hr)->get("{$this->base}/settings")->assertOk();
+    $r = ($this->as)($hr)->get("{$this->base}/settings")->assertOk();
+    expect($r->original->getData()['page']['props']['settings']['display_name'])->toBe('Set Co');
     ($this->as)($mgr)->get("{$this->base}/settings")->assertForbidden();
     ($this->as)($mgr)->put("{$this->base}/settings", $ok)->assertForbidden();
 
