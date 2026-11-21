@@ -80,12 +80,12 @@ function changeStatus(company, action) {
             <div class="mb-5">
                 <h2 class="font-semibold text-white">{{ $t('Registered Companies') }}</h2>
                 <p class="mt-1 text-sm text-slate-400">
-                    {{ companies.total }} companies registered on Humexa
+                    {{ $t('{n} companies registered on Humexa', { n: companies.total }) }}
                 </p>
             </div>
 
             <div v-if="companies.data?.length" class="overflow-x-auto">
-                <table class="w-full min-w-[850px] text-left text-sm">
+                <table class="w-full min-w-[850px] text-start text-sm">
                     <thead>
                         <tr class="border-b border-slate-800 text-slate-400">
                             <th class="px-3 py-3 font-medium">{{ $t('Company') }}</th>
@@ -117,7 +117,7 @@ function changeStatus(company, action) {
                                         ? 'bg-emerald-400/10 text-emerald-300'
                                         : 'bg-red-400/10 text-red-300'"
                                 >
-                                    {{ company.status }}
+                                    {{ $t(company.status) }}
                                 </span>
                             </td>
                             <td class="px-3 py-4 text-slate-400">
@@ -197,7 +197,7 @@ function changeStatus(company, action) {
                         <span class="text-xs text-slate-500">{{ entry.createdAt }}</span>
                     </div>
                     <p class="mt-1 text-xs text-slate-400">
-                        Tenant: {{ entry.tenantId }} · By: {{ entry.actor }}
+                        {{ $t('Company ID') }}: {{ entry.tenantId }} · {{ $t('By') }}: {{ entry.actor }}
                     </p>
                     <p v-if="entry.reason" class="mt-2 text-sm text-slate-300">
                         {{ entry.reason }}

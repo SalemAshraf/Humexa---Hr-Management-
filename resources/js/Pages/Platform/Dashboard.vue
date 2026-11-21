@@ -14,7 +14,7 @@ const props = defineProps({
 
 const statsCards = computed(() => [
     { label: 'Registered companies', value: props.stats.totalCompanies, description: 'All company workspaces', icon: 'CO' },
-    { label: 'Active workspaces', value: props.stats.activeCompanies, description: `${props.stats.activeRate}% of registered`, icon: 'AC', accent: true },
+    { label: 'Active workspaces', value: props.stats.activeCompanies, description: '{rate}% of registered', icon: 'AC', accent: true },
     { label: 'New this month', value: props.stats.newCompaniesThisMonth, description: 'Company registrations this month', icon: 'NM' },
     { label: 'Suspended', value: props.stats.suspendedCompanies, description: 'Company access disabled', icon: 'SU', warning: true },
 ]);
@@ -58,12 +58,12 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
 
         <section class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <article v-for="stat in statsCards" :key="stat.label" class="hx-card p-5">
-                <p class="text-xs text-slate-400">{{ stat.label }}</p>
+                <p class="text-xs text-slate-400">{{ $t(stat.label) }}</p>
                 <div class="mt-2 flex items-center justify-between">
                     <p class="text-3xl font-bold tabular-nums" :class="stat.accent ? 'text-emerald-300' : stat.warning ? 'text-rose-300' : 'text-slate-100'">{{ Number(stat.value || 0).toLocaleString() }}</p>
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-700 bg-slate-800/70 text-xs font-bold text-slate-400">{{ stat.icon }}</span>
                 </div>
-                <p class="mt-2 text-xs text-slate-500">{{ stat.description }}</p>
+                <p class="mt-2 text-xs text-slate-500">{{ $t(stat.description, { rate: props.stats.activeRate }) }}</p>
             </article>
         </section>
 
@@ -93,7 +93,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
 
             <article class="hx-card p-5 sm:p-6">
                 <h2 class="font-semibold text-slate-100">{{ $t('Workspace status') }}</h2>
-                <p class="mt-1 text-xs text-slate-400">{{ stats.totalCompanies }} registered workspaces</p>
+                <p class="mt-1 text-xs text-slate-400">{{ $t('{n} registered workspaces', { n: stats.totalCompanies }) }}</p>
                 <div class="my-6 flex items-center justify-center gap-5">
                     <div class="relative h-32 w-32 shrink-0 rounded-full" :style="donutStyle">
                         <div class="absolute inset-[17px] flex flex-col items-center justify-center rounded-full bg-[#111c2e]">
@@ -106,9 +106,9 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                     </div>
                 </div>
                 <div class="space-y-2 text-xs text-slate-400">
-                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-300"></span>Active · {{ stats.activeCompanies }}</p>
-                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-[#416f61]"></span>Setting up · {{ stats.settingUpCompanies }}</p>
-                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-400"></span>Suspended · {{ stats.suspendedCompanies }}</p>
+                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-300"></span>{{ $t('Active') }} · {{ stats.activeCompanies }}</p>
+                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-[#416f61]"></span>{{ $t('Setting up') }} · {{ stats.settingUpCompanies }}</p>
+                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-400"></span>{{ $t('Suspended') }} · {{ stats.suspendedCompanies }}</p>
                 </div>
             </article>
         </section>
@@ -120,7 +120,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                     <Link :href="route('platform.companies.index')" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">{{ $t('All companies →') }}</Link>
                 </div>
                 <div v-if="recentCompanies.length" class="overflow-x-auto">
-                    <table class="w-full min-w-[520px] text-left text-sm">
+                    <table class="w-full min-w-[520px] text-start text-sm">
                         <thead><tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500"><th class="px-2 py-3">{{ $t('Company / Workspace') }}</th><th class="px-2 py-3">{{ $t('Status') }}</th><th class="px-2 py-3">{{ $t('Registered') }}</th><th class="px-2 py-3">{{ $t('Domains') }}</th></tr></thead>
                         <tbody>
                             <tr v-for="company in recentCompanies" :key="company.id" class="border-b border-slate-800/70 last:border-0">
@@ -133,7 +133,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                     </table>
                 </div>
                 <div v-else class="py-12 text-center text-sm text-slate-500">{{ $t('No companies registered yet.') }}</div>
-                <p class="mt-3 text-[10px] text-slate-500">Showing {{ recentCompanies.length }} recent companies · company metadata only</p>
+                <p class="mt-3 text-[10px] text-slate-500">{{ $t('Showing {n} recent companies · company metadata only', { n: recentCompanies.length }) }}</p>
             </article>
 
             <article class="hx-card p-5 sm:p-6">

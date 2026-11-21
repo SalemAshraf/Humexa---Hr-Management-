@@ -31,7 +31,7 @@ defineProps({
                 <div>
                     <h2 class="font-semibold text-white">{{ $t('Audit history') }}</h2>
                     <p class="mt-1 text-sm text-slate-400">
-                        {{ activity.total }} recorded events
+                        {{ $t('{n} recorded events', { n: activity.total }) }}
                     </p>
                 </div>
                 <span class="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-400">{{ $t('Latest first') }}</span>
@@ -58,7 +58,7 @@ defineProps({
                                     {{ entry.event === 'company.suspended' ? $t('Company suspended') : (entry.event === 'company.plan_changed' ? $t('Plan changed') : $t('Company activated')) }}
                                 </h3>
                                 <p class="mt-1 text-sm text-slate-400">{{ entry.companyName }}</p>
-                                <p class="mt-1 break-all text-xs text-slate-600">Tenant ID: {{ entry.tenantId }}</p>
+                                <p class="mt-1 break-all text-xs text-slate-600">{{ $t('Company ID') }}: {{ entry.tenantId }}</p>
                             </div>
                         </div>
                         <time class="shrink-0 text-xs text-slate-500">{{ entry.createdAt || '—' }}</time>

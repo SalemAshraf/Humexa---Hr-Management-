@@ -46,16 +46,16 @@ function handleSidebarToggle() {
 </script>
 
 <template>
-    <div class="hx-dashboard min-h-screen" data-theme="platform" :dir="direction">
+    <div class="hx-dashboard min-h-screen" data-theme="platform" :dir="page.props.dir ?? direction">
         <DashboardSidebar
             :items="navigationItems"
             :collapsed="isCollapsed && !isMobileOpen"
             :mobile-open="isMobileOpen"
             theme="platform"
             :logout-url="route('platform.logout')"
-            :direction="direction"
+            :direction="page.props.dir ?? direction"
             title="Humexa"
-            subtitle="Platform Administration"
+            :subtitle="$t('Platform Administration')"
             @toggle-collapse="toggleCollapsed"
             @close-mobile="closeMobile"
         />
@@ -70,7 +70,7 @@ function handleSidebarToggle() {
                 theme="platform"
                 :logout-url="route('platform.logout')"
                 :collapsed="isCollapsed"
-                :direction="direction"
+                :direction="page.props.dir ?? direction"
                 @toggle-sidebar="handleSidebarToggle"
             />
 
