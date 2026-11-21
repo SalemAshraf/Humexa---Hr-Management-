@@ -7,6 +7,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Modules\Attendance\Http\Controllers\Api\V1\AttendanceController;
+use App\Modules\Attendance\Http\Controllers\Api\V1\AttendanceWorkflowController;
 
 Route::domain('{tenant}.humexa.test')->middleware([
     InitializeTenancyByDomain::class,
@@ -19,5 +20,11 @@ Route::domain('{tenant}.humexa.test')->middleware([
         Route::get('/history',[AttendanceController::class,'history']);
         Route::post('/check-in',[AttendanceController::class,'checkIn']);
         Route::post('/check-out',[AttendanceController::class,'checkOut']);
+        Route::post('/breaks/start',[AttendanceWorkflowController::class,'startBreak']);
+        Route::post('/breaks/end',[AttendanceWorkflowController::class,'endBreak']);
+        Route::post('/corrections',[AttendanceWorkflowController::class,'requestCorrection']);
+        Route::get('/corrections',[AttendanceWorkflowController::class,'corrections']);
+        Route::post('/overtime-requests',[AttendanceWorkflowController::class,'requestOvertime']);
+        Route::get('/overtime-requests',[AttendanceWorkflowController::class,'overtimeRequests']);
     });
 });
