@@ -85,8 +85,8 @@ function changeStatus(company, action) {
             </div>
 
             <div v-if="companies.data?.length" class="overflow-x-auto">
-                <table class="w-full min-w-[850px] text-start text-sm">
-                    <thead>
+                <table class="w-full text-start text-sm md:min-w-[850px] max-md:block">
+                    <thead class="max-md:hidden">
                         <tr class="border-b border-slate-800 text-slate-400">
                             <th class="px-3 py-3 font-medium">{{ $t('Company') }}</th>
                             <th class="px-3 py-3 font-medium">{{ $t('Domain') }}</th>
@@ -95,22 +95,22 @@ function changeStatus(company, action) {
                             <th class="px-3 py-3 font-medium">{{ $t('Actions') }}</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="max-md:block">
                         <tr
                             v-for="company in companies.data"
                             :key="company.id"
-                            class="border-b border-slate-800/70 align-top last:border-0"
+                            class="border-b border-slate-800/70 align-top last:border-0 max-md:mb-3 max-md:block max-md:rounded-xl max-md:border max-md:border-slate-800 max-md:p-3"
                         >
-                            <td class="px-3 py-4 font-medium text-slate-200">
+                            <td class="px-3 py-4 font-medium text-slate-200 max-md:block max-md:px-1 max-md:py-2 max-md:before:mb-1 max-md:before:block max-md:before:text-xs max-md:before:text-slate-500 max-md:before:content-[attr(data-label)]" :data-label="$t('Company')">
                                 {{ company.companyName }}
                             </td>
-                            <td class="px-3 py-4 text-cyan-400">
+                            <td class="px-3 py-4 text-cyan-400 max-md:block max-md:px-1 max-md:py-2 max-md:before:mb-1 max-md:before:block max-md:before:text-xs max-md:before:text-slate-500 max-md:before:content-[attr(data-label)]" :data-label="$t('Domain')">
                                 <div v-for="domain in company.domains" :key="domain">
                                     {{ domain }}
                                 </div>
                                 <span v-if="!company.domains.length" class="text-slate-500">—</span>
                             </td>
-                            <td class="px-3 py-4">
+                            <td class="px-3 py-4 max-md:block max-md:px-1 max-md:py-2 max-md:before:mb-1 max-md:before:block max-md:before:text-xs max-md:before:text-slate-500 max-md:before:content-[attr(data-label)]" :data-label="$t('Status')">
                                 <span
                                     class="rounded-full px-3 py-1 text-xs font-semibold"
                                     :class="company.status === 'active'
@@ -120,10 +120,10 @@ function changeStatus(company, action) {
                                     {{ $t(company.status) }}
                                 </span>
                             </td>
-                            <td class="px-3 py-4 text-slate-400">
+                            <td class="px-3 py-4 text-slate-400 max-md:block max-md:px-1 max-md:py-2 max-md:before:mb-1 max-md:before:block max-md:before:text-xs max-md:before:text-slate-500 max-md:before:content-[attr(data-label)]" :data-label="$t('Registered')">
                                 {{ company.createdAt || '—' }}
                             </td>
-                            <td class="px-3 py-4">
+                            <td class="px-3 py-4 max-md:block max-md:px-1 max-md:py-2 max-md:before:mb-1 max-md:before:block max-md:before:text-xs max-md:before:text-slate-500 max-md:before:content-[attr(data-label)]" :data-label="$t('Actions')">
                                 <div
                                     v-if="(company.status === 'active' && canSuspendCompanies) || (company.status === 'suspended' && canActivateCompanies)"
                                     class="flex min-w-48 flex-col gap-2"
