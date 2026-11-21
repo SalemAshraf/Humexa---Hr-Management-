@@ -10,6 +10,7 @@ use App\Modules\Tenants\Http\Controllers\TenantDashboardController;
 use App\Modules\Organization\Http\Controllers\OrganizationController;
 use App\Modules\Employees\Http\Controllers\EmployeeController;
 use App\Modules\Attendance\Http\Controllers\TenantAttendanceDashboardController;
+use App\Modules\Attendance\Http\Controllers\TenantAttendanceRecordsController;
 use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
 use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
@@ -18,7 +19,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeDocumentController;
 use App\Modules\Employees\Http\Controllers\EmployeeProfilePhotoController;
 use App\Http\Middleware\EnsureTenantActive;
 
-Route::domain('{tenant}.humexa.test')
+Route::domain('{tenant}.'.config('humexa.tenant_domain'))
     ->middleware([
         'web',
         InitializeTenancyByDomain::class,
