@@ -46,33 +46,64 @@ return new class extends Migration {
             $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->cascadeOnUpdate()->restrictOnDelete();
         });
 
-        Schema::create('attendance_records', function (Blueprint $table) {
+        // One daily summary per employee. Detailed clock events live in attendance_sessions.
+        $tableName = 'attendance_records';
+        Schema::create($tableName, function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
             $table->unsignedBigInteger('employee_id');
             $table->date('attendance_date');
-            $table->timestamp('check_in_at')->nullable();
-            $table->timestamp('check_out_at')->nullable();
-            $table->string('check_in_source', 30)->nullable();
-            $table->string('check_out_source', 30)->nullable();
             $table->string('status', 30)->default('recorded');
-            $table->unsignedInteger('worked_minutes')->nullable();
+            $table->unsignedInteger('total_worked_minutes')->default(0);
+            $table->unsignedInteger('total_break_minutes')->default(0);
             $table->unsignedInteger('late_minutes')->default(0);
             $table->unsignedInteger('early_leave_minutes')->default(0);
             $table->unsignedInteger('overtime_minutes')->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->unique(['id', 'tenant_id'], 'attendance_records_id_tenant_unique');
+            $table->unique(['id', 'tenant_id', 'employee_id'], 'attendance_records_id_tenant_employee_unique');
             $table->unique(['tenant_id', 'employee_id', 'attendance_date'], 'attendance_daily_unique');
             $table->index(['tenant_id', 'attendance_date', 'status']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
         });
 
-        Schema::create('attendance_events', function (Blueprint $table) {
+        // Multiple work periods are allowed for the same employee and day.
+        Schema::create('attendance_sessions', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
             $table->unsignedBigInteger('attendance_record_id');
+            $table->unsignedBigInteger('employee_id');
+            $table->unsignedSmallInteger('session_number');
+            $table->timestamp('check_in_at')->nullable();
+            $table->timestamp('check_out_at')->nullable();
+            $table->string('check_in_source', 30)->nullable();
+            $table->string('check_out_source', 30)->nullable();
+            $table->string('status', 30)->default('open');
+            $table->unsignedInteger('worked_minutes')->default(0);
+            $table->unsignedInteger('break_minutes')->default(0);
+            $table->unsignedInteger('late_minutes')->default(0);
+            $table->unsignedInteger('early_leave_minutes')->default(0);
+            $table->unsignedInteger('overtime_minutes')->default(0);
+            $table->text('notes')->nullable();
+            $table->timestamps();
+            $table->unique(['id', 'tenant_id'], 'attendance_sessions_id_tenant_unique');
+            $table->unique(['id', 'tenant_id', 'employee_id'], 'attendance_sessions_id_tenant_employee_unique');
+            $table->unique(['attendance_record_id', 'session_number'], 'attendance_session_number_unique');
+            $table->index(['tenant_id', 'employee_id', 'check_in_at'], 'attendance_sessions_employee_checkin_index');
+            $table->foreign(['attendance_record_id', 'tenant_id', 'employee_id'])
+                ->references(['id', 'tenant_id', 'employee_id'])
+                ->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('employees')
+                ->cascadeOnUpdate()->restrictOnDelete();
+        });
+
+        Schema::create('attendance_events', function (Blueprint $table) {
+            $table->id();
+            $table->string('tenant_id');
+            $table->unsignedBigInteger('attendance_session_id');
             $table->unsignedBigInteger('employee_id');
             $table->string('event_type', 30);
             $table->string('source', 30);
@@ -86,28 +117,34 @@ return new class extends Migration {
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'employee_id', 'occurred_at']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['attendance_record_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['location_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_locations')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'])
+                ->references(['id', 'tenant_id', 'employee_id'])
+                ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('employees')
+                ->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['location_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('attendance_locations')
+                ->cascadeOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_breaks', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
-            $table->unsignedBigInteger('attendance_record_id');
+            $table->unsignedBigInteger('attendance_session_id');
             $table->timestamp('started_at');
             $table->timestamp('ended_at')->nullable();
             $table->timestamps();
-            $table->index(['tenant_id', 'attendance_record_id']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['attendance_record_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
+            $table->index(['tenant_id', 'attendance_session_id']);
+            $table->foreign(['attendance_session_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('attendance_sessions')
+                ->cascadeOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_corrections', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
-            $table->unsignedBigInteger('attendance_record_id');
+            $table->unsignedBigInteger('attendance_session_id');
             $table->unsignedBigInteger('employee_id');
             $table->unsignedBigInteger('requested_by_user_id');
             $table->timestamp('requested_check_in')->nullable();
@@ -119,17 +156,24 @@ return new class extends Migration {
             $table->text('review_note')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'status']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['attendance_record_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['requested_by_user_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('users')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['reviewed_by_user_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('users')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'])
+                ->references(['id', 'tenant_id', 'employee_id'])
+                ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('employees')
+                ->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['requested_by_user_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('users')
+                ->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['reviewed_by_user_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('users')
+                ->cascadeOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('overtime_requests', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
-            $table->unsignedBigInteger('attendance_record_id');
+            $table->unsignedBigInteger('attendance_session_id');
             $table->unsignedBigInteger('employee_id');
             $table->unsignedInteger('requested_minutes');
             $table->text('reason')->nullable();
@@ -139,10 +183,15 @@ return new class extends Migration {
             $table->text('review_note')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'status']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['attendance_record_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['reviewed_by_user_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('users')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'])
+                ->references(['id', 'tenant_id', 'employee_id'])
+                ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('employees')
+                ->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['reviewed_by_user_id', 'tenant_id'])
+                ->references(['id', 'tenant_id'])->on('users')
+                ->cascadeOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_devices', function (Blueprint $table) {
@@ -189,6 +238,7 @@ return new class extends Migration {
         Schema::dropIfExists('attendance_corrections');
         Schema::dropIfExists('attendance_breaks');
         Schema::dropIfExists('attendance_events');
+        Schema::dropIfExists('attendance_sessions');
         Schema::dropIfExists('attendance_records');
         Schema::dropIfExists('attendance_locations');
         Schema::dropIfExists('attendance_policies');
