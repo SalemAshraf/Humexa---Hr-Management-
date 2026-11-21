@@ -9,6 +9,7 @@ use App\Modules\Users\Http\Controllers\TenantAuthController;
 use App\Modules\Tenants\Http\Controllers\TenantDashboardController;
 use App\Modules\Organization\Http\Controllers\OrganizationController;
 use App\Modules\Employees\Http\Controllers\EmployeeController;
+use App\Modules\Attendance\Http\Controllers\TenantAttendanceDashboardController;
 use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
 use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
@@ -33,7 +34,8 @@ Route::domain('{tenant}.humexa.test')
         Route::post('/login', [TenantAuthController::class, 'store'])->name('tenant.login.store');
 
         Route::middleware(['auth:tenant', 'tenant.user'])->group(function () {
-            Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');\n            Route::get('/attendance', TenantAttendanceDashboardController::class)->name('tenant.attendance.index');
+            Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
+            Route::get('/attendance', TenantAttendanceDashboardController::class)->name('tenant.attendance.index');\n            Route::get('/attendance', TenantAttendanceDashboardController::class)->name('tenant.attendance.index');
 
             Route::prefix('/employee-document-types')
                 ->name('employee-document-types.')
