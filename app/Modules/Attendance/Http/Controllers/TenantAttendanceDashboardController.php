@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\\Modules\\Attendance\\Http\\Controllers;
+namespace App\Modules\Attendance\Http\Controllers;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Modules\\Attendance\\Models\\AttendancePolicy;
-use App\\Modules\\Attendance\\Models\\AttendanceRecord;
-use App\\Modules\\Attendance\\Models\\AttendanceSession;
-use App\\Modules\\Employees\\Models\\Employee;
-use Illuminate\\Http\\Request;
-use Inertia\\Inertia;
-use Inertia\\Response;
+use App\Http\Controllers\Controller;
+use App\Modules\Attendance\Models\AttendancePolicy;
+use App\Modules\Attendance\Models\AttendanceRecord;
+use App\Modules\Attendance\Models\AttendanceSession;
+use App\Modules\Employees\Models\Employee;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TenantAttendanceDashboardController extends Controller
 {
