@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Modules\Attendance\Models\AttendancePolicy;
 use App\Modules\Employees\Actions\CreateEmployeeAction;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Organization\Models\Branch;
@@ -29,6 +30,8 @@ class TenantDemoDataSeeder extends Seeder
         $tenantId = (string) tenant()->getTenantKey();
 
         DB::transaction(function () use ($tenantId): void {
+            AttendancePolicy::firstOrCreate(['tenant_id' => $tenantId]);
+
             $branches = $this->seedBranches($tenantId);
             $departments = $this->seedDepartments($tenantId, $branches);
             $positions = $this->seedPositions($tenantId, $departments);
