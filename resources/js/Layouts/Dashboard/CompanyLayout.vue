@@ -28,6 +28,7 @@ const navigationItems = [
     { label: 'Performance', shortcut: 'PE', disabled: true, badge: 'Soon' },
     { label: 'Reports', shortcut: 'RP', disabled: true, badge: 'Soon' },
     { label: 'Notifications', shortcut: 'NO', disabled: true, badge: 'Soon' },
+    { label: 'Team & roles', href: '/team', shortcut: 'TR' },
     { label: 'Settings', shortcut: 'SE', disabled: true, badge: 'Soon' },
 ];
 

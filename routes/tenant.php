@@ -18,6 +18,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeDocumentTypeController;
 use App\Modules\Employees\Http\Controllers\EmployeeDocumentController;
 use App\Modules\Employees\Http\Controllers\EmployeeProfilePhotoController;
 use App\Modules\Leave\Http\Controllers\LeaveController;
+use App\Modules\Users\Http\Controllers\TenantTeamController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.'.config('humexa.tenant_domain'))
@@ -39,6 +40,12 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
             Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
+
+            Route::prefix('/team')->middleware('tenant.can:roles.manage')->name('team.')->controller(TenantTeamController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/', 'store')->name('store');
+                Route::put('/{account}/role', 'updateRole')->whereNumber('account')->name('role');
+            });
 
             Route::prefix('/leave')->middleware('tenant.can:leave.view')->name('leave.')->controller(LeaveController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
