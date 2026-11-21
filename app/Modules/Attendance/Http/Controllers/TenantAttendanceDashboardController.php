@@ -54,13 +54,25 @@ class TenantAttendanceDashboardController extends Controller
             ->get()
             ->keyBy('employee_id');
 
-        $employees->through(function (Employee $employee) use ($records): array {
+        $openSessions = AttendanceSession::query()
+            ->where('tenant_id', $tenantId)
+            ->whereIn('employee_id', $employeeIds)
+            ->whereNotNull('check_in_at')
+            ->whereNull('check_out_at')
+            ->with('breaks')
+            ->get()
+            ->keyBy('employee_id');
+
+        $employees->through(function (Employee $employee) use ($records, $openSessions): array {
             $record = $records->get($employee->id);
-            $sessions = $record?->sessions ?? collect();
-            $activeSession = $sessions->first(
-                fn (AttendanceSession $session): bool => $session->check_in_at !== null
-                    && $session->check_out_at === null
-            );
+            $activeSession = $openSessions->get($employee->id);
+            $sessions = collect($record?->sessions ?? []);
+
+            if ($activeSession && ! $sessions->contains('id', $activeSession->id)) {
+                $sessions->push($activeSession);
+            }
+
+            $sessions = $sessions->sortBy('check_in_at')->values();
 
             return [
                 'id' => $employee->id,
