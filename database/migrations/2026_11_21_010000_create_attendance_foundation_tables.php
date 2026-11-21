@@ -148,7 +148,7 @@ return new class extends Migration {
         Schema::create('attendance_devices', function (Blueprint $table) {
             $table->id();
             $table->string('tenant_id');
-            $unsigned = $table->unsignedBigInteger('branch_id')->nullable();
+            $table->unsignedBigInteger('branch_id')->nullable();
             $table->string('name', 150);
             $table->string('vendor', 100)->nullable();
             $table->string('device_identifier', 190);
