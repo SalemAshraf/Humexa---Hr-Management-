@@ -36,8 +36,8 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
         Route::middleware(['auth:tenant', 'tenant.user'])->group(function () {
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
-            Route::get('/attendance', TenantAttendanceDashboardController::class)->name('tenant.attendance.index');
-            Route::get('/attendance/records', TenantAttendanceRecordsController::class)->name('tenant.attendance.records');
+            Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
+            Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
 
             Route::prefix('/employee-document-types')
                 ->middleware('tenant.can:employees.manage')

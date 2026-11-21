@@ -3,37 +3,31 @@
 declare(strict_types=1);
 
 use App\Models\Tenant;
-use App\Models\User;
-use App\Modules\Users\Actions\ProvisionTenantRolesAction;
-use App\Modules\Users\Support\TenantRoleCatalog;
+use App\Modules\Users\Actions\BackfillTenantOwnersAction;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Log;
 
 return new class extends Migration {
     public function up(): void
     {
-        $provision = app(ProvisionTenantRolesAction::class);
+        $backfill = app(BackfillTenantOwnersAction::class);
 
-        Tenant::query()->each(function (Tenant $tenant) use ($provision): void {
-            $provision->execute($tenant);
+        Tenant::query()->each(function (Tenant $tenant) use ($backfill): void {
+            $ambiguous = $backfill->execute($tenant);
 
-            // Before roles existed, every tenant account was a full administrator.
-            // Keep that access so nobody is locked out by this change.
-            User::query()
-                ->where('tenant_id', $tenant->getTenantKey())
-                ->where('account_type', User::ACCOUNT_TYPE_TENANT)
-                ->get()
-                ->each(function (User $user) use ($tenant): void {
-                    $tenant->run(function () use ($user): void {
-                        if ($user->roles()->doesntExist()) {
-                            $user->assignRole(TenantRoleCatalog::OWNER);
-                        }
-                    });
-                });
+            foreach ($ambiguous as $tenantId) {
+                Log::warning('No registrant account identified; company has no Owner until one is assigned.', [
+                    'tenant_id' => $tenantId,
+                ]);
+            }
         });
+
+        // Only the original registrant of each company is promoted. All other
+        // existing accounts keep no company-wide permission until assigned a role.
     }
 
     public function down(): void
     {
-        // Roles are kept on rollback to avoid removing access.
+        // Roles are kept on rollback.
     }
 };
