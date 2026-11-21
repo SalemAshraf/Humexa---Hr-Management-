@@ -68,8 +68,8 @@ class AttentionService
             $expired = EmployeeDocument::query()->where('tenant_id', $tenantId)->whereNotNull('expiry_date')->whereDate('expiry_date', '<', today());
             $soon = EmployeeDocument::query()->where('tenant_id', $tenantId)->whereNotNull('expiry_date')
                 ->whereDate('expiry_date', '>=', today())->whereDate('expiry_date', '<=', today()->addDays(self::DOCUMENT_WINDOW_DAYS));
-            $push('docs_expired', 'Documents', 'Employee documents that have expired', 'Ask for renewed copies.', $expired->count(), '/employees', 'red');
-            $push('docs_soon', 'Documents', 'Employee documents expiring within '.self::DOCUMENT_WINDOW_DAYS.' days', 'Plan renewals before they lapse.', $soon->count(), '/employees');
+            $push('docs_expired', 'Documents', 'Employee documents that have expired', 'Ask for renewed copies.', $expired->count(), '/documents/expiry', 'red');
+            $push('docs_soon', 'Documents', 'Employee documents expiring within '.self::DOCUMENT_WINDOW_DAYS.' days', 'Plan renewals before they lapse.', $soon->count(), '/documents/expiry');
         }
 
         return $items;

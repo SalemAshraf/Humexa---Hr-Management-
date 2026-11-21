@@ -110,6 +110,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::put('/', 'update')->name('update');
             });
 
+            Route::get('/documents/expiry', [\App\Modules\Employees\Http\Controllers\DocumentExpiryController::class, 'index'])->middleware('tenant.can:employees.manage')->name('documents.expiry');
             Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
             Route::prefix('/me')->name('me.')->controller(\App\Modules\SelfService\Http\Controllers\SelfServiceController::class)->group(function () {
                 Route::get('/', 'index')->name('index');

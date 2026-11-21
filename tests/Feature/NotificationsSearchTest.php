@@ -67,3 +67,27 @@ test('search only returns what the role may open and escapes wildcards', functio
         ->and($labels($hr, '%%'))->toBe([])
         ->and($labels($hr, 'w'))->toBe([]);
 });
+
+
+test('document expiry page is HR only, tenant scoped and lists expired and soon items', function () {
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr-x@tenant-test.example');
+    $mgr = ($this->mk)(TenantRoleCatalog::MANAGER, 'mgr-x@tenant-test.example');
+    $emp = ($this->mk)(TenantRoleCatalog::EMPLOYEE, 'emp-x@tenant-test.example');
+    $e = Employee::query()->forceCreate(['tenant_id' => $this->tid, 'employee_number' => 'X-1', 'first_name' => 'Doc', 'last_name' => 'Holder', 'employment_status' => 'active']);
+    $type = \App\Modules\Employees\Models\EmployeeDocumentType::query()->forceCreate(['tenant_id' => $this->tid, 'name' => 'Passport', 'slug' => 'passport', 'is_active' => true]);
+    $mkDoc = fn (string $title, $date) => \App\Modules\Employees\Models\EmployeeDocument::query()->forceCreate([
+        'tenant_id' => $this->tid, 'employee_id' => $e->id, 'document_type_id' => $type->id, 'title' => $title,
+        'original_file_name' => 'a.pdf', 'file_path' => 'x/a.pdf', 'disk' => 'local', 'mime_type' => 'application/pdf', 'file_size' => 1, 'expiry_date' => $date,
+    ]);
+    $mkDoc('Old passport', today()->subDays(3));
+    $mkDoc('Soon passport', today()->addDays(10));
+    $mkDoc('Far passport', today()->addDays(90));
+    $gone = $mkDoc('Archived passport', today()->subDays(5));
+    $gone->delete();
+
+    $titles = collect(($this->as)($hr)->get("{$this->base}/documents/expiry")->assertOk()->viewData('page')['props']['rows'])->pluck('title')->all();
+    expect($titles)->toBe(['Old passport', 'Soon passport']);
+
+    ($this->as)($mgr)->get("{$this->base}/documents/expiry")->assertForbidden();
+    ($this->as)($emp)->get("{$this->base}/documents/expiry")->assertForbidden();
+});

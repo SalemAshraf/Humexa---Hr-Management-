@@ -27,6 +27,7 @@ const allNavigationItems = [
     { label: 'My space', href: '/me', shortcut: 'ME' },
     { label: 'Employees', permission: 'employees.view', href: '/employees', shortcut: 'EM' },
     { label: 'Organization', permission: 'employees.view', href: '/organization', shortcut: 'OR' },
+    { label: 'Document expiry', permission: 'employees.manage', href: '/documents/expiry', shortcut: 'DX' },
     { label: 'Attendance', permission: 'attendance.view', href: '/attendance', shortcut: 'AT' },
     { label: 'Leaves', permission: 'leave.view', href: '/leave', shortcut: 'LE' },
     { label: 'Payroll', permission: 'payroll.view', href: '/payroll', shortcut: 'PA' },
