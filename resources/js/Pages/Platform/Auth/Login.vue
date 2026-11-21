@@ -61,7 +61,7 @@ function submit() {
                         required
                         autofocus
                         autocomplete="username"
-                        :placeholder="$t('admin@humexa.com')"
+                        :placeholder="$t('admin@example.com')"
                         class="mt-2 block w-full !border-white/10 !bg-[#0B1425] !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                     />
                     <InputError class="mt-2" :message="form.errors.email" />

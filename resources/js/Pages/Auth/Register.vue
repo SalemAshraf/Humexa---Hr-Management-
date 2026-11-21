@@ -171,7 +171,7 @@ const submit = () => {
                                     <button
                                         type="button"
                                         @click="showPassword = !showPassword"
-                                        :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                        :aria-label="showPassword ? $t('Hide password') : $t('Show password')"
                                         class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 transition hover:text-cyan-400 focus:outline-none focus:text-cyan-400"
                                     >
                                         {{ showPassword ? $t('Hide') : $t('Show') }}
@@ -206,7 +206,7 @@ const submit = () => {
                                     <button
                                         type="button"
                                         @click="showPasswordConfirmation = !showPasswordConfirmation"
-                                        :aria-label="showPasswordConfirmation ? 'Hide confirm password' : 'Show confirm password'"
+                                        :aria-label="showPasswordConfirmation ? $t('Hide confirm password') : $t('Show confirm password')"
                                         class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 transition hover:text-cyan-400 focus:outline-none focus:text-cyan-400"
                                     >
                                         {{ showPasswordConfirmation ? $t('Hide') : $t('Show') }}

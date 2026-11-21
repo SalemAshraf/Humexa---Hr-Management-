@@ -1,6 +1,7 @@
 
 <script setup>
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import LanguageSwitch from '@/Components/LanguageSwitch.vue';
 import { Link } from '@inertiajs/vue3';
 </script>
 
@@ -9,6 +10,8 @@ import { Link } from '@inertiajs/vue3';
         <!-- Background effects -->
         <div class="pointer-events-none absolute -left-40 -top-40 h-96 w-96 rounded-full bg-blue-600/20 blur-[120px]"></div>
         <div class="pointer-events-none absolute -bottom-40 -right-40 h-96 w-96 rounded-full bg-cyan-500/10 blur-[120px]"></div>
+
+        <div class="absolute end-4 top-4 z-20"><LanguageSwitch dark /></div>
 
         <div class="relative grid min-h-screen lg:grid-cols-2">
             <!-- Branding panel -->
@@ -27,19 +30,18 @@ import { Link } from '@inertiajs/vue3';
 
                 <div class="relative max-w-lg">
                     <div class="mb-5 inline-flex items-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                        Human Resources, Simplified
+                        {{ $t('Human Resources, Simplified') }}
                     </div>
 
                     <h1 class="text-5xl font-bold leading-tight xl:text-6xl">
-                        Build a better
+                        {{ $t('Build a better') }}
                         <span class="bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">
-                            workplace.
+                            {{ $t('workplace.') }}
                         </span>
                     </h1>
 
                     <p class="mt-5 max-w-md text-base leading-7 text-slate-400 xl:text-lg xl:leading-8">
-                        Bring your people, processes, and organization together
-                        with one powerful HR management platform.
+                        {{ $t('Bring your people, processes, and organization together with one powerful HR management platform.') }}
                     </p>
 
                     <div class="mt-9 space-y-4">
@@ -52,7 +54,7 @@ import { Link } from '@inertiajs/vue3';
                                 </svg>
                             </div>
 
-                            <span class="text-sm text-slate-300">Manage your entire workforce</span>
+                            <span class="text-sm text-slate-300">{{ $t('Manage your entire workforce') }}</span>
                         </div>
 
                         <div class="flex items-center gap-4">
@@ -63,7 +65,7 @@ import { Link } from '@inertiajs/vue3';
                                 </svg>
                             </div>
 
-                            <span class="text-sm text-slate-300">Simplify everyday HR operations</span>
+                            <span class="text-sm text-slate-300">{{ $t('Simplify everyday HR operations') }}</span>
                         </div>
 
                         <div class="flex items-center gap-4">
@@ -74,7 +76,7 @@ import { Link } from '@inertiajs/vue3';
                                 </svg>
                             </div>
 
-                            <span class="text-sm text-slate-300">Keep your company data organized</span>
+                            <span class="text-sm text-slate-300">{{ $t('Keep your company data organized') }}</span>
                         </div>
                     </div>
                 </div>
@@ -100,7 +102,7 @@ import { Link } from '@inertiajs/vue3';
                 </div>
 
                 <p class="mt-5 text-center text-xs text-slate-500">
-                    Secure workspace for your business
+                    {{ $t('Secure workspace for your business') }}
                 </p>
             </main>
         </div>
