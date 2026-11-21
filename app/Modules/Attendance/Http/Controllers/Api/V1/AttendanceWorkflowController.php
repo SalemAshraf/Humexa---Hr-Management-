@@ -31,28 +31,65 @@ class AttendanceWorkflowController extends Controller
 
     public function startBreak(Request $request)
     {
-        $employee=$this->employee($request);
-        $data=$request->validate(['attendance_record_id'=>'required|integer']);
-        $record=$this->record($employee,$data['attendance_record_id']);
-        abort_unless($record->check_in_at && !$record->check_out_at,422,'Breaks require an active attendance record.');
-        if($record->breaks()->whereNull('ended_at')->exists()) throw ValidationException::withMessages(['break'=>'A break is already active.']);
-        $break=AttendanceBreak::create(['tenant_id'=>tenant('id'),'attendance_record_id'=>$record->id,'started_at'=>now()]);
-        return response()->json(['data'=>$break],201);
+        $employee = $this->employee($request);
+        $data = $request->validate(['attendance_record_id' => 'required|integer']);
+
+        $break = DB::transaction(function () use ($employee, $data) {
+            $record = AttendanceRecord::query()
+                ->where('tenant_id', tenant('id'))
+                ->where('employee_id', $employee->id)
+                ->whereKey($data['attendance_record_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_unless($record->check_in_at && ! $record->check_out_at, 422, 'Breaks require an active attendance record.');
+
+            if ($record->breaks()->whereNull('ended_at')->exists()) {
+                throw ValidationException::withMessages(['break' => 'A break is already active.']);
+            }
+
+            return AttendanceBreak::create([
+                'tenant_id' => tenant('id'),
+                'attendance_record_id' => $record->id,
+                'started_at' => now(),
+            ]);
+        }, 3);
+
+        return response()->json(['data' => $break], 201);
     }
 
     public function endBreak(Request $request)
     {
-        $employee=$this->employee($request);
-        $data=$request->validate(['attendance_record_id'=>'required|integer']);
-        $record=$this->record($employee,$data['attendance_record_id']);
-        $break=$record->breaks()->whereNull('ended_at')->latest('id')->firstOrFail();
-        $break->ended_at=now();$break->save();
-        return response()->json(['data'=>$break]);
+        $employee = $this->employee($request);
+        $data = $request->validate(['attendance_record_id' => 'required|integer']);
+
+        $break = DB::transaction(function () use ($employee, $data) {
+            $record = AttendanceRecord::query()
+                ->where('tenant_id', tenant('id'))
+                ->where('employee_id', $employee->id)
+                ->whereKey($data['attendance_record_id'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $break = $record->breaks()
+                ->whereNull('ended_at')
+                ->lockForUpdate()
+                ->latest('id')
+                ->firstOrFail();
+
+            $break->ended_at = now();
+            $break->save();
+
+            return $break;
+        }, 3);
+
+        return response()->json(['data' => $break]);
     }
 
     public function requestCorrection(Request $request)
     {
         $employee=$this->employee($request);
+        abort_unless(\App\Modules\Attendance\Models\AttendancePolicy::query()->where('tenant_id', tenant('id'))->value('attendance_correction_enabled'), 403, 'Attendance corrections are disabled by company policy.');
         $data=$request->validate(['attendance_record_id'=>'required|integer','requested_check_in'=>'nullable|date','requested_check_out'=>'nullable|date|after_or_equal:requested_check_in','reason'=>'required|string|max:2000']);
         $record=$this->record($employee,$data['attendance_record_id']);
         $correction=AttendanceCorrection::create([
