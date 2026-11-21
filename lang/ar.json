@@ -1097,5 +1097,15 @@
  "Answers come from your own workspace data": "الإجابات من بيانات مساحة عملك أنت",
  "Follows the same roles and permissions as Humexa": "يتبع نفس أدوار هيوميكسا وصلاحياته",
  "The sources and open questions below are recorded in English.": "المصادر والأسئلة المفتوحة أدناه مسجلة بالإنجليزية.",
- "setting up": "قيد الإعداد"
+ "setting up": "قيد الإعداد",
+ "An AI assistant for your HR data is planned.": "مساعد ذكاء اصطناعي لبيانات الموارد البشرية قيد التخطيط.",
+ "Planned: not available yet. No Claude or ChatGPT connection exists today": "مخطط له: غير متاح بعد. لا يوجد ربط مع Claude أو ChatGPT حاليًا",
+ "Planned: answers would come only from your own workspace data": "مخطط له: ستأتي الإجابات من بيانات مساحة عملك فقط",
+ "Planned: would follow the same roles and permissions as Humexa": "مخطط له: سيتبع نفس أدوار هيوميكسا وصلاحياته",
+ "Illustration of the planned feature, not a working product": "توضيح للميزة المخطط لها، وليس منتجًا يعمل",
+ "Planned, not available yet: ask questions about your HR data in plain language.": "مخطط له وغير متاح بعد: اسأل عن بيانات الموارد البشرية بلغة بسيطة.",
+ "This is a planned feature and is not available today. The conversation shown is only an illustration of what it could look like.": "هذه ميزة مخطط لها وغير متاحة اليوم. المحادثة المعروضة مجرد توضيح لشكلها المحتمل.",
+ "Track working hours, late arrivals, and overtime with company attendance policies.": "تابع ساعات العمل والتأخير والعمل الإضافي بسياسات الحضور في شركتك.",
+ "Set up departments and leave types, then invite your team.": "جهّز الأقسام وأنواع الإجازات ثم ادعُ فريقك.",
+ "Step {n}": "الخطوة {n}"
 }

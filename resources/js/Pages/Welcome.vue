@@ -29,7 +29,7 @@ const features = [
     {
         icon: 'clock',
         title: 'Attendance',
-        description: 'Track working hours, shifts, late arrivals, and overtime with policies that match how you work.',
+        description: 'Track working hours, late arrivals, and overtime with company attendance policies.',
     },
     {
         icon: 'calendar',
@@ -49,7 +49,7 @@ const features = [
     {
         icon: 'sparkle',
         title: 'AI assistant',
-        description: 'Ask questions about your HR data in plain language and get answers without building a report.',
+        description: 'Planned, not available yet: ask questions about your HR data in plain language.',
     },
 ];
 
@@ -60,7 +60,7 @@ const steps = [
     },
     {
         title: 'Add your people and policies',
-        description: 'Set up departments, shifts, and leave types, then invite your team.',
+        description: 'Set up departments and leave types, then invite your team.',
     },
     {
         title: 'Run HR from one place',
@@ -110,9 +110,9 @@ const assistants = [
 ];
 const activeAssistant = ref('claude');
 const aiPoints = [
-    'Works with Claude and ChatGPT',
-    'Answers come from your own workspace data',
-    'Follows the same roles and permissions as Humexa',
+    'Planned: not available yet. No Claude or ChatGPT connection exists today',
+    'Planned: answers would come only from your own workspace data',
+    'Planned: would follow the same roles and permissions as Humexa',
 ];
 const aiPanel = ref(null);
 const aiVisible = ref(false);
@@ -358,8 +358,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
             <section id="ai" class="mx-auto max-w-6xl px-6 py-24 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
                     <div v-reveal>
-                        <h2 class="max-w-md text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('Ask Humexa from Claude or ChatGPT.') }}</h2>
-                        <p class="mt-5 max-w-md leading-7 text-[#4A5875]">{{ $t('Connect your workspace to the AI assistant your team already uses. Ask in plain language and get answers from your own HR data, without opening a report.') }}</p>
+                        <h2 class="max-w-md text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('An AI assistant for your HR data is planned.') }}</h2>
+                        <p class="mt-5 max-w-md leading-7 text-[#4A5875]">{{ $t('This is a planned feature and is not available today. The conversation shown is only an illustration of what it could look like.') }}</p>
                         <ul class="mt-8 space-y-4">
                             <li v-for="point in aiPoints" :key="point" class="flex items-start gap-3">
                                 <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF0FD] text-[#1F4FD8]">
@@ -390,7 +390,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                         {{ a.name }}
                                     </button>
                                 </div>
-                                <span class="text-xs text-[#6B7894]">{{ $t('Sample conversation') }}</span>
+                                <span class="text-xs text-[#6B7894]">{{ $t('Illustration of the planned feature, not a working product') }}</span>
                             </div>
 
                             <div class="min-h-[340px] p-5 sm:p-6" aria-live="polite">
@@ -428,7 +428,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
                 <ol class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
                     <li v-for="(s, i) in steps" :key="s.title" v-reveal="i * 120"><div class="group border-t-2 border-[#0F1B33] pt-6 transition-colors duration-300 hover:border-[#1F4FD8]">
-                        <span class="text-sm font-bold text-[#1F4FD8]">Step {{ i + 1 }}</span>
+                        <span class="text-sm font-bold text-[#1F4FD8]">{{ $t('Step {n}', { n: i + 1 }) }}</span>
                         <h3 class="mt-3 text-lg font-bold">{{ $t(s.title) }}</h3>
                         <p class="mt-2 text-[15px] leading-7 text-[#4A5875]">{{ $t(s.description) }}</p>
                     </div></li>
