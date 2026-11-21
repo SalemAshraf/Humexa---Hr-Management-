@@ -32,9 +32,11 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $middleware->alias([
             'tenant.active' => \App\Http\Middleware\EnsureTenantActive::class,
-        'tenant.user' => \App\Http\Middleware\EnsureTenantUser::class,
-        'platform.user' => \App\Http\Middleware\EnsurePlatformUser::class,
-    ]);
+            'tenant.user' => \App\Http\Middleware\EnsureTenantUser::class,
+            'platform.user' => \App\Http\Middleware\EnsurePlatformUser::class,
+            'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+            'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
