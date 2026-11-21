@@ -28,6 +28,13 @@ final class TenantRoleCatalog
         'leave.manage',
         'leave.approve',
         'reports.view',
+        'recruitment.view',
+        'recruitment.manage',
+        'performance.view',
+        'performance.manage',
+        'payroll.view',
+        'payroll.manage',
+        'settings.manage',
         'roles.manage',
     ];
 
@@ -45,6 +52,7 @@ final class TenantRoleCatalog
                 'leave.view',
                 'leave.approve',
                 'reports.view',
+                'performance.view',
             ],
             self::EMPLOYEE => [],
         ];

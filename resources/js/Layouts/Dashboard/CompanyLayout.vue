@@ -29,7 +29,7 @@ const allNavigationItems = [
     { label: 'Attendance', permission: 'attendance.view', href: '/attendance', shortcut: 'AT' },
     { label: 'Leaves', permission: 'leave.view', href: '/leave', shortcut: 'LE' },
     { label: 'Payroll', shortcut: 'PA', disabled: true, badge: 'Soon' },
-    { label: 'Recruitment', shortcut: 'RE', disabled: true, badge: 'Soon' },
+    { label: 'Recruitment', permission: 'recruitment.view', href: '/recruitment', shortcut: 'RE' },
     { label: 'Performance', shortcut: 'PE', disabled: true, badge: 'Soon' },
     { label: 'Reports', shortcut: 'RP', disabled: true, badge: 'Soon' },
     { label: 'Notifications', shortcut: 'NO', disabled: true, badge: 'Soon' },

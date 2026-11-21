@@ -21,6 +21,7 @@ use App\Modules\Employees\Http\Controllers\EmployeeProfilePhotoController;
 use App\Modules\Leave\Http\Controllers\LeaveController;
 use App\Modules\Users\Http\Controllers\TenantTeamController;
 use App\Modules\Users\Http\Controllers\TenantPasswordController;
+use App\Modules\Recruitment\Http\Controllers\RecruitmentController;
 use App\Http\Middleware\EnsureTenantActive;
 
 Route::domain('{tenant}.'.config('humexa.tenant_domain'))
@@ -50,6 +51,18 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::get('/', 'index')->name('index');
                 Route::post('/correction/{correction}/review', 'reviewCorrection')->whereNumber('correction')->name('correction');
                 Route::post('/overtime/{overtime}/review', 'reviewOvertime')->whereNumber('overtime')->name('overtime');
+            });
+
+            Route::prefix('/recruitment')->middleware('tenant.can:recruitment.view,recruitment.manage')->name('recruitment.')->controller(RecruitmentController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/jobs', 'storeJob')->name('jobs.store');
+                Route::put('/jobs/{job}', 'updateJob')->whereNumber('job')->name('jobs.update');
+                Route::delete('/jobs/{job}', 'destroyJob')->whereNumber('job')->name('jobs.destroy');
+                Route::post('/candidates', 'storeCandidate')->name('candidates.store');
+                Route::put('/candidates/{candidate}', 'updateCandidate')->whereNumber('candidate')->name('candidates.update');
+                Route::post('/candidates/{candidate}/move', 'moveCandidate')->whereNumber('candidate')->name('candidates.move');
+                Route::post('/candidates/{candidate}/hire', 'hire')->whereNumber('candidate')->name('candidates.hire');
+                Route::delete('/candidates/{candidate}', 'destroyCandidate')->whereNumber('candidate')->name('candidates.destroy');
             });
 
             Route::prefix('/team')->middleware('tenant.can:roles.manage')->name('team.')->controller(TenantTeamController::class)->group(function () {
