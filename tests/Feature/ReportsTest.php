@@ -50,8 +50,28 @@ test('hr sees the whole company, a manager only direct reports, an employee noth
     expect(collect($page($r)['sections']['Headcount'])->sum('value'))->toBe(1)->and($page($r)['scope'])->toBe('direct_reports')
         ->and($page($r)['sections'])->not->toHaveKeys(['Recruitment pipeline', 'Payroll estimates, net total (EGP, experimental)']);
 
+    // department rows add up to everyone who is not resigned, terminated or draft
+    $r = ($this->as)($hr)->get("{$this->base}/reports")->assertOk();
+    expect(collect($page($r)['sections']['Current headcount by department'])->sum('value'))->toBe(3);
+    repEmp($this, 'Gone')->forceFill(['employment_status' => 'resigned'])->save();
+    $r = ($this->as)($hr)->get("{$this->base}/reports")->assertOk();
+    expect(collect($page($r)['sections']['Headcount'])->sum('value'))->toBe(4)
+        ->and(collect($page($r)['sections']['Current headcount by department'])->sum('value'))->toBe(3);
+
     ($this->as)($emp)->get("{$this->base}/reports")->assertForbidden();
     ($this->as)($emp)->get("{$this->base}/reports/export")->assertForbidden();
     ($this->as)($hr)->get("{$this->base}/reports/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
     ($this->as)($hr)->get("{$this->base}/reports?from=2020-01-01&to=2026-01-01")->assertStatus(422);
+});
+
+test('approved leave only counts working days that fall inside the period', function () {
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr-rep2@tenant-test.example');
+    $e = repEmp($this, 'Leaver');
+    $type = \App\Modules\Leave\Models\LeaveType::query()->forceCreate(['tenant_id' => $this->tid, 'name' => 'Annual', 'annual_days' => 21, 'is_paid' => true]);
+    // 2026-03-01 (Sun) to 2026-03-12 (Thu): 10 working days with a Fri/Sat weekend. Period covers 2026-03-08 to 2026-03-12 = 5.
+    \App\Modules\Leave\Models\LeaveRequest::query()->forceCreate(['tenant_id' => $this->tid, 'employee_id' => $e->id, 'leave_type_id' => $type->id, 'start_date' => '2026-03-01', 'end_date' => '2026-03-12', 'days' => 10, 'status' => 'approved']);
+
+    $r = ($this->as)($hr)->get("{$this->base}/reports?from=2026-03-08&to=2026-03-31")->assertOk();
+    $rows = collect($r->original->getData()['page']['props']['sections']['Approved leave, working days inside the period']);
+    expect((float) $rows->firstWhere('label', 'Annual')['value'])->toBe(5.0);
 });

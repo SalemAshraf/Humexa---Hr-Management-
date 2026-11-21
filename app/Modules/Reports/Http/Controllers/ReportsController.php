@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Modules\Attendance\Models\AttendanceRecord;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Leave\Models\LeaveRequest;
+use App\Modules\Leave\Services\LeaveService;
 use App\Modules\Organization\Models\Department;
 use App\Modules\Payroll\Models\PayrollRun;
 use App\Modules\Payroll\Models\Payslip;
@@ -33,7 +34,7 @@ class ReportsController extends Controller
     public function export(Request $request): StreamedResponse
     {
         $data = $this->build($request);
-        $rows = [['section', 'label', 'value']];
+        $rows = [['section', 'label', 'value'], ['Report', 'Period from', $data['from']], ['Report', 'Period to', $data['to']], ['Report', 'Scope', $data['scope'] === 'company' ? 'Whole company' : 'Direct reports only']];
 
         foreach ($data['sections'] as $name => $items) {
             foreach ($items as $item) {
@@ -72,12 +73,15 @@ class ReportsController extends Controller
 
         $leave = $inScope(LeaveRequest::query()->where('tenant_id', $tenantId)->where('status', LeaveRequest::APPROVED)
             ->whereDate('start_date', '<=', $to->toDateString())->whereDate('end_date', '>=', $from->toDateString()));
-        $leaveByType = (clone $leave)->with('type:id,name')->get()->groupBy(fn ($r) => $r->type?->name ?? 'Unknown')->map(fn ($g) => round((float) $g->sum('days'), 1));
+        $weekend = app(LeaveService::class)->weekendDays($tenantId);
+        $leaveByType = (clone $leave)->with('type:id,name')->get()->groupBy(fn ($r) => $r->type?->name ?? 'Unknown')->map(fn ($g) => round((float) $g->sum(
+            fn ($r) => app(LeaveService::class)->workingDays($r->start_date->copy()->max($from), $r->end_date->copy()->min($to), $weekend)
+        ), 1));
         $pendingLeave = $inScope(LeaveRequest::query()->where('tenant_id', $tenantId)->where('status', LeaveRequest::PENDING))->count();
 
         $sections = [
             'Headcount' => collect($byStatus)->map(fn ($n, $k) => ['label' => ucfirst(str_replace('_', ' ', (string) $k)), 'value' => (int) $n])->values()->all(),
-            'Active headcount by department' => collect($byDept)->map(fn ($n, $k) => ['label' => $deptNames[$k] ?? 'No department', 'value' => (int) $n])->values()->all(),
+            'Current headcount by department' => collect($byDept)->map(fn ($n, $k) => ['label' => $deptNames[$k] ?? 'No department', 'value' => (int) $n])->values()->all(),
             'Attendance' => [
                 ['label' => 'Days recorded', 'value' => (int) $attRow->days],
                 ['label' => 'Days with late arrival', 'value' => (int) $attRow->late_days],
@@ -85,10 +89,10 @@ class ReportsController extends Controller
                 ['label' => 'Total overtime hours', 'value' => round($attRow->ot / 60, 1)],
                 ['label' => 'Average hours per recorded day', 'value' => $attRow->days ? round($attRow->worked / 60 / $attRow->days, 1) : 0],
             ],
-            'Approved leave days' => $leaveByType->map(fn ($d, $k) => ['label' => $k, 'value' => $d])->values()->all()
+            'Approved leave, working days inside the period' => $leaveByType->map(fn ($d, $k) => ['label' => $k, 'value' => $d])->values()->all()
                 + [],
         ];
-        $sections['Approved leave days'][] = ['label' => 'Requests waiting for a decision', 'value' => $pendingLeave];
+        $sections['Approved leave, working days inside the period'][] = ['label' => 'Requests waiting for a decision', 'value' => $pendingLeave];
 
         if ($user->can('recruitment.view')) {
             $stages = Candidate::query()->where('tenant_id', $tenantId)->selectRaw('stage as k, count(*) as n')->groupBy('stage')->pluck('n', 'k');
@@ -108,6 +112,8 @@ class ReportsController extends Controller
             'from' => $from->toDateString(), 'to' => $to->toDateString(),
             'scope' => $scope === null ? 'company' : 'direct_reports',
             'sections' => $sections,
+            'no_bars' => ['Attendance', 'Approved leave, working days inside the period'],
+            'notes' => ['Current headcount by department' => 'Everyone who is not resigned, terminated or still a draft. Active, on leave, probation and suspended are all counted.'],
         ];
     }
 
