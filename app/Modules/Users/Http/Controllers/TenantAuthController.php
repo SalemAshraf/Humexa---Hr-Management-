@@ -17,7 +17,7 @@ class TenantAuthController extends Controller
     public function create(): Response|RedirectResponse
     {
         if (Auth::guard('tenant')->check()) {
-            return redirect()->route('tenant.dashboard');
+            return redirect('/dashboard');
         }
 
         return Inertia::render('Auth/Login', [
