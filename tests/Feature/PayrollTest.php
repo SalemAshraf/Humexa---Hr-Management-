@@ -1,0 +1,103 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Models\User;
+use App\Modules\Employees\Models\Employee;
+use App\Modules\Payroll\Models\PayrollRuleSet;
+use App\Modules\Payroll\Models\PayrollRun;
+use App\Modules\Payroll\Models\Payslip;
+use App\Modules\Tenants\Actions\RegisterCompanyAction;
+use App\Modules\Users\Support\TenantRoleCatalog;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->withoutVite();
+    config(['humexa.tenant_domain' => 'humexa.test', 'humexa.reserved_subdomains' => [], 'tenancy.central_domains' => ['humexa.test']]);
+
+    $this->reg = app(RegisterCompanyAction::class)->execute(companyName: 'Pay Co', adminName: 'Pay Owner', email: 'pay-owner@tenant-test.example', password: 'StrongPassword123!');
+    $this->tid = (string) $this->reg['tenant']->id;
+    $this->base = 'http://'.$this->reg['domain'];
+    $this->mk = fn (string $role, string $email) => $this->reg['tenant']->run(function () use ($role, $email) {
+        $u = new User(['name' => $email, 'email' => $email, 'password' => 'StrongPassword123!']);
+        $u->forceFill(['tenant_id' => $this->tid, 'account_type' => User::ACCOUNT_TYPE_TENANT])->save();
+        $u->assignRole($role);
+
+        return $u;
+    });
+    $this->as = fn (User $u) => $this->actingAs($u, 'tenant')->withSession(['tenant_session_version' => 1]);
+    $this->hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr-pay@tenant-test.example');
+    $this->worker = Employee::query()->forceCreate([
+        'tenant_id' => $this->tid, 'employee_number' => 'PY-1', 'first_name' => 'Salary', 'last_name' => 'Earner',
+        'employment_status' => 'active', 'hire_date' => '2024-01-01',
+    ]);
+});
+
+test('a run needs confirmed rules, then calculates payslips and locks on approval', function () {
+    $hr = $this->hr;
+    ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
+    $rules = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
+    expect($rules->isConfirmed())->toBeFalse();
+
+    ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertSessionHasErrors('run');
+
+    ($this->as)($hr)->post("{$this->base}/payroll/employees/{$this->worker->id}/compensation", ['effective_from' => '2026-01-01', 'basic_salary' => 30000, 'allowances' => 0, 'insured' => true])->assertRedirect();
+    ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm")->assertRedirect();
+    ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertRedirect();
+
+    $run = PayrollRun::where('tenant_id', $this->tid)->firstOrFail();
+    $slip = Payslip::where('payroll_run_id', $run->id)->firstOrFail();
+    expect((float) $slip->net_pay)->toBe(23472.27)->and((float) $slip->income_tax)->toBe(4690.73);
+
+    ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertSessionHasErrors('run');
+
+    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/adjustments", ['employee_id' => $this->worker->id, 'kind' => 'deduction', 'label' => 'Advance', 'amount' => 1000, 'taxable' => false])->assertRedirect();
+    expect((float) Payslip::where('payroll_run_id', $run->id)->first()->net_pay)->toBe(22472.27);
+
+    ($this->as)($hr)->get("{$this->base}/payroll/runs/{$run->id}/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
+    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertRedirect();
+    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/recalculate")->assertStatus(422);
+    ($this->as)($hr)->delete("{$this->base}/payroll/runs/{$run->id}")->assertStatus(422);
+    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/adjustments", ['employee_id' => $this->worker->id, 'kind' => 'earning', 'label' => 'x', 'amount' => 5, 'taxable' => true])->assertStatus(422);
+});
+
+test('editing confirmed rules clears the confirmation and bad tables are refused', function () {
+    $hr = $this->hr;
+    ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
+    ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm");
+    $r = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
+    expect($r->isConfirmed())->toBeTrue();
+
+    $payload = fn (array $o = []) => array_merge([
+        'name' => 'Mine', 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
+        'insurable_min' => 2700, 'insurable_max' => 16700, 'personal_exemption_annual' => 20000, 'rounding_step' => 10,
+        'after_tax_levy_rate' => 0, 'month_days_basis' => 30,
+        'tax_tables_json' => json_encode([['up_to' => null, 'bands' => [[50000, 0], [null, 0.2]]]]),
+    ], $o);
+
+    ($this->as)($hr)->put("{$this->base}/payroll/rules", $payload(['tax_tables_json' => json_encode([['up_to' => 5, 'bands' => [[null, 0.1]]]])]))->assertStatus(422);
+    expect($r->fresh()->isConfirmed())->toBeTrue();
+
+    ($this->as)($hr)->put("{$this->base}/payroll/rules", $payload())->assertRedirect();
+    expect($r->fresh()->isConfirmed())->toBeFalse()->and($r->fresh()->name)->toBe('Mine');
+});
+
+test('roles without payroll access are refused, and other tenants cannot be reached', function () {
+    $emp = ($this->mk)(TenantRoleCatalog::EMPLOYEE, 'emp-pay@tenant-test.example');
+    $mgr = ($this->mk)(TenantRoleCatalog::MANAGER, 'mgr-pay@tenant-test.example');
+
+    foreach ([$emp, $mgr] as $u) {
+        ($this->as)($u)->get("{$this->base}/payroll")->assertForbidden();
+        ($this->as)($u)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 1])->assertForbidden();
+    }
+
+    $other = app(RegisterCompanyAction::class)->execute(companyName: 'Other Co', adminName: 'O', email: 'other-pay@tenant-test.example', password: 'StrongPassword123!');
+    $foreign = PayrollRun::query()->forceCreate(['tenant_id' => (string) $other['tenant']->id, 'year' => 2026, 'month' => 1,
+        'rule_set_id' => PayrollRuleSet::query()->forceCreate(['tenant_id' => (string) $other['tenant']->id] + \App\Modules\Payroll\Services\EgyptRuleDefaults::attributes())->id]);
+
+    ($this->as)($this->hr)->get("{$this->base}/payroll/runs/{$foreign->id}")->assertNotFound();
+    ($this->as)($this->hr)->post("{$this->base}/payroll/runs/{$foreign->id}/approve")->assertNotFound();
+    expect($foreign->fresh()->status)->toBe('draft');
+});

@@ -28,7 +28,7 @@ const allNavigationItems = [
     { label: 'Organization', permission: 'employees.view', href: '/organization', shortcut: 'OR' },
     { label: 'Attendance', permission: 'attendance.view', href: '/attendance', shortcut: 'AT' },
     { label: 'Leaves', permission: 'leave.view', href: '/leave', shortcut: 'LE' },
-    { label: 'Payroll', shortcut: 'PA', disabled: true, badge: 'Soon' },
+    { label: 'Payroll', permission: 'payroll.view', href: '/payroll', shortcut: 'PA' },
     { label: 'Recruitment', permission: 'recruitment.view', href: '/recruitment', shortcut: 'RE' },
     { label: 'Performance', permission: 'performance.view', href: '/performance', shortcut: 'PE' },
     { label: 'Reports', shortcut: 'RP', disabled: true, badge: 'Soon' },

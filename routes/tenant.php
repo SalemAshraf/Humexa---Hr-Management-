@@ -23,6 +23,7 @@ use App\Modules\Users\Http\Controllers\TenantTeamController;
 use App\Modules\Users\Http\Controllers\TenantPasswordController;
 use App\Modules\Recruitment\Http\Controllers\RecruitmentController;
 use App\Modules\Performance\Http\Controllers\PerformanceController;
+use App\Modules\Payroll\Http\Controllers\PayrollController;
 use App\Modules\Notifications\Http\Controllers\NotificationsController;
 use App\Modules\Search\Http\Controllers\SearchController;
 use App\Http\Middleware\EnsureTenantActive;
@@ -78,6 +79,23 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::post('/reviews/{review}/finalize', 'finalize')->whereNumber('review')->name('reviews.finalize');
                 Route::post('/reviews/{review}/reopen', 'reopen')->whereNumber('review')->name('reviews.reopen');
                 Route::delete('/reviews/{review}', 'destroyReview')->whereNumber('review')->name('reviews.destroy');
+            });
+
+            Route::prefix('/payroll')->middleware('tenant.can:payroll.view')->name('payroll.')->controller(PayrollController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/runs/{run}', 'showRun')->whereNumber('run')->name('runs.show');
+                Route::get('/runs/{run}/export', 'export')->whereNumber('run')->name('runs.export');
+                Route::middleware('tenant.can:payroll.manage')->group(function () {
+                    Route::put('/rules', 'updateRules')->name('rules.update');
+                    Route::post('/rules/confirm', 'confirmRules')->name('rules.confirm');
+                    Route::post('/employees/{employee}/compensation', 'storeCompensation')->whereNumber('employee')->name('compensation.store');
+                    Route::post('/runs', 'storeRun')->name('runs.store');
+                    Route::post('/runs/{run}/recalculate', 'recalculate')->whereNumber('run')->name('runs.recalculate');
+                    Route::post('/runs/{run}/approve', 'approve')->whereNumber('run')->name('runs.approve');
+                    Route::delete('/runs/{run}', 'destroyRun')->whereNumber('run')->name('runs.destroy');
+                    Route::post('/runs/{run}/adjustments', 'storeAdjustment')->whereNumber('run')->name('adjustments.store');
+                    Route::delete('/runs/{run}/adjustments/{adjustment}', 'destroyAdjustment')->whereNumber('run')->whereNumber('adjustment')->name('adjustments.destroy');
+                });
             });
 
             Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
