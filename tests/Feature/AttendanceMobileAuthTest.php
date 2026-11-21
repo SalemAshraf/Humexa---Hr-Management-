@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Employees\Actions\CreateEmployeeAction;
 use App\Modules\Tenants\Actions\RegisterCompanyAction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\PersonalAccessToken;
 
 uses(RefreshDatabase::class);
@@ -203,6 +204,10 @@ test('attendance mobile token accesses protected API and logout revokes only the
     $this->assertDatabaseMissing('personal_access_tokens', [
         'id' => $token->accessToken->getKey(),
     ]);
+
+    // Each real HTTP request gets a fresh authentication guard.
+    // Reset the cached guard between simulated requests in this test process.
+    Auth::forgetGuards();
 
     $this->withToken($plainTextToken)
         ->getJson($policyUrl)
