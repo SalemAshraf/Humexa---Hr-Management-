@@ -33,7 +33,7 @@ Route::domain('{tenant}.humexa.test')
         Route::post('/login', [TenantAuthController::class, 'store'])->name('tenant.login.store');
 
         Route::middleware(['auth:tenant', 'tenant.user'])->group(function () {
-            Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
+            Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');\n            Route::get('/attendance', TenantAttendanceDashboardController::class)->name('tenant.attendance.index');
 
             Route::prefix('/employee-document-types')
                 ->name('employee-document-types.')
