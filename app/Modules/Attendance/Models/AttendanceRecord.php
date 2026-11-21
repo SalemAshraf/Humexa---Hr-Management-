@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Attendance\Models;
 
+use App\Modules\Employees\Models\Employee;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AttendanceRecord extends Model
@@ -27,6 +29,11 @@ class AttendanceRecord extends Model
             'early_leave_minutes' => 'integer',
             'overtime_minutes' => 'integer',
         ];
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     public function sessions(): HasMany
