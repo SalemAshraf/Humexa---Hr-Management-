@@ -31,7 +31,7 @@ const allNavigationItems = [
     { label: 'Payroll', permission: 'payroll.view', href: '/payroll', shortcut: 'PA' },
     { label: 'Recruitment', permission: 'recruitment.view', href: '/recruitment', shortcut: 'RE' },
     { label: 'Performance', permission: 'performance.view', href: '/performance', shortcut: 'PE' },
-    { label: 'Reports', shortcut: 'RP', disabled: true, badge: 'Soon' },
+    { label: 'Reports', permission: 'reports.view', href: '/reports', shortcut: 'RP' },
     { label: 'Notifications', href: '/notifications', shortcut: 'NO' },
     { label: 'Team & roles', permission: 'roles.manage', href: '/team', shortcut: 'TR' },
     { label: 'Settings', shortcut: 'SE', disabled: true, badge: 'Soon' },
