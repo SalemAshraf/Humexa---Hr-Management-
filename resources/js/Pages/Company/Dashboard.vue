@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
@@ -73,6 +73,7 @@ const modules = [
         name: 'Attendance',
         description: 'Check-in, shifts, working hours and overtime',
         shortcut: 'AT',
+        href: '/attendance',
     },
     {
         name: 'Leave Management',
@@ -221,10 +222,13 @@ const modules = [
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <article
+                <component
+                    :is="module.href ? Link : 'article'"
                     v-for="module in modules"
                     :key="module.name"
-                    class="flex min-h-36 items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 opacity-80 shadow-sm"
+                    :href="module.href"
+                    class="flex min-h-36 items-start gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                    :class="module.href ? 'transition hover:-translate-y-0.5 hover:shadow-md' : 'opacity-80'"
                 >
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600">
                         {{ module.shortcut }}
@@ -232,13 +236,16 @@ const modules = [
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <h3 class="text-sm font-semibold text-slate-800">{{ module.name }}</h3>
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                            <span v-if="!module.href" class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                                 Coming soon
+                            </span>
+                            <span v-else class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                                Available
                             </span>
                         </div>
                         <p class="mt-2 text-xs leading-5 text-slate-500">{{ module.description }}</p>
                     </div>
-                </article>
+                </component>
             </div>
         </section>
 
