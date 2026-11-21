@@ -27,22 +27,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Dashboard UI Preview
-|--------------------------------------------------------------------------
-| Temporary routes for local UI development only.
-| Remove before production deployment.
-*/
-
-Route::get('/preview/company', function () {
-    return Inertia::render('Company/Dashboard');
-})->name('preview.company');
-
-Route::get('/preview/platform', function () {
-    return Inertia::render('Platform/Dashboard');
-})->name('preview.platform');
-
 Route::prefix('platform')->name('platform.')->group(function () {
     Route::get('/login', [PlatformAuthController::class, 'create'])
         ->name('login');

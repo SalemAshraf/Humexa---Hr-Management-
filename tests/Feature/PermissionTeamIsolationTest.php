@@ -127,7 +127,7 @@ test('it prevents assigning a role from another tenant', function () {
     expect(fn () => $userB->assignRole($roleA))
         ->toThrow(RoleDoesNotExist::class);
 
-    expect($userB->roles()->exists())->toBeFalse();
+    expect($userB->roles()->pluck('name')->all())->not->toContain('HR Manager', 'Foreign HR Manager');
 });
 
 test('it preserves existing roles when syncing a role from another tenant', function () {
@@ -174,14 +174,14 @@ test('it prevents removing a role from another tenant', function () {
     expect(fn () => $userB->removeRole($foreignRole))
         ->toThrow(RoleDoesNotExist::class);
 
-    expect($userB->roles()->exists())->toBeFalse();
+    expect($userB->roles()->pluck('name')->all())->not->toContain('HR Manager', 'Foreign HR Manager');
 });
 
 test('it prevents granting permissions outside the user tenant context', function () {
     tenancy()->initialize($this->tenantB);
 
     $permission = Permission::create([
-        'name' => 'employees.view',
+        'name' => 'isolation.test.permission',
         'guard_name' => 'tenant',
     ]);
 
@@ -203,7 +203,7 @@ test('it preserves existing direct permissions when syncing outside tenant conte
     tenancy()->initialize($this->tenantB);
 
     $existingPermission = Permission::create([
-        'name' => 'employees.view',
+        'name' => 'isolation.test.permission',
         'guard_name' => 'tenant',
     ]);
 
@@ -225,7 +225,7 @@ test('it preserves existing direct permissions when syncing outside tenant conte
     tenancy()->end();
     tenancy()->initialize($this->tenantB);
 
-    expect($userB->fresh()->hasDirectPermission('employees.view', 'tenant'))
+    expect($userB->fresh()->hasDirectPermission('isolation.test.permission', 'tenant'))
         ->toBeTrue();
 });
 
@@ -233,7 +233,7 @@ test('it prevents revoking permissions outside the user tenant context', functio
     tenancy()->initialize($this->tenantB);
 
     $permission = Permission::create([
-        'name' => 'employees.view',
+        'name' => 'isolation.test.permission',
         'guard_name' => 'tenant',
     ]);
 
@@ -250,6 +250,6 @@ test('it prevents revoking permissions outside the user tenant context', functio
     tenancy()->end();
     tenancy()->initialize($this->tenantB);
 
-    expect($userB->fresh()->hasDirectPermission('employees.view', 'tenant'))
+    expect($userB->fresh()->hasDirectPermission('isolation.test.permission', 'tenant'))
         ->toBeTrue();
 });

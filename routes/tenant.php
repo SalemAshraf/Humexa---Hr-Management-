@@ -40,6 +40,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->name('tenant.attendance.records');
 
             Route::prefix('/employee-document-types')
+                ->middleware('tenant.can:employees.manage')
                 ->name('employee-document-types.')
                 ->controller(EmployeeDocumentTypeController::class)
                 ->group(function () {
@@ -49,7 +50,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                     Route::delete('/{type}', 'destroy')->whereNumber('type')->name('destroy');
                 });
 
-            Route::prefix('/organization')->name('organization.')->controller(OrganizationController::class)->group(function () {
+            Route::prefix('/organization')->middleware('tenant.can:employees.view,organization.manage')->name('organization.')->controller(OrganizationController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::post('/branches', 'storeBranch')->name('branches.store');
                 Route::put('/branches/{branch}', 'updateBranch')->whereNumber('branch')->name('branches.update');
@@ -62,7 +63,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::delete('/positions/{position}', 'destroyPosition')->whereNumber('position')->name('positions.destroy');
             });
 
-            Route::prefix('/employees')->name('employees.')->group(function () {
+            Route::prefix('/employees')->middleware('tenant.can:employees.view,employees.manage')->name('employees.')->group(function () {
                 Route::controller(EmployeeController::class)->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('/archived', 'archived')->name('archived');

@@ -7,6 +7,8 @@ namespace App\Modules\Tenants\Actions;
 use App\Models\Tenant;
 use App\Modules\Attendance\Models\AttendancePolicy;
 use App\Models\User;
+use App\Modules\Users\Actions\ProvisionTenantRolesAction;
+use App\Modules\Users\Support\TenantRoleCatalog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -61,6 +63,12 @@ class RegisterCompanyAction
             ]);
 
             $user->save();
+
+            app(ProvisionTenantRolesAction::class)->execute($tenant);
+
+            $tenant->run(function () use ($user): void {
+                $user->assignRole(TenantRoleCatalog::OWNER);
+            });
 
             return [
                 'tenant' => $tenant,
