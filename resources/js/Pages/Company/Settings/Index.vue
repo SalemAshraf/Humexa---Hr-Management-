@@ -29,7 +29,7 @@ const save = () => form.put('/settings', { preserveScroll: true });
             <label class="text-xs font-medium text-slate-500">Time zone
                 <select v-model="form.timezone" class="mt-1 w-full rounded-lg border-slate-300 text-sm"><option v-for="t in timezones" :key="t" :value="t">{{ t }}</option></select>
             </label>
-            <label class="text-xs font-medium text-slate-500">Currency code<input v-model="form.currency" maxlength="3" class="mt-1 w-full rounded-lg border-slate-300 text-sm uppercase" required /></label>
+            <label class="text-xs font-medium text-slate-500">Display currency code<input v-model="form.currency" maxlength="3" class="mt-1 w-full rounded-lg border-slate-300 text-sm uppercase" required /></label>
             <label class="text-xs font-medium text-slate-500">Work day starts<input v-model="form.work_start" type="time" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
             <label class="text-xs font-medium text-slate-500">Work day ends<input v-model="form.work_end" type="time" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
             <label class="text-xs font-medium text-slate-500">HR contact email<input v-model="form.contact_email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
@@ -43,7 +43,7 @@ const save = () => form.put('/settings', { preserveScroll: true });
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 class="text-base font-bold text-slate-900">Weekend and leave rules</h2>
             <p class="mt-1 text-sm text-slate-600">Weekend: {{ weekend_days.map((d) => days[d]).join(' and ') }}. Change it in <Link href="/leave" class="font-semibold text-cyan-700">Leaves</Link>. Payroll rules are in <Link href="/payroll" class="font-semibold text-cyan-700">Payroll</Link>.</p>
-            <p class="mt-2 text-xs text-slate-500">Time zone and work hours are saved for the company. Attendance and payroll do not read them yet.</p>
+            <p class="mt-2 text-xs text-slate-500">The mobile attendance policy API sends the time zone and work hours to the app. Stored attendance times and past records are not changed, and the web attendance screens do not convert times yet. Payroll always uses EGP and does not read the currency here.</p>
         </section>
     </CompanyLayout>
 </template>

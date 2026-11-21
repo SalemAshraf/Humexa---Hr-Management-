@@ -37,7 +37,14 @@ class AttendanceController extends Controller
         $this->employee($request);
         $policy = AttendancePolicy::query()->where('tenant_id', tenant('id'))->firstOrFail();
 
-        return response()->json(['data' => [
+        $company = \App\Modules\Settings\Models\CompanySetting::query()->where('tenant_id', tenant('id'))->first();
+
+        return response()->json(['company' => [
+            'configured' => $company !== null,
+            'timezone' => $company?->timezone ?? 'Africa/Cairo',
+            'work_start' => substr((string) ($company?->work_start ?? '09:00'), 0, 5),
+            'work_end' => substr((string) ($company?->work_end ?? '17:00'), 0, 5),
+        ], 'data' => [
             'mobile_checkin_enabled' => $policy->mobile_checkin_enabled,
             'location_verification_enabled' => $policy->location_verification_enabled,
             'selfie_verification_enabled' => $policy->selfie_verification_enabled,

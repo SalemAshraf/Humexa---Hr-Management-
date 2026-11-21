@@ -213,3 +213,21 @@ test('attendance mobile token accesses protected API and logout revokes only the
         ->getJson($policyUrl)
         ->assertUnauthorized();
 });
+
+
+test('attendance policy API also tells the app the company time zone and work hours', function () {
+    $registration = createAttendanceMobileAuthTenant('Mobile Company Hours', 'mobile-hours@example.test');
+    linkAttendanceMobileAuthEmployee($registration);
+    $token = $registration['user']->createToken('Hours Device', ['attendance:mobile'])->plainTextToken;
+    $url = 'http://' . $registration['domain'] . '/api/v1/attendance/policy';
+
+    $this->withToken($token)->getJson($url)->assertOk()
+        ->assertJsonPath('company.configured', false)->assertJsonPath('company.work_start', '09:00');
+
+    \App\Modules\Settings\Models\CompanySetting::query()->create(['tenant_id' => (string) $registration['tenant']->id, 'timezone' => 'Asia/Riyadh', 'work_start' => '08:00:00', 'work_end' => '15:30:00']);
+    Auth::forgetGuards();
+
+    $this->withToken($token)->getJson($url)->assertOk()
+        ->assertJsonPath('company.configured', true)->assertJsonPath('company.timezone', 'Asia/Riyadh')
+        ->assertJsonPath('company.work_end', '15:30')->assertJsonStructure(['data' => ['mobile_checkin_enabled']]);
+});
