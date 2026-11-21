@@ -3,27 +3,18 @@
 declare(strict_types=1);
 
 use App\Models\Tenant;
-use App\Modules\Users\Actions\BackfillTenantOwnersAction;
+use App\Modules\Users\Actions\ProvisionTenantRolesAction;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Log;
 
 return new class extends Migration {
     public function up(): void
     {
-        $backfill = app(BackfillTenantOwnersAction::class);
+        $provision = app(ProvisionTenantRolesAction::class);
 
-        Tenant::query()->each(function (Tenant $tenant) use ($backfill): void {
-            $ambiguous = $backfill->execute($tenant);
-
-            foreach ($ambiguous as $tenantId) {
-                Log::warning('No registrant account identified; company has no Owner until one is assigned.', [
-                    'tenant_id' => $tenantId,
-                ]);
-            }
-        });
-
-        // Only the original registrant of each company is promoted. All other
-        // existing accounts keep no company-wide permission until assigned a role.
+        // Creates roles and permissions only. No account is promoted here:
+        // legacy companies stay fail-closed (no company-wide access) until an
+        // operator runs `php artisan app:assign-tenant-owner {tenant} {email} --confirm`.
+        Tenant::query()->each(fn (Tenant $tenant) => $provision->execute($tenant));
     }
 
     public function down(): void

@@ -120,52 +120,60 @@ test('an attendance mobile token from another company is rejected on this compan
         ->assertStatus(403);
 });
 
-test('owner backfill promotes only the original registrant', function () {
+test('legacy company without roles stays fail-closed until an operator names the owner', function () {
     $tenant = $this->registration['tenant'];
     $registrant = $this->registration['user'];
 
-    // Simulate the pre-roles state: no roles at all, plus later accounts.
+    // Pre-roles state: account exists, has no role.
     $tenant->run(fn () => $registrant->roles()->detach());
-    $late = $tenant->run(function () use ($tenant) {
-        $user = new User(['name' => 'Later account', 'email' => 'later@roles.test', 'password' => 'StrongPassword123!']);
-        $user->forceFill(['tenant_id' => $tenant->id, 'account_type' => User::ACCOUNT_TYPE_TENANT, 'created_at' => now()->addDay()])->save();
 
-        return $user;
-    });
+    getAs($this, $registrant, '/employees')->assertForbidden();
+    getAs($this, $registrant, '/attendance')->assertForbidden();
 
-    $other = app(RegisterCompanyAction::class)->execute(
-        companyName: 'Backfill Other Co',
-        adminName: 'Other Owner',
-        email: 'owner@backfillother.test',
-        password: 'StrongPassword123!',
-    );
-    $other['tenant']->run(fn () => $other['user']->roles()->detach());
+    $this->artisan('app:assign-tenant-owner', ['tenant' => $tenant->id, 'email' => 'owner@roles.test'])
+        ->assertFailed();
+    getAs($this, $registrant->fresh(), '/employees')->assertForbidden();
 
-    $backfill = app(\App\Modules\Users\Actions\BackfillTenantOwnersAction::class);
-    expect($backfill->execute($tenant))->toBe([]);
-    expect($backfill->execute($other['tenant']))->toBe([]);
+    $this->artisan('app:assign-tenant-owner', ['tenant' => $tenant->id, 'email' => 'nobody@roles.test', '--confirm' => true])
+        ->assertFailed();
 
-    $tenant->run(function () use ($registrant, $late) {
-        expect($registrant->fresh()->hasRole(TenantRoleCatalog::OWNER))->toBeTrue();
-        expect($late->fresh()->roles()->exists())->toBeFalse();
-        expect($late->fresh()->can('employees.view'))->toBeFalse();
-    });
+    $this->artisan('app:assign-tenant-owner', ['tenant' => $tenant->id, 'email' => 'owner@roles.test', '--confirm' => true])
+        ->assertSuccessful();
 
-    // Each company's owner belongs to that company only.
-    $other['tenant']->run(function () use ($other, $registrant) {
-        expect($other['user']->fresh()->hasRole(TenantRoleCatalog::OWNER))->toBeTrue();
-        expect(User::query()->where('tenant_id', $other['tenant']->id)->where('id', $registrant->id)->exists())->toBeFalse();
-    });
+    \Illuminate\Support\Facades\Auth::forgetGuards();
+    app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+    getAs($this, User::find($registrant->id), '/employees')->assertOk();
 });
 
-test('owner backfill leaves a company without owner when the registrant cannot be identified', function () {
+test('operator cannot assign owner to an account from another company', function () {
+    $other = app(RegisterCompanyAction::class)->execute(
+        companyName: 'Cross Owner Co',
+        adminName: 'Cross Owner',
+        email: 'cross@owner.test',
+        password: 'StrongPassword123!',
+    );
+
+    $this->artisan('app:assign-tenant-owner', [
+        'tenant' => $this->registration['tenant']->id,
+        'email' => 'cross@owner.test',
+        '--confirm' => true,
+    ])->assertFailed();
+
+    $this->registration['tenant']->run(
+        fn () => expect($other['user']->fresh()->hasRole(TenantRoleCatalog::OWNER))->toBeFalse()
+    );
+});
+
+test('the migration provisions roles without promoting any existing account', function () {
     $tenant = $this->registration['tenant'];
-
     $tenant->run(fn () => $this->registration['user']->roles()->detach());
-    User::query()->where('id', $this->registration['user']->id)->update(['created_at' => now()->addDays(3)]);
+    $late = tenantUserWithRole($this->registration, 'later2@roles.test', TenantRoleCatalog::EMPLOYEE);
+    $tenant->run(fn () => $late->roles()->detach());
 
-    $result = app(\App\Modules\Users\Actions\BackfillTenantOwnersAction::class)->execute($tenant);
+    (require database_path('migrations/2026_11_21_050000_provision_tenant_roles_for_existing_tenants.php'))->up();
 
-    expect($result)->toBe([(string) $tenant->id]);
-    $tenant->run(fn () => expect($this->registration['user']->fresh()->roles()->exists())->toBeFalse());
+    $tenant->run(function () use ($late) {
+        expect($this->registration['user']->fresh()->roles()->exists())->toBeFalse();
+        expect($late->fresh()->roles()->exists())->toBeFalse();
+    });
 });
