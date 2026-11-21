@@ -73,34 +73,36 @@ class AttendanceMobileAction
                 $now = now();
                 $date = $now->toDateString();
 
-                $dailyRecord = AttendanceRecord::query()
-                    ->where('tenant_id', $tenantId)
-                    ->where('employee_id', $employee->id)
-                    ->whereDate('attendance_date', $date)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (! $dailyRecord) {
-                    $dailyRecord = AttendanceRecord::create([
-                        'tenant_id' => $tenantId,
-                        'employee_id' => $employee->id,
-                        'attendance_date' => $date,
-                        'status' => 'recorded',
-                    ]);
-                }
-
+                // Lock/search the employee's open session across dates so overnight work
+                // cannot accidentally create overlapping sessions or lose its check-out.
                 $openSession = AttendanceSession::query()
                     ->where('tenant_id', $tenantId)
-                    ->where('attendance_record_id', $dailyRecord->id)
+                    ->where('employee_id', $employee->id)
                     ->whereNotNull('check_in_at')
                     ->whereNull('check_out_at')
                     ->lockForUpdate()
-                    ->latest('session_number')
+                    ->latest('id')
                     ->first();
 
                 if ($type === 'check_in') {
                     if ($openSession) {
                         throw ValidationException::withMessages(['attendance' => 'An attendance session is already open. Check out before starting another session.']);
+                    }
+
+                    $dailyRecord = AttendanceRecord::query()
+                        ->where('tenant_id', $tenantId)
+                        ->where('employee_id', $employee->id)
+                        ->whereDate('attendance_date', $date)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $dailyRecord) {
+                        $dailyRecord = AttendanceRecord::create([
+                            'tenant_id' => $tenantId,
+                            'employee_id' => $employee->id,
+                            'attendance_date' => $date,
+                            'status' => 'recorded',
+                        ]);
                     }
 
                     $nextSessionNumber = ((int) AttendanceSession::query()
@@ -121,6 +123,8 @@ class AttendanceMobileAction
                     if (! $openSession) {
                         throw ValidationException::withMessages(['attendance' => 'There is no open attendance session to check out from.']);
                     }
+
+                    $dailyRecord = $openSession->attendanceRecord()->firstOrFail();
 
                     if ($openSession->breaks()->whereNull('ended_at')->exists()) {
                         throw ValidationException::withMessages(['attendance' => 'End the active break before checking out.']);
