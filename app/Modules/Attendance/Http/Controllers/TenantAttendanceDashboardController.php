@@ -38,6 +38,7 @@ class TenantAttendanceDashboardController extends Controller
 
         return Inertia::render('Company/Attendance/Index', [
             'date' => $today,
+            'canViewRecords' => $user->can('attendance.view'),
             'stats' => [
                 'total_employees' => Employee::query()
                     ->where('tenant_id', $tenantId)
