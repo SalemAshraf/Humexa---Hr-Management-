@@ -92,10 +92,10 @@ return new class extends Migration {
             $table->unique(['id', 'tenant_id', 'employee_id'], 'attendance_sessions_id_tenant_employee_unique');
             $table->unique(['attendance_record_id', 'session_number'], 'attendance_session_number_unique');
             $table->index(['tenant_id', 'employee_id', 'check_in_at'], 'attendance_sessions_employee_checkin_index');
-            $table->foreign(['attendance_record_id', 'tenant_id', 'employee_id'])
+            $table->foreign(['attendance_record_id', 'tenant_id', 'employee_id'], 'attendance_sessions_daily_record_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
                 ->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])
+            $table->foreign(['employee_id', 'tenant_id'], 'attendance_child_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
@@ -117,13 +117,13 @@ return new class extends Migration {
             $table->json('metadata')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'employee_id', 'occurred_at']);
-            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'])
+            $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'attendance_session_child_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
                 ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['employee_id', 'tenant_id'])
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['location_id', 'tenant_id'])
+            $table->foreign(['location_id', 'tenant_id'], 'attendance_events_location_fk')
                 ->references(['id', 'tenant_id'])->on('attendance_locations')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
@@ -136,7 +136,7 @@ return new class extends Migration {
             $table->timestamp('ended_at')->nullable();
             $table->timestamps();
             $table->index(['tenant_id', 'attendance_session_id']);
-            $table->foreign(['attendance_session_id', 'tenant_id'])
+            $table->foreign(['attendance_session_id', 'tenant_id'], 'attendance_breaks_session_fk')
                 ->references(['id', 'tenant_id'])->on('attendance_sessions')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
@@ -162,10 +162,10 @@ return new class extends Migration {
             $table->foreign(['employee_id', 'tenant_id'])
                 ->references(['id', 'tenant_id'])->on('employees')
                 ->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['requested_by_user_id', 'tenant_id'])
+            $table->foreign(['requested_by_user_id', 'tenant_id'], 'attendance_corrections_requester_fk')
                 ->references(['id', 'tenant_id'])->on('users')
                 ->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['reviewed_by_user_id', 'tenant_id'])
+            $table->foreign(['reviewed_by_user_id', 'tenant_id'], 'attendance_reviewed_by_user_fk')
                 ->references(['id', 'tenant_id'])->on('users')
                 ->cascadeOnUpdate()->restrictOnDelete();
         });
