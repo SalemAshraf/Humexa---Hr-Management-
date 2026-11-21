@@ -22,6 +22,12 @@ const save = () => form.put('/settings', { preserveScroll: true });
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Settings') }}</h1>
         </section>
 
+        <section v-if="$page.props.planUsage" class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700" aria-label="Plan">
+            <p class="font-bold text-slate-900">{{ $t('Your plan') }}: {{ $page.props.planUsage.plan ? $page.props.planUsage.plan.name : $t('No plan assigned (no limits)') }}</p>
+            <p class="mt-1">{{ $t('Employees') }}: {{ $page.props.planUsage.employees }} / {{ $page.props.planUsage.plan?.max_employees ?? $t('No limit') }} · {{ $t('Sign-in accounts') }}: {{ $page.props.planUsage.accounts }} / {{ $page.props.planUsage.plan?.max_accounts ?? $t('No limit') }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ $t('Limits apply only to adding new employees and accounts. Nothing is hidden or removed. Billing is not set up yet.') }}</p>
+        </section>
+
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $page.props.flash.status }}</p>
 
         <form class="mb-6 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-2" @submit.prevent="save">

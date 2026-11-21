@@ -28,6 +28,7 @@ class PlatformAuthorizationSeeder extends Seeder
                 'tenants.view',
                 'tenants.suspend',
                 'tenants.activate',
+                'plans.manage',
                 'platform.activity-logs.view',
             ])->map(fn (string $name) => Permission::firstOrCreate([
                 'name' => $name,

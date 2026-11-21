@@ -23,6 +23,7 @@ class Tenant extends BaseTenant
         return [
             'id',
             'status',
+            'plan_id',
             'session_version',
             'suspended_at',
         ];

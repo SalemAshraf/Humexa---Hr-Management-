@@ -156,7 +156,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                 <div v-if="recentActivity.length" class="space-y-3">
                     <div v-for="entry in recentActivity" :key="entry.id" class="flex gap-3 border-b border-slate-800 pb-3 last:border-0">
                         <span class="mt-1 h-2 w-2 shrink-0 rounded-full" :class="entry.newStatus === 'suspended' ? 'bg-rose-400' : 'bg-emerald-300'"></span>
-                        <div class="min-w-0"><p class="text-sm text-slate-200">{{ entry.event === $t('company.suspended') ? $t('Workspace access suspended') : $t('Company registration reviewed / activated') }}</p><p class="mt-1 text-xs text-slate-500">{{ entry.companyName }} · {{ entry.actor }} · {{ entry.createdAt }}</p></div>
+                        <div class="min-w-0"><p class="text-sm text-slate-200">{{ entry.event === 'company.suspended' ? $t('Workspace access suspended') : $t('Company registration reviewed / activated') }}</p><p class="mt-1 text-xs text-slate-500">{{ entry.companyName }} · {{ entry.actor }} · {{ entry.createdAt }}</p></div>
                     </div>
                 </div>
                 <p v-else class="text-sm text-slate-500">{{ $t('No recorded platform actions yet.') }}</p>

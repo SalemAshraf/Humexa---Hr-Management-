@@ -14,6 +14,10 @@ class CreateEmployeeAction
     public function execute(array $data, string $tenantId, ?int $actorId): Employee
     {
         return DB::transaction(function () use ($data, $tenantId, $actorId) {
+            // Serialize with other additions, then check the plan limit for a NEW employee.
+            Tenant::query()->whereKey($tenantId)->lockForUpdate()->firstOrFail();
+            app(\App\Modules\Plans\Services\PlanLimits::class)->assertCanAddEmployee($tenantId);
+
             unset($data['status_change_reason']);
 
             $employeeNumber = trim((string) ($data['employee_number'] ?? ''));

@@ -83,6 +83,7 @@ function handleSidebarToggle() {
             />
 
             <main class="min-h-[calc(100vh-72px)] p-4 sm:p-6 lg:p-8">
+                <p v-if="$page.props.errors?.plan_limit" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900" role="alert">{{ $page.props.errors.plan_limit }}</p>
                 <slot />
             </main>
         </div>

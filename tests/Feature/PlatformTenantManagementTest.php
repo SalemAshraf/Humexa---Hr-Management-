@@ -177,3 +177,23 @@ test('super admin can view the platform activity log page', function () {
             ->where('activity.data.0.reason', 'Security review')
         );
 });
+
+
+test('only a platform admin with plans.manage can assign a plan, and assignment is audited', function () {
+    $plan = \App\Modules\Plans\Models\Plan::query()->create(['name' => 'Audit Plan', 'max_employees' => 5, 'is_active' => true]);
+
+    $this->actingAs($this->platformUser, 'platform')
+        ->patch(route('platform.companies.plan', $this->tenant), ['plan_id' => $plan->id])
+        ->assertForbidden();
+    expect($this->tenant->fresh()->plan_id)->toBeNull();
+
+    assignPlatformSuperAdmin($this->platformUser);
+    app(PermissionRegistrar::class)->setPermissionsTeamId(null);
+
+    $this->actingAs($this->platformUser, 'platform')
+        ->patch(route('platform.companies.plan', $this->tenant), ['plan_id' => $plan->id])
+        ->assertRedirect();
+
+    expect((int) $this->tenant->fresh()->plan_id)->toBe($plan->id);
+    expect(PlatformActivityLog::query()->where('tenant_id', $this->tenant->getKey())->where('event', 'company.plan_changed')->count())->toBe(1);
+});

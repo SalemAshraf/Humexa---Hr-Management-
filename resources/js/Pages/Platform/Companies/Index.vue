@@ -192,7 +192,7 @@ function changeStatus(company, action) {
                 >
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="text-sm font-semibold text-slate-200">
-                            {{ entry.event === $t('company.suspended') ? $t('Company suspended') : $t('Company activated') }}
+                            {{ entry.event === 'company.suspended' ? $t('Company suspended') : (entry.event === 'company.plan_changed' ? $t('Plan changed') : $t('Company activated')) }}
                         </p>
                         <span class="text-xs text-slate-500">{{ entry.createdAt }}</span>
                     </div>

@@ -27,7 +27,7 @@ const navigationItems = computed(() => [
     ...(page.props.canViewActivityLogs
         ? [{ label: 'Activity Logs', href: route('platform.activity-logs.index'), shortcut: 'AC' }]
         : []),
-    { label: 'Subscriptions', shortcut: 'SU', disabled: true, badge: 'Soon' },
+    { label: 'Plans', href: route('platform.plans.index'), shortcut: 'PL' },
     { label: 'Billing', shortcut: 'BI', disabled: true, badge: 'Soon' },
     { label: 'Platform Users', shortcut: 'US', disabled: true, badge: 'Soon' },
     { label: 'Notifications', shortcut: 'NO', disabled: true, badge: 'Soon' },

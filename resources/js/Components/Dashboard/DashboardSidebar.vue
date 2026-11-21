@@ -144,7 +144,7 @@ function isActive(item) {
                     <Link
                         v-if="!item.disabled"
                         :href="item.href"
-                        :title="collapsed ? item.label : undefined"
+                        :title="collapsed ? $t(item.label) : undefined"
                         :aria-current="isActive(item) ? 'page' : undefined"
                         class="group flex min-h-11 items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
                         :class="[
@@ -173,20 +173,20 @@ function isActive(item) {
                             {{ item.shortcut || item.label?.charAt(0) || '?' }}
                         </span>
                         <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
-                            {{ item.label }}
+                            {{ $t(item.label) }}
                         </span>
                         <span
                             v-if="item.badge && !collapsed"
                             class="rounded-full px-2 py-0.5 text-xs"
                             :class="isPlatform ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'"
                         >
-                            {{ item.badge }}
+                            {{ $t(item.badge) }}
                         </span>
                     </Link>
 
                     <div
                         v-else
-                        :title="collapsed ? item.label : undefined"
+                        :title="collapsed ? $t(item.label) : undefined"
                         aria-disabled="true"
                         class="flex min-h-11 cursor-not-allowed items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 opacity-60"
                         :class="collapsed ? 'justify-center' : 'gap-3'"
@@ -199,10 +199,10 @@ function isActive(item) {
                             {{ item.shortcut || item.label?.charAt(0) || '?' }}
                         </span>
                         <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
-                            {{ item.label }}
+                            {{ $t(item.label) }}
                         </span>
                         <span v-if="item.badge && !collapsed" class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-500">
-                            {{ item.badge }}
+                            {{ $t(item.badge) }}
                         </span>
                     </div>
                 </template>

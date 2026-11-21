@@ -59,6 +59,16 @@ class HandleInertiaRequests extends Middleware
                 return app(\App\Modules\Notifications\Services\AttentionService::class)->total($user, (string) tenant()->getTenantKey());
             },
 
+            'planUsage' => function () use ($request) {
+                $user = $request->user('tenant');
+
+                if (! $user || ! tenancy()->initialized) {
+                    return null;
+                }
+
+                return app(\App\Modules\Plans\Services\PlanLimits::class)->usage((string) tenant()->getTenantKey());
+            },
+
             'flash' => [
                 'status' => fn () => $this->translated($request->session()->get('status')),
                 'success' => fn () => $this->translated($request->session()->get('success')),

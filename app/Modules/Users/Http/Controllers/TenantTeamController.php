@@ -59,9 +59,13 @@ class TenantTeamController extends Controller
             'role' => ['required', Rule::in(array_keys(TenantRoleCatalog::roles()))],
         ]);
 
+        \Illuminate\Support\Facades\DB::transaction(function () use ($tenantId, $data) {
+        \App\Models\Tenant::query()->whereKey($tenantId)->lockForUpdate()->firstOrFail();
+        app(\App\Modules\Plans\Services\PlanLimits::class)->assertCanAddAccount($tenantId);
         $user = new User(['name' => trim($data['name']), 'email' => strtolower(trim($data['email'])), 'password' => $data['password']]);
         $user->forceFill(['tenant_id' => $tenantId, 'account_type' => User::ACCOUNT_TYPE_TENANT, 'must_change_password' => true])->save();
         $user->assignRole($data['role']);
+        });
 
         return back()->with('success', 'Account created. The person must choose their own password at first sign-in. Share the starting password privately.');
     }

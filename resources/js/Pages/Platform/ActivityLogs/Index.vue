@@ -51,11 +51,11 @@ defineProps({
                                     ? 'bg-red-400/10 text-red-300'
                                     : 'bg-emerald-400/10 text-emerald-300'"
                             >
-                                {{ entry.newStatus === $t('suspended') ? $t('SUS') : $t('ACT') }}
+                                {{ entry.event === 'company.plan_changed' ? $t('PLAN') : (entry.newStatus === 'suspended' ? $t('SUS') : $t('ACT')) }}
                             </span>
                             <div class="min-w-0">
                                 <h3 class="font-semibold text-slate-100">
-                                    {{ entry.event === $t('company.suspended') ? $t('Company suspended') : $t('Company activated') }}
+                                    {{ entry.event === 'company.suspended' ? $t('Company suspended') : (entry.event === 'company.plan_changed' ? $t('Plan changed') : $t('Company activated')) }}
                                 </h3>
                                 <p class="mt-1 text-sm text-slate-400">{{ entry.companyName }}</p>
                                 <p class="mt-1 break-all text-xs text-slate-600">Tenant ID: {{ entry.tenantId }}</p>

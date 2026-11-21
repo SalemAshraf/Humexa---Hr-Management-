@@ -320,7 +320,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                     leaveState === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600',
                                 ]"
                             >
-                                {{ leaveState === $t('approved') ? $t('Approved') : $t('Declined') }}
+                                {{ leaveState === 'approved' ? $t('Approved') : $t('Declined') }}
                             </span>
                             <button
                                 type="button"

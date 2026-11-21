@@ -52,6 +52,11 @@ Route::prefix('platform')->name('platform.')->group(function () {
         Route::get('/activity-logs', [PlatformTenantController::class, 'activityLogs'])
             ->name('activity-logs.index');
 
+        Route::get('/plans', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'index'])->name('plans.index');
+        Route::post('/plans', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'store'])->name('plans.store');
+        Route::patch('/plans/{plan}', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'update'])->name('plans.update');
+        Route::patch('/companies/{tenant}/plan', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'assign'])->name('companies.plan');
+
         Route::post('/logout', [PlatformAuthController::class, 'destroy'])
             ->name('logout');
     });
