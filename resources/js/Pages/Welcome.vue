@@ -157,6 +157,7 @@ const btnGhost = `inline-flex items-center justify-center rounded-xl border bord
                 </div>
                 <div class="flex items-center gap-2">
                     <LanguageSwitch dark />
+                    <Link :href="route('login')" :class="['hidden rounded-xl px-3 py-2.5 text-sm font-semibold text-white hover:bg-white/10 sm:inline-flex', ring]">{{ $t('Sign in') }}</Link>
                     <Link v-if="canRegister" :href="route('register')" :class="['inline-flex rounded-xl bg-[#2BD9A9] px-4 py-2.5 text-sm font-bold text-[#0A2038] hover:bg-[#4BE5BB]', ring]">{{ $t('Get started') }}</Link>
                 </div>
             </nav>
@@ -460,7 +461,7 @@ const btnGhost = `inline-flex items-center justify-center rounded-xl border bord
                     <p class="mx-auto mt-4 max-w-xl text-lg leading-8 text-slate-300">{{ $t('Create your workspace and start with your first employees today.') }}</p>
                     <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
                         <Link v-if="canRegister" :href="route('register')" :class="btnMint">{{ $t('Create your workspace') }}</Link>
-                        <a href="#modules" :class="btnGhost">{{ $t('See what\'s included') }}</a>
+                        <Link :href="route('login')" :class="btnGhost">{{ $t('Sign in') }}</Link>
                     </div>
                 </div>
             </section>
@@ -477,6 +478,7 @@ const btnGhost = `inline-flex items-center justify-center rounded-xl border bord
                     <a href="#security" class="hover:text-white">{{ $t('Security') }}</a>
                     <a href="#plans" class="hover:text-white">{{ $t('Plans') }}</a>
                     <a href="#faq" class="hover:text-white">{{ $t('FAQ') }}</a>
+                    <Link :href="route('login')" class="hover:text-white">{{ $t('Sign in') }}</Link>
                 </nav>
                 <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
             </div>
