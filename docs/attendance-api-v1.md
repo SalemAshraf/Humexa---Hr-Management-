@@ -8,11 +8,11 @@ Auth: Bearer token (Laravel Sanctum). Tenant context is resolved from tenant dom
 
 | Method | Endpoint | Notes |
 |---|---|---|
-| GET | /attendance/policy | Company attendance settings exposed to employee app |
+| POST | /auth/login | Issue a Sanctum bearer token (rate limited) |\n| POST | /auth/logout | Revoke current token |\n| GET | /attendance/policy | Company attendance settings exposed to employee app |
 | GET | /attendance/status | Current employee status for server-local date |
 | GET | /attendance/history?from=&to=&per_page= | Paginated employee history |
 | POST | /attendance/check-in | Record check-in (JSON or multipart) |
-| POST | /attendance/check-out | Record check-out (JSON or multipart) |
+| POST | /attendance/check-out | Record check-out (JSON or multipart) |\n| POST | /attendance/breaks/start | Start a break |\n| POST | /attendance/breaks/end | End an active break |\n| POST | /attendance/corrections | Submit a correction request |\n| GET | /attendance/corrections | List employee correction requests |\n| POST | /attendance/overtime-requests | Request overtime approval |\n| GET | /attendance/overtime-requests | List overtime requests |
 
 ## Event request
 
