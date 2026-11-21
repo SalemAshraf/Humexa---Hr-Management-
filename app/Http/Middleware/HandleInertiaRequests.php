@@ -37,6 +37,12 @@ class HandleInertiaRequests extends Middleware
                     ->mapWithKeys(fn ($permission) => [$permission => $user->can($permission)]);
             },
 
+            'is_owner' => function () use ($request) {
+                $user = $request->user('tenant');
+
+                return $user instanceof \App\Models\User && tenancy()->initialized && $user->hasRole(\App\Modules\Users\Support\TenantRoleCatalog::OWNER);
+            },
+
             'attention_count' => function () use ($request) {
                 $user = $request->user('tenant');
 

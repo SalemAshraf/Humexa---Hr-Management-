@@ -320,3 +320,16 @@ test('mobile token stops working when the account is deactivated or unlinked', f
     $this->app['auth']->forgetGuards();
     $this->withToken($plain2)->getJson($api)->assertStatus(401);
 });
+
+
+test('My space is closed to the Owner role (page redirects, writes refused) and open to other roles', function () {
+    $owner = $this->reg['user'] ?? null;
+    expect($owner)->not->toBeNull();
+
+    ($this->as)($owner)->get("{$this->base}/me")->assertRedirect('/dashboard');
+    ($this->as)($owner)->post("{$this->base}/me/leave", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-12-06', 'end_date' => '2026-12-06'])->assertForbidden();
+    ($this->as)($owner)->get("{$this->base}/dashboard")->assertOk()->assertInertia(fn ($p) => $p->where('is_owner', true));
+
+    [$emp] = ($this->account)('emp-owner-rule@tenant-test.example');
+    ($this->as)($emp)->get("{$this->base}/me")->assertOk()->assertInertia(fn ($p) => $p->where('is_owner', false));
+});

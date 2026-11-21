@@ -112,7 +112,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
             Route::get('/documents/expiry', [\App\Modules\Employees\Http\Controllers\DocumentExpiryController::class, 'index'])->middleware('tenant.can:employees.manage')->name('documents.expiry');
             Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
-            Route::prefix('/me')->name('me.')->controller(\App\Modules\SelfService\Http\Controllers\SelfServiceController::class)->group(function () {
+            Route::prefix('/me')->middleware(\App\Http\Middleware\ExcludeOwnerFromSelfService::class)->name('me.')->controller(\App\Modules\SelfService\Http\Controllers\SelfServiceController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::post('/leave', 'storeLeave')->middleware('throttle:20,1')->name('leave.store');
                 Route::post('/leave/{leaveRequest}/cancel', 'cancelLeave')->whereNumber('leaveRequest')->name('leave.cancel');

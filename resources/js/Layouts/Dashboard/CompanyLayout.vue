@@ -24,7 +24,7 @@ const allowed = (permission) => !permission || !!page.props.can?.[permission];
 
 const allNavigationItems = [
     { label: 'Overview', href: '/dashboard', shortcut: 'OV' },
-    { label: 'My space', href: '/me', shortcut: 'ME' },
+    { label: 'My space', href: '/me', shortcut: 'ME', hideForOwner: true },
     { label: 'Employees', permission: 'employees.view', href: '/employees', shortcut: 'EM' },
     { label: 'Organization', permission: 'employees.view', href: '/organization', shortcut: 'OR' },
     { label: 'Document expiry', permission: 'employees.manage', href: '/documents/expiry', shortcut: 'DX' },
@@ -39,7 +39,7 @@ const allNavigationItems = [
     { label: 'Settings', permission: 'settings.manage', href: '/settings', shortcut: 'SE' },
 ];
 
-const navigationItems = computed(() => allNavigationItems.filter((item) => allowed(item.permission)));
+const navigationItems = computed(() => allNavigationItems.filter((item) => allowed(item.permission) && !(item.hideForOwner && page.props.is_owner)));
 
 function handleSidebarToggle() {
     if (window.matchMedia('(min-width: 1024px)').matches) {
