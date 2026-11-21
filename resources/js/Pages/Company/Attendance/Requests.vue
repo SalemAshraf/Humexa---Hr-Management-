@@ -15,15 +15,15 @@ const decide = (kind, id, decision) =>
 </script>
 
 <template>
-    <Head title="Attendance requests" />
-    <CompanyLayout title="Attendance requests" subtitle="Corrections and overtime">
+    <Head :title="$t('Attendance requests')" />
+    <CompanyLayout :title="$t('Attendance requests')" :subtitle="$t('Corrections and overtime')">
         <section class="mb-6 flex items-end justify-between gap-4">
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">REVIEW</p>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Attendance requests</h1>
-                <p class="mt-2 text-sm text-slate-500">Approving a correction changes the recorded times. Approving overtime adds it to the day.</p>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{{ $t('REVIEW') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Attendance requests') }}</h1>
+                <p class="mt-2 text-sm text-slate-500">{{ $t('Approving a correction changes the recorded times. Approving overtime adds it to the day.') }}</p>
             </div>
-            <a href="/attendance" class="text-sm font-semibold text-cyan-700">Back to attendance</a>
+            <a href="/attendance" class="text-sm font-semibold text-cyan-700">{{ $t('Back to attendance') }}</a>
         </section>
 
         <template v-for="block in [{ key: 'correction', title: 'Time corrections', rows: corrections }, { key: 'overtime', title: 'Overtime', rows: overtime }]" :key="block.key">
@@ -33,22 +33,22 @@ const decide = (kind, id, decision) =>
                     <li v-for="r in block.rows" :key="r.id" class="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="min-w-0">
                             <p class="font-semibold text-slate-800">{{ r.employee }}
-                                <span class="ml-2 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="styles[r.status]">{{ r.status }}</span>
+                                <span class="ml-2 rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize" :class="styles[r.status]">{{ $t(r.status) }}</span>
                             </p>
                             <p v-if="block.key === 'correction'" class="mt-1 text-xs text-slate-500">
-                                In: {{ r.requested_check_in ?? 'unchanged' }} · Out: {{ r.requested_check_out ?? 'unchanged' }}
+                                {{ $t('In') }}: {{ r.requested_check_in ?? $t('unchanged') }} · {{ $t('Out') }}: {{ r.requested_check_out ?? $t('unchanged') }}
                             </p>
-                            <p v-else class="mt-1 text-xs text-slate-500">{{ r.minutes }} minutes requested</p>
+                            <p v-else class="mt-1 text-xs text-slate-500">{{ $t('{n} minutes requested', { n: r.minutes }) }}</p>
                             <p v-if="r.reason" class="mt-1 text-sm text-slate-600">{{ r.reason }}</p>
-                            <p v-if="r.review_note" class="mt-1 text-xs italic text-slate-400">Note: {{ r.review_note }}</p>
+                            <p v-if="r.review_note" class="mt-1 text-xs italic text-slate-400">{{ $t('Note') }}: {{ r.review_note }}</p>
                         </div>
                         <div v-if="r.status === 'pending'" class="flex items-center gap-2">
-                            <input v-model="note[block.key + r.id]" placeholder="Note" class="w-32 rounded-lg border-slate-300 py-1 text-xs" />
-                            <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="decide(block.key, r.id, 'approve')">Approve</button>
-                            <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="decide(block.key, r.id, 'reject')">Reject</button>
+                            <input v-model="note[block.key + r.id]" :placeholder="$t('Note')" class="w-32 rounded-lg border-slate-300 py-1 text-xs" />
+                            <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="decide(block.key, r.id, 'approve')">{{ $t('Approve') }}</button>
+                            <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="decide(block.key, r.id, 'reject')">{{ $t('Reject') }}</button>
                         </div>
                     </li>
-                    <li v-if="!block.rows.length" class="p-8 text-center text-sm text-slate-500">Nothing here yet.</li>
+                    <li v-if="!block.rows.length" class="p-8 text-center text-sm text-slate-500">{{ $t('Nothing here yet.') }}</li>
                 </ul>
             </section>
         </template>

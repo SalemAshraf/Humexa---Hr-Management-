@@ -1,4 +1,5 @@
 <script setup>
+import { t } from '@/lib/i18n';
 import { computed, reactive, ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
@@ -14,7 +15,7 @@ const props = defineProps({
     abilities: { type: Object, required: true },
 });
 
-const label = (v) => String(v).replace(/_/g, ' ');
+const label = (v) => t(String(v).replace(/_/g, ' '));
 const stageStyles = {
     applied: 'bg-slate-100 text-slate-600',
     screening: 'bg-sky-50 text-sky-700',
@@ -73,18 +74,18 @@ const errors = computed(() => Object.values({ ...jobForm.errors, ...candForm.err
 </script>
 
 <template>
-    <Head title="Recruitment" />
+    <Head :title="$t('Recruitment')" />
 
-    <CompanyLayout title="Recruitment" subtitle="Openings, candidates and hiring">
+    <CompanyLayout :title="$t('Recruitment')" :subtitle="$t('Openings, candidates and hiring')">
         <section class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">HIRING</p>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Recruitment</h1>
-                <p class="mt-2 text-sm text-slate-500">{{ openJobs }} open {{ openJobs === 1 ? 'opening' : 'openings' }} · {{ candidates.total }} candidates in view</p>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{{ $t('HIRING') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Recruitment') }}</h1>
+                <p class="mt-2 text-sm text-slate-500">{{ $t('{o} open · {c} candidates in view', { o: openJobs, c: candidates.total }) }}</p>
             </div>
             <div v-if="abilities.manage" class="flex gap-2">
-                <button class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200" @click="startJob()">New opening</button>
-                <button class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!jobs.length" @click="showCandidateForm = !showCandidateForm">Add candidate</button>
+                <button class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200" @click="startJob()">{{ $t('New opening') }}</button>
+                <button class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!jobs.length" @click="showCandidateForm = !showCandidateForm">{{ $t('Add candidate') }}</button>
             </div>
         </section>
 
@@ -97,78 +98,64 @@ const errors = computed(() => Object.values({ ...jobForm.errors, ...candForm.err
             </button>
         </section>
 
-        <p v-for="(msg, i) in errors" :key="i" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ msg }}</p>
+        <p v-for="(msg, i) in errors" :key="i" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(msg) }}</p>
 
         <section v-if="showJobForm" class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 class="text-base font-bold text-slate-900">{{ editingJob ? 'Edit opening' : 'New opening' }}</h2>
+            <h2 class="text-base font-bold text-slate-900">{{ editingJob ? $t('Edit opening') : $t('New opening') }}</h2>
             <form class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4" @submit.prevent="saveJob">
-                <label class="text-xs font-medium text-slate-500 md:col-span-2">Job title
-                    <input v-model="jobForm.title" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required />
+                <label class="text-xs font-medium text-slate-500 md:col-span-2">{{ $t('Job title') }}<input v-model="jobForm.title" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required />
                 </label>
-                <label class="text-xs font-medium text-slate-500">Department
-                    <select v-model="jobForm.department_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
-                        <option value="">None</option><option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
+                <label class="text-xs font-medium text-slate-500">{{ $t('Department') }}<select v-model="jobForm.department_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
+                        <option value="">{{ $t('None') }}</option><option v-for="d in departments" :key="d.id" :value="d.id">{{ d.name }}</option>
                     </select>
                 </label>
-                <label class="text-xs font-medium text-slate-500">Branch
-                    <select v-model="jobForm.branch_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
-                        <option value="">None</option><option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
+                <label class="text-xs font-medium text-slate-500">{{ $t('Branch') }}<select v-model="jobForm.branch_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm">
+                        <option value="">{{ $t('None') }}</option><option v-for="b in branches" :key="b.id" :value="b.id">{{ b.name }}</option>
                     </select>
                 </label>
-                <label class="text-xs font-medium text-slate-500">Type
-                    <select v-model="jobForm.employment_type" class="mt-1 w-full rounded-lg border-slate-300 text-sm capitalize">
+                <label class="text-xs font-medium text-slate-500">{{ $t('Type') }}<select v-model="jobForm.employment_type" class="mt-1 w-full rounded-lg border-slate-300 text-sm capitalize">
                         <option v-for="t in options.types" :key="t" :value="t">{{ label(t) }}</option>
                     </select>
                 </label>
-                <label class="text-xs font-medium text-slate-500">Positions to fill
-                    <input v-model="jobForm.positions" type="number" min="1" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                <label class="text-xs font-medium text-slate-500">{{ $t('Positions to fill') }}<input v-model="jobForm.positions" type="number" min="1" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
                 </label>
-                <label class="text-xs font-medium text-slate-500">Status
-                    <select v-model="jobForm.status" class="mt-1 w-full rounded-lg border-slate-300 text-sm capitalize">
+                <label class="text-xs font-medium text-slate-500">{{ $t('Status') }}<select v-model="jobForm.status" class="mt-1 w-full rounded-lg border-slate-300 text-sm capitalize">
                         <option v-for="s in options.statuses" :key="s" :value="s">{{ label(s) }}</option>
                     </select>
                 </label>
-                <label class="text-xs font-medium text-slate-500 md:col-span-4">Description
-                    <textarea v-model="jobForm.description" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea>
+                <label class="text-xs font-medium text-slate-500 md:col-span-4">{{ $t('Description') }}<textarea v-model="jobForm.description" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea>
                 </label>
                 <div class="flex gap-2 md:col-span-4">
-                    <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="jobForm.processing">Save opening</button>
-                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500" @click="showJobForm = false">Cancel</button>
+                    <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="jobForm.processing">{{ $t('Save opening') }}</button>
+                    <button type="button" class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500" @click="showJobForm = false">{{ $t('Cancel') }}</button>
                 </div>
             </form>
         </section>
 
         <section v-if="showCandidateForm && abilities.manage" class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 class="text-base font-bold text-slate-900">Add candidate</h2>
+            <h2 class="text-base font-bold text-slate-900">{{ $t('Add candidate') }}</h2>
             <form class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4" @submit.prevent="saveCandidate">
-                <label class="text-xs font-medium text-slate-500">Opening
-                    <select v-model="candForm.job_opening_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required>
-                        <option value="" disabled>Choose</option>
+                <label class="text-xs font-medium text-slate-500">{{ $t('Opening') }}<select v-model="candForm.job_opening_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required>
+                        <option value="" disabled>{{ $t('Choose') }}</option>
                         <option v-for="j in jobs.filter((x) => x.status !== 'closed')" :key="j.id" :value="j.id">{{ j.title }}</option>
                     </select>
                 </label>
-                <label class="text-xs font-medium text-slate-500 md:col-span-2">Full name
-                    <input v-model="candForm.name" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required />
+                <label class="text-xs font-medium text-slate-500 md:col-span-2">{{ $t('Full name') }}<input v-model="candForm.name" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required />
                 </label>
-                <label class="text-xs font-medium text-slate-500">Source
-                    <input v-model="candForm.source" placeholder="Referral, LinkedIn..." class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                <label class="text-xs font-medium text-slate-500">{{ $t('Source') }}<input v-model="candForm.source" :placeholder="$t('Referral, LinkedIn...')" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
                 </label>
-                <label class="text-xs font-medium text-slate-500">Email
-                    <input v-model="candForm.email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                <label class="text-xs font-medium text-slate-500">{{ $t('Email') }}<input v-model="candForm.email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
                 </label>
-                <label class="text-xs font-medium text-slate-500">Phone
-                    <input v-model="candForm.phone" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                <label class="text-xs font-medium text-slate-500">{{ $t('Phone') }}<input v-model="candForm.phone" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
                 </label>
                 <label class="text-xs font-medium text-slate-500">Rating (1-5)
                     <input v-model="candForm.rating" type="number" min="1" max="5" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
                 </label>
-                <label class="text-xs font-medium text-slate-500">Expected salary
-                    <input v-model="candForm.expected_salary" type="number" min="0" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                <label class="text-xs font-medium text-slate-500">{{ $t('Expected salary') }}<input v-model="candForm.expected_salary" type="number" min="0" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
                 </label>
-                <label class="text-xs font-medium text-slate-500 md:col-span-4">Notes
-                    <textarea v-model="candForm.notes" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea>
+                <label class="text-xs font-medium text-slate-500 md:col-span-4">{{ $t('Notes') }}<textarea v-model="candForm.notes" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea>
                 </label>
-                <div class="md:col-span-4"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="candForm.processing">Add candidate</button></div>
+                <div class="md:col-span-4"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="candForm.processing">{{ $t('Add candidate') }}</button></div>
             </form>
         </section>
 
@@ -177,55 +164,53 @@ const errors = computed(() => Object.values({ ...jobForm.errors, ...candForm.err
                 <div class="flex items-start justify-between gap-2">
                     <button class="text-left" @click="filterBy({ job: filters.job === j.id ? null : j.id })">
                         <p class="font-semibold text-slate-900">{{ j.title }}</p>
-                        <p class="text-xs capitalize text-slate-400">{{ label(j.employment_type) }} · {{ j.positions }} {{ j.positions === 1 ? 'position' : 'positions' }}</p>
+                        <p class="text-xs capitalize text-slate-400">{{ label(j.employment_type) }} · {{ $t('{n} position(s)', { n: j.positions }) }}</p>
                     </button>
                     <span class="rounded-full px-2.5 py-1 text-xs font-semibold capitalize" :class="jobStatusStyles[j.status]">{{ label(j.status) }}</span>
                 </div>
-                <p class="mt-3 text-sm text-slate-600">{{ j.active_count }} in progress · {{ j.hired_count }} hired · {{ j.candidates_count }} total</p>
+                <p class="mt-3 text-sm text-slate-600">{{ $t('{a} in progress · {h} hired · {t} total', { a: j.active_count, h: j.hired_count, t: j.candidates_count }) }}</p>
                 <div v-if="abilities.manage" class="mt-3 flex gap-3 text-xs font-semibold">
-                    <button class="text-cyan-700" @click="startJob(j)">Edit</button>
-                    <button class="text-red-600" @click="removeJob(j)">Delete</button>
+                    <button class="text-cyan-700" @click="startJob(j)">{{ $t('Edit') }}</button>
+                    <button class="text-red-600" @click="removeJob(j)">{{ $t('Delete') }}</button>
                 </div>
             </article>
-            <p v-if="!jobs.length" class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-3">
-                No openings yet. Create one, then add candidates and move them through the stages.
-            </p>
+            <p v-if="!jobs.length" class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-3">{{ $t('No openings yet. Create one, then add candidates and move them through the stages.') }}</p>
         </section>
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 p-4">
-                <h2 class="text-base font-bold text-slate-900">Candidates</h2>
-                <button v-if="filters.job || filters.stage" class="text-xs font-semibold text-cyan-700" @click="router.get('/recruitment')">Clear filters</button>
+                <h2 class="text-base font-bold text-slate-900">{{ $t('Candidates') }}</h2>
+                <button v-if="filters.job || filters.stage" class="text-xs font-semibold text-cyan-700" @click="router.get('/recruitment')">{{ $t('Clear filters') }}</button>
             </div>
             <ul class="divide-y divide-slate-100">
                 <li v-for="c in candidates.data" :key="c.id" class="flex flex-col gap-3 p-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
                     <div class="min-w-0">
                         <p class="font-semibold text-slate-800">{{ c.name }} <span class="ml-1 rounded-full px-2 py-0.5 text-xs font-semibold capitalize" :class="stageStyles[c.stage]">{{ label(c.stage) }}</span></p>
                         <p class="truncate text-xs text-slate-500">{{ c.job?.title }}<span v-if="c.email"> · {{ c.email }}</span><span v-if="c.phone"> · {{ c.phone }}</span><span v-if="c.source"> · {{ c.source }}</span></p>
-                        <p v-if="c.rating" class="text-xs text-amber-600">Rating {{ c.rating }}/5</p>
+                        <p v-if="c.rating" class="text-xs text-amber-600">{{ $t('Rating {n}/5', { n: c.rating }) }}</p>
                     </div>
                     <div v-if="abilities.manage" class="flex flex-wrap items-center gap-2">
                         <select v-if="c.stage !== 'hired'" :value="c.stage" class="rounded-lg border-slate-300 py-1 text-xs capitalize" @change="move(c, $event.target.value)">
                             <option v-for="s in options.stages.filter((x) => x !== 'hired')" :key="s" :value="s">{{ label(s) }}</option>
                         </select>
-                        <button v-if="c.stage === 'offer' && abilities.hire" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="hire(c)">Hire</button>
-                        <a v-if="c.employee_id" :href="`/employees/${c.employee_id}`" class="text-xs font-semibold text-cyan-700">View employee</a>
-                        <button class="text-xs font-semibold text-cyan-700" @click="startEdit(c)">{{ editingCand === c.id ? 'Close' : 'Edit' }}</button>
-                        <button v-if="!c.employee_id" class="text-xs font-semibold text-red-600" @click="removeCandidate(c)">Delete</button>
+                        <button v-if="c.stage === 'offer' && abilities.hire" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="hire(c)">{{ $t('Hire') }}</button>
+                        <a v-if="c.employee_id" :href="`/employees/${c.employee_id}`" class="text-xs font-semibold text-cyan-700">{{ $t('View employee') }}</a>
+                        <button class="text-xs font-semibold text-cyan-700" @click="startEdit(c)">{{ editingCand === c.id ? $t('Close') : $t('Edit') }}</button>
+                        <button v-if="!c.employee_id" class="text-xs font-semibold text-red-600" @click="removeCandidate(c)">{{ $t('Delete') }}</button>
                     </div>
                     <form v-if="editingCand === c.id" class="grid w-full grid-cols-1 gap-3 md:grid-cols-4 lg:basis-full" @submit.prevent="saveEdit(c)">
-                        <label class="text-xs font-medium text-slate-500 md:col-span-2">Full name<input v-model="editForm.name" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
-                        <label class="text-xs font-medium text-slate-500">Email<input v-model="editForm.email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
-                        <label class="text-xs font-medium text-slate-500">Phone<input v-model="editForm.phone" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
-                        <label class="text-xs font-medium text-slate-500">Source<input v-model="editForm.source" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500 md:col-span-2">{{ $t('Full name') }}<input v-model="editForm.name" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
+                        <label class="text-xs font-medium text-slate-500">{{ $t('Email') }}<input v-model="editForm.email" type="email" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500">{{ $t('Phone') }}<input v-model="editForm.phone" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500">{{ $t('Source') }}<input v-model="editForm.source" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
                         <label class="text-xs font-medium text-slate-500">Rating (1-5)<input v-model="editForm.rating" type="number" min="1" max="5" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
-                        <label class="text-xs font-medium text-slate-500">Expected salary<input v-model="editForm.expected_salary" type="number" min="0" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
-                        <label class="text-xs font-medium text-slate-500 md:col-span-4">Notes<textarea v-model="editForm.notes" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea></label>
-                        <p v-for="(m, k) in editForm.errors" :key="k" class="text-xs text-red-600 md:col-span-4">{{ m }}</p>
-                        <div class="md:col-span-4"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="editForm.processing">Save changes</button></div>
+                        <label class="text-xs font-medium text-slate-500">{{ $t('Expected salary') }}<input v-model="editForm.expected_salary" type="number" min="0" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                        <label class="text-xs font-medium text-slate-500 md:col-span-4">{{ $t('Notes') }}<textarea v-model="editForm.notes" rows="2" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></textarea></label>
+                        <p v-for="(m, k) in editForm.errors" :key="k" class="text-xs text-red-600 md:col-span-4">{{ $t(m) }}</p>
+                        <div class="md:col-span-4"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="editForm.processing">{{ $t('Save changes') }}</button></div>
                     </form>
                 </li>
-                <li v-if="!candidates.data.length" class="p-8 text-center text-sm text-slate-500">No candidates match this view.</li>
+                <li v-if="!candidates.data.length" class="p-8 text-center text-sm text-slate-500">{{ $t('No candidates match this view.') }}</li>
             </ul>
         </section>
     </CompanyLayout>

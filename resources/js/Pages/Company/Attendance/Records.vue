@@ -32,37 +32,33 @@ const pagination = computed(() => props.records.links ?? []);
 </script>
 
 <template>
-    <Head title="Attendance records" />
+    <Head :title="$t('Attendance records')" />
 
-    <CompanyLayout title="Attendance records" subtitle="Employee attendance records">
+    <CompanyLayout :title="$t('Attendance records')" :subtitle="$t('Employee attendance records')">
         <section class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">WORKFORCE MANAGEMENT</p>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Attendance records</h1>
-                <p class="mt-2 text-sm text-slate-500">Daily attendance details for employees in this company.</p>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{{ $t('WORKFORCE MANAGEMENT') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Attendance records') }}</h1>
+                <p class="mt-2 text-sm text-slate-500">{{ $t('Daily attendance details for employees in this company.') }}</p>
             </div>
-            <a href="/attendance" class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">Back to overview</a>
+            <a href="/attendance" class="text-sm font-semibold text-cyan-700 hover:text-cyan-900">{{ $t('Back to overview') }}</a>
         </section>
 
         <section class="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <form class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_2fr_auto]" @submit.prevent="applyFilters">
-                <label class="text-sm font-medium text-slate-600">
-                    Attendance date
-                    <input v-model="form.date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-cyan-600 focus:ring-cyan-600" />
+                <label class="text-sm font-medium text-slate-600">{{ $t('Attendance date') }}<input v-model="form.date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-cyan-600 focus:ring-cyan-600" />
                 </label>
-                <label class="text-sm font-medium text-slate-600">
-                    Search employee
-                    <input v-model="form.search" type="search" placeholder="Name or employee number" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-cyan-600 focus:ring-cyan-600" />
+                <label class="text-sm font-medium text-slate-600">{{ $t('Search employee') }}<input v-model="form.search" type="search" :placeholder="$t('Name or employee number')" class="mt-1 w-full rounded-lg border-slate-300 text-sm focus:border-cyan-600 focus:ring-cyan-600" />
                 </label>
-                <button type="submit" class="self-end rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">Apply filters</button>
+                <button type="submit" class="self-end rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">{{ $t('Apply filters') }}</button>
             </form>
         </section>
 
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                 <div>
-                    <h2 class="font-bold text-slate-900">Daily attendance</h2>
-                    <p class="mt-1 text-xs text-slate-500">{{ records.total }} record(s) found</p>
+                    <h2 class="font-bold text-slate-900">{{ $t('Daily attendance') }}</h2>
+                    <p class="mt-1 text-xs text-slate-500">{{ $t('{n} record(s) found', { n: records.total }) }}</p>
                 </div>
             </div>
 
@@ -70,14 +66,14 @@ const pagination = computed(() => props.records.links ?? []);
                 <table class="w-full min-w-[900px] text-left text-sm">
                     <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                         <tr>
-                            <th class="px-5 py-3 font-semibold">Employee</th>
-                            <th class="px-5 py-3 font-semibold">Department / Branch</th>
-                            <th class="px-5 py-3 font-semibold">Status</th>
-                            <th class="px-5 py-3 font-semibold">Worked</th>
-                            <th class="px-5 py-3 font-semibold">Break</th>
-                            <th class="px-5 py-3 font-semibold">Late</th>
-                            <th class="px-5 py-3 font-semibold">Early leave</th>
-                            <th class="px-5 py-3 font-semibold">Overtime</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Employee') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Department / Branch') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Status') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Worked') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Break') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Late') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Early leave') }}</th>
+                            <th class="px-5 py-3 font-semibold">{{ $t('Overtime') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -91,7 +87,7 @@ const pagination = computed(() => props.records.links ?? []);
                                 <p class="mt-1 text-xs text-slate-400">{{ record.employee?.branch ?? '—' }}</p>
                             </td>
                             <td class="px-5 py-4">
-                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ record.status }}</span>
+                                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ $t(record.status) }}</span>
                             </td>
                             <td class="px-5 py-4 tabular-nums text-slate-700">{{ formatMinutes(record.total_worked_minutes) }}</td>
                             <td class="px-5 py-4 tabular-nums text-slate-700">{{ formatMinutes(record.total_break_minutes) }}</td>
@@ -104,8 +100,8 @@ const pagination = computed(() => props.records.links ?? []);
             </div>
 
             <div v-else class="px-6 py-14 text-center">
-                <h3 class="font-semibold text-slate-800">No attendance records found</h3>
-                <p class="mt-2 text-sm text-slate-500">Try another date or adjust your employee search.</p>
+                <h3 class="font-semibold text-slate-800">{{ $t('No attendance records found') }}</h3>
+                <p class="mt-2 text-sm text-slate-500">{{ $t('Try another date or adjust your employee search.') }}</p>
             </div>
 
             <div v-if="pagination.length > 3" class="flex flex-wrap gap-2 border-t border-slate-100 px-5 py-4">

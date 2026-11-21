@@ -11,3 +11,8 @@ export function t(text, params = {}) {
     for (const [k, v] of Object.entries(params)) out = out.replaceAll(`{${k}}`, String(v));
     return out;
 }
+
+/** Locale for dates and month names: Arabic words with Western digits, or English. */
+export function dateLocale() {
+    return usePage().props.locale === 'ar' ? 'ar-u-nu-latn' : 'en-US';
+}

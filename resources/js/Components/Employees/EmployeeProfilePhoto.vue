@@ -105,20 +105,20 @@ onBeforeUnmount(releasePhotoUrl);
         <div class="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-100 to-cyan-50 shadow-sm">
             <img v-if="photoUrl" :src="photoUrl" :alt="`${employeeName} profile photo`" class="h-full w-full object-cover">
             <span v-else class="text-3xl font-bold tracking-wide text-cyan-800">{{ initials || '?' }}</span>
-            <span v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/70 text-xs font-medium text-slate-600">Loading…</span>
+            <span v-if="loading" class="absolute inset-0 flex items-center justify-center bg-white/70 text-xs font-medium text-slate-600">{{ $t('Loading…') }}</span>
         </div>
 
         <div v-if="canUpdate" class="flex flex-wrap justify-center gap-2">
             <button type="button" :disabled="uploading || deleting" class="rounded-lg bg-cyan-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60" @click.stop.prevent="choosePhoto">
-                {{ uploading ? 'Uploading…' : photoUrl ? 'Change photo' : 'Upload photo' }}
+                {{ uploading ? $t('Uploading…') : photoUrl ? $t('Change photo') : $t('Upload photo') }}
             </button>
             <button v-if="photoUrl" type="button" :disabled="uploading || deleting" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60" @click.stop.prevent="removePhoto">
-                {{ deleting ? 'Removing…' : 'Remove' }}
+                {{ deleting ? $t('Removing…') : $t('Remove') }}
             </button>
             <input ref="fileInput" type="file" accept="image/jpeg,image/png" class="hidden" @change="uploadPhoto">
         </div>
 
-        <p v-if="canUpdate" class="text-center text-[11px] text-slate-400">JPG or PNG · Maximum 5 MB</p>
-        <p v-if="errorMessage" class="max-w-52 text-center text-xs text-red-600" role="alert">{{ errorMessage }}</p>
+        <p v-if="canUpdate" class="text-center text-[11px] text-slate-400">{{ $t('JPG or PNG · Maximum 5 MB') }}</p>
+        <p v-if="errorMessage" class="max-w-52 text-center text-xs text-red-600" role="alert">{{ $t(errorMessage) }}</p>
     </div>
 </template>

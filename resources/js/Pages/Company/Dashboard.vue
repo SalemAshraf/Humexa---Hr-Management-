@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
-import { t } from '@/lib/i18n';
+import { t, dateLocale } from '@/lib/i18n';
 
 const props = defineProps({
     company: {
@@ -49,7 +49,7 @@ const formattedCreatedAt = computed(() => {
         return props.company.createdAt;
     }
 
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(dateLocale(), {
         day: 'numeric',
         month: 'short',
         year: 'numeric',

@@ -73,3 +73,33 @@ test('My account is open to every role including Owner and edits only the own na
     ($this->as)($emp)->put("{$this->base}/account", ['name' => 'x', 'locale' => 'en'])->assertSessionHasErrors('name');
     ($this->as)($emp)->put("{$this->base}/account", ['name' => 'Fine Name', 'locale' => 'fr'])->assertSessionHasErrors('locale');
 });
+
+test('every English UI string wrapped for translation has an Arabic entry', function () {
+    $ar = json_decode(file_get_contents(base_path('lang/ar.json')), true);
+    $missing = [];
+    $iter = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(resource_path('js')));
+    foreach ($iter as $file) {
+        if ($file->getExtension() !== 'vue') {
+            continue;
+        }
+        preg_match_all('/(?<![A-Za-z0-9_])\$?t\(\s*(?:\'((?:[^\'\\\\]|\\\\.)*)\'|"((?:[^"\\\\]|\\\\.)*)")/', file_get_contents($file->getPathname()), $m);
+        foreach (array_merge($m[1], $m[2]) as $key) {
+            $key = str_replace("\\'", "'", $key);
+            if ($key !== '' && preg_match('/[A-Za-z]/', $key) && ! array_key_exists($key, $ar)) {
+                $missing[$key] = true;
+            }
+        }
+    }
+    expect(array_keys($missing))->toBe([]);
+});
+
+test('the Arabic file is valid, has no empty values and keeps every placeholder', function () {
+    $ar = json_decode(file_get_contents(base_path('lang/ar.json')), true);
+    expect($ar)->toBeArray();
+    foreach ($ar as $en => $tr) {
+        expect(trim((string) $tr))->not->toBe('', "empty translation for: $en");
+        preg_match_all('/\{[a-z]+\}/', $en, $a);
+        preg_match_all('/\{[a-z]+\}/', $tr, $b);
+        expect($b[0])->toEqualCanonicalizing($a[0], "placeholders differ for: $en");
+    }
+});

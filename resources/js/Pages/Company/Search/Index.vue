@@ -14,14 +14,14 @@ const submit = () => router.get('/search', { q: q.value }, { preserveState: true
 </script>
 
 <template>
-    <Head title="Search" />
+    <Head :title="$t('Search')" />
 
-    <CompanyLayout title="Search" subtitle="Find people, candidates and more">
+    <CompanyLayout :title="$t('Search')" :subtitle="$t('Find people, candidates and more')">
         <form class="mb-6" @submit.prevent="submit">
-            <input v-model="q" autofocus type="search" placeholder="Search by name, employee number, email or phone" class="w-full rounded-xl border-slate-300 text-sm shadow-sm" />
+            <input v-model="q" autofocus type="search" :placeholder="$t('Search by name, employee number, email or phone')" class="w-full rounded-xl border-slate-300 text-sm shadow-sm" />
         </form>
 
-        <p v-if="tooShort" class="mb-4 text-sm text-slate-500">Type at least 2 characters.</p>
+        <p v-if="tooShort" class="mb-4 text-sm text-slate-500">{{ $t('Type at least 2 characters.') }}</p>
 
         <section v-for="g in groups" :key="g.label" class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <h2 class="border-b border-slate-100 px-4 py-3 text-sm font-bold text-slate-900">{{ g.label }}</h2>
@@ -36,7 +36,7 @@ const submit = () => router.get('/search', { q: q.value }, { preserveState: true
         </section>
 
         <p v-if="term && !tooShort && !groups.length" class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-            Nothing found for "{{ term }}" in the areas your role can open.
+            {{ $t('Nothing found for "{term}" in the areas your role can open.', { term }) }}
         </p>
     </CompanyLayout>
 </template>

@@ -60,10 +60,24 @@ class HandleInertiaRequests extends Middleware
             },
 
             'flash' => [
-                'status' => fn () => $request->session()->get('status'),
-                'success' => fn () => $request->session()->get('success'),
+                'status' => fn () => $this->translated($request->session()->get('status')),
+                'success' => fn () => $this->translated($request->session()->get('success')),
                 'registered_domain' => fn () => $request->session()->get('registered_domain'),
             ],
         ];
+    }
+
+    /** Message text written in English in the code; translated when the active language has it. */
+    private function translated(mixed $message): mixed
+    {
+        return is_string($message) ? __($message) : $message;
+    }
+
+    public function resolveValidationErrors(Request $request)
+    {
+        $errors = parent::resolveValidationErrors($request);
+        $map = fn ($v) => is_string($v) ? __($v) : $v;
+
+        return (object) collect((array) $errors)->map(fn ($v) => is_object($v) || is_array($v) ? (object) collect((array) $v)->map($map)->all() : $map($v))->all();
     }
 }
