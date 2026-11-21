@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Tenants\Actions;
 
 use App\Models\Tenant;
+use App\Modules\Attendance\Models\AttendancePolicy;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -36,6 +37,11 @@ class RegisterCompanyAction
         ) {
             $tenant = Tenant::create([
                 'company_name' => trim($companyName),
+            ]);
+
+            // Provision the tenant's default attendance policy during onboarding.
+            AttendancePolicy::create([
+                'tenant_id' => $tenant->id,
             ]);
 
             $domain = $this->generateDomain($companyName);
