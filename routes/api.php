@@ -10,7 +10,7 @@ use App\Modules\Attendance\Http\Controllers\Api\V1\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\Api\V1\AttendanceWorkflowController;
 use App\Modules\Attendance\Http\Controllers\Api\V1\MobileAuthController;
 
-Route::domain('{tenant}.humexa.test')->middleware([
+Route::domain('{tenant}.'.config('humexa.tenant_domain'))->middleware([
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
     EnsureTenantActive::class,
