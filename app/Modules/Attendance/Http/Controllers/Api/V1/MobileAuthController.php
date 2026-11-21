@@ -18,7 +18,7 @@ class MobileAuthController extends Controller
         $data=$request->validate(['email'=>'required|email','password'=>'required|string','device_name'=>'required|string|max:120']);
         $user=User::query()->where('tenant_id',tenant('id'))->where('account_type',User::ACCOUNT_TYPE_TENANT)->where('email',$data['email'])->first();
         if(!$user || !Hash::check($data['password'],$user->password)) throw ValidationException::withMessages(['credentials'=>'The supplied credentials are invalid.']);
-        $user->employee()->exists();
+        abort_unless(Employee::query()->where('tenant_id',tenant('id'))->where('user_id',$user->id)->exists(),403,'No employee profile is linked to this account.');
         $token=$user->createToken($data['device_name'],['attendance:mobile'])->plainTextToken;
         return response()->json(['data'=>['token'=>$token,'token_type'=>'Bearer','user'=>['id'=>$user->id,'name'=>$user->name,'email'=>$user->email]]]);
     }
