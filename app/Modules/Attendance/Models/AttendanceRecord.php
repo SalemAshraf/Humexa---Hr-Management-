@@ -10,10 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class AttendanceRecord extends Model
 {
     protected $fillable = [
-        'tenant_id', 'employee_id', 'attendance_date', 'check_in_at',
-        'check_out_at', 'check_in_source', 'check_out_source', 'status',
-        'worked_minutes', 'late_minutes', 'early_leave_minutes',
-        'overtime_minutes', 'notes',
+        'tenant_id', 'employee_id', 'attendance_date', 'status',
+        'total_worked_minutes', 'total_break_minutes', 'late_minutes',
+        'early_leave_minutes', 'overtime_minutes', 'notes',
     ];
 
     protected $hidden = ['tenant_id'];
@@ -22,22 +21,16 @@ class AttendanceRecord extends Model
     {
         return [
             'attendance_date' => 'date',
-            'check_in_at' => 'datetime',
-            'check_out_at' => 'datetime',
-            'worked_minutes' => 'integer',
+            'total_worked_minutes' => 'integer',
+            'total_break_minutes' => 'integer',
             'late_minutes' => 'integer',
             'early_leave_minutes' => 'integer',
             'overtime_minutes' => 'integer',
         ];
     }
 
-    public function events(): HasMany
+    public function sessions(): HasMany
     {
-        return $this->hasMany(AttendanceEvent::class);
-    }
-
-    public function breaks(): HasMany
-    {
-        return $this->hasMany(AttendanceBreak::class);
+        return $this->hasMany(AttendanceSession::class)->orderBy('session_number');
     }
 }
