@@ -12,7 +12,7 @@ const props = defineProps({
 
 const page = usePage();
 const activeTab = ref('overview');
-const tabs = [
+const baseTabs = [
     { key: 'overview', label: 'Overview' },
     { key: 'personal', label: 'Personal' },
     { key: 'organization', label: 'Organization' },
@@ -22,6 +22,9 @@ const tabs = [
     { key: 'identity', label: 'Identity' },
     { key: 'documents', label: 'Documents' },
 ];
+// Personal-data tabs are HR only on the server; hide them for everyone else.
+const personalDataTabs = ['addresses', 'contacts', 'identity', 'documents'];
+const tabs = computed(() => baseTabs.filter((t) => !personalDataTabs.includes(t.key) || page.props.can?.['employees.manage']));
 
 const fullName = computed(() => [
     props.employee.first_name,

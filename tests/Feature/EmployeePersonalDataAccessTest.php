@@ -81,3 +81,30 @@ test('managers can read the employee directory but cannot change it and employee
     ($this->as)($staff)->get("{$this->base}/employees/{$this->emp->id}")->assertForbidden();
     ($this->as)($staff)->get("{$this->base}/employees/{$this->emp->id}/profile-photo")->assertForbidden();
 });
+
+test('screens receive the signed-in permissions so denied actions are hidden', function () {
+    $manager = ($this->mk)(TenantRoleCatalog::MANAGER, 'm3@tenant-test.example');
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr4@tenant-test.example');
+    $url = "{$this->base}/employees/{$this->emp->id}";
+
+    $can = function (User $user) use ($url) {
+        $captured = [];
+        ($this->as)($user)->get($url)->assertOk()->assertInertia(function ($page) use (&$captured) {
+            $captured = $page->toArray()['props'];
+        });
+
+        return $captured;
+    };
+
+    $m = $can($manager);
+    expect($m['canUpdate'])->toBeFalse()
+        ->and($m['can']['employees.view'])->toBeTrue()
+        ->and($m['can']['employees.manage'])->toBeFalse()
+        ->and($m['can']['roles.manage'])->toBeFalse()
+        ->and($m['can']['leave.approve'])->toBeTrue();
+
+    $h = $can($hr);
+    expect($h['canUpdate'])->toBeTrue()->and($h['can']['employees.manage'])->toBeTrue()->and($h['can']['roles.manage'])->toBeFalse();
+
+    expect($can($this->reg['user'])['can']['roles.manage'])->toBeTrue();
+});

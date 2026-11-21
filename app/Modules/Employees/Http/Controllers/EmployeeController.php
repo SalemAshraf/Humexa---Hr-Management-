@@ -185,7 +185,7 @@ class EmployeeController extends Controller
 
         return Inertia::render('Employees/Show', [
             'employee' => $record,
-            'canUpdate' => $request->user('tenant')?->can('update', $record) ?? false,
+            'canUpdate' => ($request->user('tenant')?->can('update', $record) ?? false) && $request->user('tenant')->can('employees.manage'),
         ]);
     }
 

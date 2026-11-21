@@ -10,6 +10,7 @@ const props = defineProps({
     summary: { type: Object, default: () => ({}) },
 });
 const page = usePage();
+const canEdit = () => !!page.props.can?.['organization.manage'];
 const tab = ref('branches');
 const editing = ref({ type: null, id: null });
 const branch = useForm({ name: '', code: '', city: '', address: '', is_active: true });
@@ -80,7 +81,7 @@ const tabItems = [
             <div class="p-5 sm:p-6">
                 <template v-if="tab === 'branches'">
                     <h2 class="text-lg font-bold text-slate-900">{{ editing.id ? 'Edit branch' : 'Add branch' }}</h2>
-                    <form class="mb-8 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit('branches')">
+                    <form v-if="canEdit()" class="mb-8 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit('branches')">
                         <label class="text-sm font-medium text-slate-700">Branch name<input v-model="branch.name" required maxlength="150" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="Alexandria HQ"><span v-if="branch.errors.name" class="mt-1 block text-xs text-red-600">{{ branch.errors.name }}</span></label>
                         <label class="text-sm font-medium text-slate-700">Code<input v-model="branch.code" maxlength="50" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="ALX-01"><span v-if="branch.errors.code" class="mt-1 block text-xs text-red-600">{{ branch.errors.code }}</span></label>
                         <label class="text-sm font-medium text-slate-700">City<input v-model="branch.city" maxlength="100" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="Alexandria"></label>
@@ -89,7 +90,7 @@ const tabItems = [
                         <div class="flex gap-2 md:col-span-2"><button :disabled="branch.processing" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{{ editing.id ? 'Save changes' : 'Create branch' }}</button><button v-if="editing.id" type="button" class="rounded-xl border px-5 py-2.5 text-sm" @click="clear()">Cancel</button></div>
                     </form>
                     <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-4 py-3">Branch</th><th class="px-4 py-3">Code</th><th class="px-4 py-3">City</th><th class="px-4 py-3">Departments</th><th class="px-4 py-3">Status</th><th class="px-4 py-3 text-right">Actions</th></tr></thead><tbody class="divide-y divide-slate-100">
-                        <tr v-for="item in branches" :key="item.id"><td class="px-4 py-3 font-semibold">{{ item.name }}</td><td class="px-4 py-3 text-slate-500">{{ item.code || '—' }}</td><td class="px-4 py-3 text-slate-500">{{ item.city || '—' }}</td><td class="px-4 py-3">{{ item.departments_count }}</td><td class="px-4 py-3">{{ item.is_active ? 'Active' : 'Inactive' }}</td><td class="px-4 py-3 text-right"><button class="mr-3 font-semibold text-cyan-700" @click="edit('branches', item)">Edit</button><button class="font-semibold text-red-600" @click="archive('branches', item.id)">Archive</button></td></tr>
+                        <tr v-for="item in branches" :key="item.id"><td class="px-4 py-3 font-semibold">{{ item.name }}</td><td class="px-4 py-3 text-slate-500">{{ item.code || '—' }}</td><td class="px-4 py-3 text-slate-500">{{ item.city || '—' }}</td><td class="px-4 py-3">{{ item.departments_count }}</td><td class="px-4 py-3">{{ item.is_active ? 'Active' : 'Inactive' }}</td><td class="px-4 py-3 text-right"><button v-if="canEdit()" class="mr-3 font-semibold text-cyan-700" @click="edit('branches', item)">Edit</button><button v-if="canEdit()" class="font-semibold text-red-600" @click="archive('branches', item.id)">Archive</button></td></tr>
                         <tr v-if="!branches.length"><td colspan="6" class="px-4 py-10 text-center text-slate-400">No branches yet. Add your first branch above.</td></tr>
                     </tbody></table></div>
                 </template>
@@ -97,7 +98,7 @@ const tabItems = [
                 <template v-else-if="tab === 'departments'">
                     <h2 class="text-lg font-bold text-slate-900">{{ editing.id ? 'Edit department' : 'Add department' }}</h2>
                     <p class="mt-1 text-sm text-slate-500">A department may belong to a branch or remain company-wide.</p>
-                    <form class="mb-8 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit('departments')">
+                    <form v-if="canEdit()" class="mb-8 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit('departments')">
                         <label class="text-sm font-medium text-slate-700">Department name<input v-model="department.name" required maxlength="150" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="Human Resources"><span v-if="department.errors.name" class="mt-1 block text-xs text-red-600">{{ department.errors.name }}</span></label>
                         <label class="text-sm font-medium text-slate-700">Branch (optional)<select v-model="department.branch_id" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm"><option value="">Company-wide</option><option v-for="item in branches" :key="item.id" :value="item.id">{{ item.name }}</option></select><span v-if="department.errors.branch_id" class="mt-1 block text-xs text-red-600">{{ department.errors.branch_id }}</span></label>
                         <label class="text-sm font-medium text-slate-700">Code<input v-model="department.code" maxlength="50" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="HR"><span v-if="department.errors.code" class="mt-1 block text-xs text-red-600">{{ department.errors.code }}</span></label>
@@ -106,7 +107,7 @@ const tabItems = [
                         <div class="flex gap-2 md:col-span-2"><button :disabled="department.processing" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{{ editing.id ? 'Save changes' : 'Create department' }}</button><button v-if="editing.id" type="button" class="rounded-xl border px-5 py-2.5 text-sm" @click="clear()">Cancel</button></div>
                     </form>
                     <div class="overflow-x-auto"><table class="w-full min-w-[650px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-4 py-3">Department</th><th class="px-4 py-3">Branch</th><th class="px-4 py-3">Code</th><th class="px-4 py-3">Positions</th><th class="px-4 py-3">Status</th><th class="px-4 py-3 text-right">Actions</th></tr></thead><tbody class="divide-y divide-slate-100">
-                        <tr v-for="item in departments" :key="item.id"><td class="px-4 py-3 font-semibold">{{ item.name }}</td><td class="px-4 py-3">{{ item.branch?.name || 'Company-wide' }}</td><td class="px-4 py-3">{{ item.code || '—' }}</td><td class="px-4 py-3">{{ item.positions_count }}</td><td class="px-4 py-3">{{ item.is_active ? 'Active' : 'Inactive' }}</td><td class="px-4 py-3 text-right"><button class="mr-3 font-semibold text-cyan-700" @click="edit('departments', item)">Edit</button><button class="font-semibold text-red-600" @click="archive('departments', item.id)">Archive</button></td></tr>
+                        <tr v-for="item in departments" :key="item.id"><td class="px-4 py-3 font-semibold">{{ item.name }}</td><td class="px-4 py-3">{{ item.branch?.name || 'Company-wide' }}</td><td class="px-4 py-3">{{ item.code || '—' }}</td><td class="px-4 py-3">{{ item.positions_count }}</td><td class="px-4 py-3">{{ item.is_active ? 'Active' : 'Inactive' }}</td><td class="px-4 py-3 text-right"><button v-if="canEdit()" class="mr-3 font-semibold text-cyan-700" @click="edit('departments', item)">Edit</button><button v-if="canEdit()" class="font-semibold text-red-600" @click="archive('departments', item.id)">Archive</button></td></tr>
                         <tr v-if="!departments.length"><td colspan="6" class="px-4 py-10 text-center text-slate-400">No departments yet.</td></tr>
                     </tbody></table></div>
                 </template>
@@ -114,7 +115,7 @@ const tabItems = [
                 <template v-else>
                     <h2 class="text-lg font-bold text-slate-900">{{ editing.id ? 'Edit position' : 'Add position' }}</h2>
                     <p class="mt-1 text-sm text-slate-500">Define job titles under the relevant department.</p>
-                    <form class="mb-8 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit('positions')">
+                    <form v-if="canEdit()" class="mb-8 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit('positions')">
                         <label class="text-sm font-medium text-slate-700">Position name<input v-model="position.name" required maxlength="150" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="HR Specialist"><span v-if="position.errors.name" class="mt-1 block text-xs text-red-600">{{ position.errors.name }}</span></label>
                         <label class="text-sm font-medium text-slate-700">Department<select v-model="position.department_id" required class="mt-1.5 w-full rounded-xl border-slate-300 text-sm"><option value="" disabled>Select department</option><option v-for="item in departments" :key="item.id" :value="item.id">{{ item.name }}</option></select><span v-if="position.errors.department_id" class="mt-1 block text-xs text-red-600">{{ position.errors.department_id }}</span></label>
                         <label class="text-sm font-medium text-slate-700">Code<input v-model="position.code" maxlength="50" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm" placeholder="HR-SPEC"><span v-if="position.errors.code" class="mt-1 block text-xs text-red-600">{{ position.errors.code }}</span></label>
@@ -123,7 +124,7 @@ const tabItems = [
                         <div class="flex gap-2 md:col-span-2"><button :disabled="position.processing" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{{ editing.id ? 'Save changes' : 'Create position' }}</button><button v-if="editing.id" type="button" class="rounded-xl border px-5 py-2.5 text-sm" @click="clear()">Cancel</button></div>
                     </form>
                     <div class="overflow-x-auto"><table class="w-full min-w-[600px] text-left text-sm"><thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-4 py-3">Position</th><th class="px-4 py-3">Department</th><th class="px-4 py-3">Code</th><th class="px-4 py-3">Status</th><th class="px-4 py-3 text-right">Actions</th></tr></thead><tbody class="divide-y divide-slate-100">
-                        <tr v-for="item in positions" :key="item.id"><td class="px-4 py-3 font-semibold">{{ item.name }}</td><td class="px-4 py-3">{{ item.department?.name || '—' }}</td><td class="px-4 py-3">{{ item.code || '—' }}</td><td class="px-4 py-3">{{ item.is_active ? 'Active' : 'Inactive' }}</td><td class="px-4 py-3 text-right"><button class="mr-3 font-semibold text-cyan-700" @click="edit('positions', item)">Edit</button><button class="font-semibold text-red-600" @click="archive('positions', item.id)">Archive</button></td></tr>
+                        <tr v-for="item in positions" :key="item.id"><td class="px-4 py-3 font-semibold">{{ item.name }}</td><td class="px-4 py-3">{{ item.department?.name || '—' }}</td><td class="px-4 py-3">{{ item.code || '—' }}</td><td class="px-4 py-3">{{ item.is_active ? 'Active' : 'Inactive' }}</td><td class="px-4 py-3 text-right"><button v-if="canEdit()" class="mr-3 font-semibold text-cyan-700" @click="edit('positions', item)">Edit</button><button v-if="canEdit()" class="font-semibold text-red-600" @click="archive('positions', item.id)">Archive</button></td></tr>
                         <tr v-if="!positions.length"><td colspan="5" class="px-4 py-10 text-center text-slate-400">No positions yet.</td></tr>
                     </tbody></table></div>
                 </template>

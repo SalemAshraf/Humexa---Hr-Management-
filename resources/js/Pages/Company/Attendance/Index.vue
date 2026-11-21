@@ -5,6 +5,7 @@ import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
     canViewRecords: { type: Boolean, default: false },
+    canReviewRequests: { type: Boolean, default: false },
     date: { type: String, required: true },
     stats: { type: Object, required: true },
     policy: { type: Object, required: true },
@@ -77,6 +78,14 @@ const formattedDate = computed(() => new Intl.DateTimeFormat(undefined, {
                     </span>
                 </div>
             </div>
+        </section>
+
+        <section v-if="canReviewRequests" class="mb-4 flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center">
+            <div>
+                <h2 class="font-semibold text-slate-900">Corrections and overtime</h2>
+                <p class="mt-1 text-sm text-slate-500">Review requests employees sent from the mobile app.</p>
+            </div>
+            <a href="/attendance/requests" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700">Review requests</a>
         </section>
 
         <section v-if="canViewRecords" class="mb-7 flex flex-col justify-between gap-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:flex-row sm:items-center">

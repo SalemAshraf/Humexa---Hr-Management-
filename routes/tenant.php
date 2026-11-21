@@ -11,6 +11,7 @@ use App\Modules\Organization\Http\Controllers\OrganizationController;
 use App\Modules\Employees\Http\Controllers\EmployeeController;
 use App\Modules\Attendance\Http\Controllers\TenantAttendanceDashboardController;
 use App\Modules\Attendance\Http\Controllers\TenantAttendanceRecordsController;
+use App\Modules\Attendance\Http\Controllers\TenantAttendanceRequestsController;
 use App\Modules\Employees\Http\Controllers\EmployeeAddressController;
 use App\Modules\Employees\Http\Controllers\EmployeeEmergencyContactController;
 use App\Modules\Employees\Http\Controllers\EmployeeIdentityRecordController;
@@ -44,6 +45,12 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
             Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
+
+            Route::prefix('/attendance/requests')->middleware('tenant.can:attendance.manage')->name('tenant.attendance.requests.')->controller(TenantAttendanceRequestsController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/correction/{correction}/review', 'reviewCorrection')->whereNumber('correction')->name('correction');
+                Route::post('/overtime/{overtime}/review', 'reviewOvertime')->whereNumber('overtime')->name('overtime');
+            });
 
             Route::prefix('/team')->middleware('tenant.can:roles.manage')->name('team.')->controller(TenantTeamController::class)->group(function () {
                 Route::get('/', 'index')->name('index');

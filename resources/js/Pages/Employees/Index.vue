@@ -41,8 +41,8 @@ const paginationLinks = computed(() => props.employees.links || []);
                 <p class="mt-2 text-sm text-slate-500">Manage employee profiles, employment status and organization assignments.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <Link href="/employees/archived" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Archived employees</Link>
-                <Link href="/employees/create" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700">+ Add employee</Link>
+                <Link v-if="$page.props.can?.['employees.manage']" href="/employees/archived" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Archived employees</Link>
+                <Link v-if="$page.props.can?.['employees.manage']" href="/employees/create" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700">+ Add employee</Link>
             </div>
         </section>
 
@@ -84,7 +84,7 @@ const paginationLinks = computed(() => props.employees.links || []);
                             <td class="px-4 py-3"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ statusLabel(item.employment_status) }}</span></td>
                             <td class="px-4 py-3 text-right"><Link :href="'/employees/' + item.id + '/edit'" class="font-semibold text-cyan-700">Edit</Link></td>
                         </tr>
-                        <tr v-if="!employees.data.length"><td colspan="6" class="px-4 py-12 text-center"><p class="font-semibold text-slate-700">No employees found</p><p class="mt-1 text-sm text-slate-500">Add your first employee or adjust the search filters.</p><Link href="/employees/create" class="mt-4 inline-flex rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white">Add employee</Link></td></tr>
+                        <tr v-if="!employees.data.length"><td colspan="6" class="px-4 py-12 text-center"><p class="font-semibold text-slate-700">No employees found</p><p class="mt-1 text-sm text-slate-500">Add your first employee or adjust the search filters.</p><Link v-if="$page.props.can?.['employees.manage']" href="/employees/create" class="mt-4 inline-flex rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold text-white">Add employee</Link></td></tr>
                     </tbody>
                 </table>
             </div>
