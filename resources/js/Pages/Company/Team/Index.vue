@@ -41,6 +41,10 @@ const label = (p) => p.replace('.', ' · ');
                     <div>
                         <p class="font-semibold text-slate-800">{{ a.name }} <span v-if="a.is_you" class="ml-1 rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold text-cyan-800">You</span></p>
                         <p class="text-xs text-slate-500">{{ a.email }}</p>
+                        <p class="text-xs" :class="a.employee ? 'text-emerald-700' : 'text-slate-400'">
+                            <a v-if="a.employee" :href="`/employees/${a.employee.id}`" class="underline">Linked to {{ a.employee.name }}</a>
+                            <span v-else>Not linked to an employee. Link it from the employee's Edit page ("Login account").</span>
+                        </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
                     <span v-if="!a.is_active" class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">Deactivated</span>

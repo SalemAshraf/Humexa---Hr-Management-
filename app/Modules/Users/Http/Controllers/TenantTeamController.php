@@ -22,12 +22,17 @@ class TenantTeamController extends Controller
         $tenantId = $this->tenantId();
         $this->actor($request);
 
+        $linked = \App\Modules\Employees\Models\Employee::query()
+            ->where('tenant_id', $tenantId)->whereNotNull('user_id')
+            ->get(['id', 'tenant_id', 'user_id', 'first_name', 'middle_name', 'last_name'])->keyBy('user_id');
+
         $accounts = User::query()
             ->where('tenant_id', $tenantId)
             ->where('account_type', User::ACCOUNT_TYPE_TENANT)
             ->orderBy('name')
             ->get()
             ->map(fn (User $u) => [
+                'employee' => $linked->get($u->id) ? ['id' => $linked->get($u->id)->id, 'name' => $linked->get($u->id)->full_name] : null,
                 'id' => $u->id,
                 'name' => $u->name,
                 'email' => $u->email,

@@ -361,3 +361,28 @@ test('employee create and update persist all supported personal contact fields',
         'marital_status' => 'married',
     ]);
 });
+
+test('HR links a login account to an employee: same company only, one employee per account', function () {
+    $a = registerEmployeeTenant('Link Alpha', 'link-alpha@example.test');
+    $b = registerEmployeeTenant('Link Beta', 'link-beta@example.test');
+    actAsEmployeeTenant($this, $a);
+    $base = 'http://' . $a['domain'] . '/employees';
+
+    $this->post($base, employeePayload(['first_name' => 'One']))->assertRedirect();
+    $this->post($base, employeePayload(['first_name' => 'Two']))->assertRedirect();
+    $ids = DB::table('employees')->where('tenant_id', $a['tenant']->id)->orderBy('id')->pluck('id');
+
+    // an account from another company is refused
+    $this->put($base . '/' . $ids[0], employeePayload(['first_name' => 'One', 'user_id' => $b['user']->id]))->assertSessionHasErrors('user_id');
+    expect(DB::table('employees')->where('id', $ids[0])->value('user_id'))->toBeNull();
+
+    // own company account links
+    $this->put($base . '/' . $ids[0], employeePayload(['first_name' => 'One', 'user_id' => $a['user']->id]))->assertSessionHasNoErrors();
+    expect((int) DB::table('employees')->where('id', $ids[0])->value('user_id'))->toBe($a['user']->id);
+
+    // the same account cannot be linked to a second employee
+    $this->put($base . '/' . $ids[1], employeePayload(['first_name' => 'Two', 'user_id' => $a['user']->id]))->assertSessionHasErrors('user_id');
+
+    // and it is no longer offered in the picker
+    $this->get($base . '/' . $ids[1] . '/edit')->assertInertia(fn ($p) => $p->where('accounts', fn ($acc) => collect($acc)->where('id', $a['user']->id)->isEmpty()));
+});

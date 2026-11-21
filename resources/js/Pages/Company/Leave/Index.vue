@@ -57,6 +57,7 @@ const toggleType = (type) =>
 const removeType = (type) => confirm(`Delete "${type.name}"? Only types with no requests can be deleted.`) && router.delete(`/leave/types/${type.id}`, { preserveScroll: true });
 
 const editing = ref(null);
+const editingName = computed(() => props.requests.data.find((x) => x.id === editing.value)?.employee ?? '');
 const editForm = useForm({ leave_type_id: '', start_date: '', end_date: '', reason: '' });
 const startEdit = (r) => {
     editing.value = editing.value === r.id ? null : r.id;
@@ -178,6 +179,7 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                 >{{ tab.label }}</button>
             </div>
             <form v-if="editing" class="grid grid-cols-1 gap-3 border-b border-slate-100 bg-slate-50 p-4 md:grid-cols-5" @submit.prevent="saveEdit({ id: editing })">
+                <p class="text-sm font-semibold text-slate-800 md:col-span-5">Editing the pending request of {{ editingName }}. Saving cancels the old request (kept in history) and files a new one that is checked again.</p>
                 <label class="text-xs font-medium text-slate-500">Type<select v-model="editForm.leave_type_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm"><option v-for="t in types.filter((x) => x.is_active)" :key="t.id" :value="t.id">{{ t.name }}</option></select></label>
                 <label class="text-xs font-medium text-slate-500">From<input v-model="editForm.start_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
                 <label class="text-xs font-medium text-slate-500">To<input v-model="editForm.end_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
@@ -197,7 +199,7 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                         <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="review(r.id, 'approve')">Approve</button>
                         <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="review(r.id, 'reject')">Reject</button>
                     </div>
-                    <div v-else-if="r.can_cancel" class="flex gap-3"><button v-if="r.can_edit" class="text-xs font-semibold text-cyan-700" @click="startEdit(r)">Edit</button><button class="text-xs font-semibold text-slate-500" @click="cancel(r.id)">Cancel request</button></div>
+                    <div v-if="r.can_cancel" class="mt-2 flex gap-3"><button v-if="r.can_edit" class="text-xs font-semibold text-cyan-700" @click="startEdit(r)">Edit</button><button class="text-xs font-semibold text-slate-500" @click="cancel(r.id)">Cancel request</button></div>
                 </li>
                 <li v-if="!requests.data.length" class="p-8 text-center text-sm text-slate-500">No leave requests here yet.</li>
             </ul>
@@ -222,7 +224,7 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                                     <button class="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-semibold text-white" @click="review(r.id, 'approve')">Approve</button>
                                     <button class="rounded-lg bg-white px-3 py-1 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="review(r.id, 'reject')">Reject</button>
                                 </div>
-                                <template v-else-if="r.can_cancel"><button v-if="r.can_edit" class="mr-3 text-xs font-semibold text-cyan-700" @click="startEdit(r)">Edit</button><button class="text-xs font-semibold text-slate-500 hover:text-red-600" @click="cancel(r.id)">Cancel</button></template>
+                                <div v-if="r.can_cancel" class="mt-2 text-right"><button v-if="r.can_edit" class="mr-3 text-xs font-semibold text-cyan-700" @click="startEdit(r)">Edit</button><button class="text-xs font-semibold text-slate-500 hover:text-red-600" @click="cancel(r.id)">Cancel</button></div>
                             </td>
                         </tr>
                         <tr v-if="!requests.data.length"><td colspan="6" class="px-4 py-10 text-center text-slate-500">No leave requests here yet.</td></tr>
