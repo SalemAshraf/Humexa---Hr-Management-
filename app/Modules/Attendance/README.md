@@ -47,7 +47,7 @@ Selfies use the private local disk path under `tenants/{tenant}/attendance/selfi
 ## Important gaps before production
 
 - Tenant timezone must be a configured tenant setting before date-boundary logic is considered final. The current implementation still uses the application timezone.
-- Overnight sessions crossing the tenant's local date boundary need explicit handling and tests.
+- Active sessions can be checked out across a date boundary, but the tenant timezone must be configured before date-boundary behavior is considered production-ready and needs dedicated tests.
 - Selfie validation, retention, and privacy policy must be confirmed.
 - Overtime, break and correction approval workflows need completion and authorization tests.
 - Fingerprint adapters need vendor/model-specific requirements and credentials strategy. Mobile OS biometric checks must remain on-device; raw biometric data must not be sent to Humexa.
