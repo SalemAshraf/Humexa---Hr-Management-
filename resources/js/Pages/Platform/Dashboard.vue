@@ -1,182 +1,174 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import PlatformLayout from '@/Layouts/Dashboard/PlatformLayout.vue';
 
 const props = defineProps({
-    stats: {
-        type: Object,
-        required: true,
-    },
-    recentCompanies: {
-        type: Array,
-        default: () => [],
-    },
-    canViewActivityLogs: {
-        type: Boolean,
-        default: false,
-    },
+    stats: { type: Object, required: true },
+    growth: { type: Array, default: () => [] },
+    registrationActivity: { type: Array, default: () => [] },
+    recentCompanies: { type: Array, default: () => [] },
+    recentActivity: { type: Array, default: () => [] },
+    canViewActivityLogs: { type: Boolean, default: false },
 });
 
-const statsCards = [
-    {
-        label: 'Total Companies',
-        description: 'All registered companies',
-        value: props.stats.totalCompanies,
-        icon: 'CO',
-    },
-    {
-        label: 'Tenant Users',
-        description: 'Users across all companies',
-        value: props.stats.totalTenantUsers,
-        icon: 'US',
-    },
-    {
-        label: 'New This Month',
-        description: 'Companies registered this month',
-        value: props.stats.newCompaniesThisMonth,
-        icon: 'MT',
-    },
-    {
-        label: 'New Today',
-        description: 'Companies registered today',
-        value: props.stats.newCompaniesToday,
-        icon: 'TD',
-    },
-];
+const statsCards = computed(() => [
+    { label: 'Registered companies', value: props.stats.totalCompanies, description: 'All company workspaces', icon: 'CO' },
+    { label: 'Active workspaces', value: props.stats.activeCompanies, description: `${props.stats.activeRate}% of registered`, icon: 'AC', accent: true },
+    { label: 'New this month', value: props.stats.newCompaniesThisMonth, description: 'Company registrations this month', icon: 'NM' },
+    { label: 'Suspended', value: props.stats.suspendedCompanies, description: 'Company access disabled', icon: 'SU', warning: true },
+]);
+
+const chartPoints = computed(() => {
+    const values = props.growth.map(item => Number(item.count || 0));
+    const max = Math.max(1, ...values);
+    return values.map((value, index) => ({
+        x: 32 + index * (568 / Math.max(values.length - 1, 1)),
+        y: 154 - (value / max) * 120,
+        label: props.growth[index]?.label,
+        count: value,
+    }));
+});
+const linePath = computed(() => chartPoints.value.map((p, i) => `${i ? 'L' : 'M'} ${p.x} ${p.y}`).join(' '));
+const areaPath = computed(() => chartPoints.value.length ? `${linePath.value} L 600 160 L 32 160 Z` : '');
+const totalStatus = computed(() => Math.max(0, props.stats.totalCompanies));
+const activeAngle = computed(() => totalStatus.value ? (props.stats.activeCompanies / totalStatus.value) * 360 : 0);
+const setupAngle = computed(() => totalStatus.value ? (props.stats.settingUpCompanies / totalStatus.value) * 360 : 0);
+const donutStyle = computed(() => ({ background: `conic-gradient(#78d9ae 0deg ${activeAngle.value}deg, #416f61 ${activeAngle.value}deg ${activeAngle.value + setupAngle.value}deg, #e57383 ${activeAngle.value + setupAngle.value}deg 360deg)` }));
+const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d => d.count)));
 </script>
 
 <template>
     <Head title="Platform Overview" />
-
     <PlatformLayout title="Overview" subtitle="Platform management and system insights">
-        <section class="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400">
-                    HUMEXA CONTROL CENTER
-                </p>
-                <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                    Platform Overview
-                </h1>
-                <p class="mt-2 max-w-2xl text-sm text-slate-400">
-                    A central view of company registrations and platform activity.
-                </p>
+                <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-300">Humexa Control Center</p>
+                <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">Platform growth, at a glance.</h1>
+                <p class="mt-1 text-sm text-slate-400">Company workspaces, registration activity and platform health.</p>
             </div>
-
-            <Link
-                :href="route('platform.companies.index')"
-                class="inline-flex items-center justify-center rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
-            >
-                Manage Companies
-                <span class="ms-2" aria-hidden="true">→</span>
+            <Link :href="route('platform.companies.index')" class="inline-flex items-center rounded-xl bg-emerald-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
+                Manage companies <span class="ms-2">→</span>
             </Link>
-        </section>
+        </div>
 
-        <section class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <article
-                v-for="stat in statsCards"
-                :key="stat.label"
-                class="hx-card relative overflow-hidden p-5"
-            >
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <p class="text-sm font-medium text-slate-400">{{ stat.label }}</p>
-                        <p class="mt-3 text-3xl font-bold tabular-nums text-white">
-                            {{ Number(stat.value ?? 0).toLocaleString() }}
-                        </p>
-                        <p class="mt-2 text-xs text-slate-500">{{ stat.description }}</p>
-                    </div>
-                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-cyan-400/15 bg-cyan-400/10 text-xs font-bold text-cyan-300">
-                        {{ stat.icon }}
-                    </span>
+        <div class="mb-5 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-xs">
+            <div><span class="font-bold tracking-wide text-slate-200">UI CONCEPT</span><span class="ms-3 text-slate-500">Live platform data · Development</span></div>
+            <span class="text-slate-500">Super admin view</span>
+        </div>
+
+        <section class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <article v-for="stat in statsCards" :key="stat.label" class="hx-card p-5">
+                <p class="text-xs text-slate-400">{{ stat.label }}</p>
+                <div class="mt-2 flex items-center justify-between">
+                    <p class="text-3xl font-bold tabular-nums" :class="stat.accent ? 'text-emerald-300' : stat.warning ? 'text-rose-300' : 'text-slate-100'">{{ Number(stat.value || 0).toLocaleString() }}</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-700 bg-slate-800/70 text-xs font-bold text-slate-400">{{ stat.icon }}</span>
                 </div>
-                <div class="pointer-events-none absolute -bottom-8 -end-8 h-24 w-24 rounded-full bg-cyan-500/5 blur-2xl" />
+                <p class="mt-2 text-xs text-slate-500">{{ stat.description }}</p>
             </article>
         </section>
 
-        <section class="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <article class="hx-card overflow-hidden p-5 sm:p-6 xl:col-span-2">
-                <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 class="font-semibold text-white">Recently Registered Companies</h2>
-                        <p class="mt-1 text-sm text-slate-400">The latest organizations joining Humexa</p>
-                    </div>
-                    <Link
-                        :href="route('platform.companies.index')"
-                        class="text-sm font-semibold text-cyan-400 transition hover:text-cyan-300"
-                    >
-                        View all companies →
-                    </Link>
+        <section class="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <article class="hx-card p-5 sm:p-6 xl:col-span-2">
+                <div class="mb-4">
+                    <h2 class="font-semibold text-slate-100">Company growth</h2>
+                    <p class="mt-1 text-xs text-slate-400">New registered workspaces · Last six months</p>
                 </div>
+                <div class="overflow-hidden">
+                    <svg viewBox="0 0 620 190" class="w-full" role="img" aria-label="Monthly company registrations trend">
+                        <g stroke="#263449" stroke-width="1">
+                            <line x1="32" y1="34" x2="600" y2="34"/><line x1="32" y1="74" x2="600" y2="74"/>
+                            <line x1="32" y1="114" x2="600" y2="114"/><line x1="32" y1="160" x2="600" y2="160"/>
+                        </g>
+                        <path v-if="chartPoints.length" :d="areaPath" fill="#78d9ae" fill-opacity=".12"/>
+                        <path v-if="chartPoints.length" :d="linePath" fill="none" stroke="#78d9ae" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <g v-for="(point,index) in chartPoints" :key="index">
+                            <circle :cx="point.x" :cy="point.y" r="4" fill="#78d9ae"/>
+                            <text :x="point.x" :y="point.y-10" text-anchor="middle" fill="#dbe5ef" font-size="11" font-weight="600">{{ point.count }}</text>
+                            <text :x="point.x" y="180" text-anchor="middle" fill="#64748b" font-size="10">{{ point.label }}</text>
+                        </g>
+                    </svg>
+                </div>
+                <p class="mt-2 text-[10px] text-slate-500">Workspace metadata only · employee records are not exposed at platform level</p>
+            </article>
 
+            <article class="hx-card p-5 sm:p-6">
+                <h2 class="font-semibold text-slate-100">Workspace status</h2>
+                <p class="mt-1 text-xs text-slate-400">{{ stats.totalCompanies }} registered workspaces</p>
+                <div class="my-6 flex items-center justify-center gap-5">
+                    <div class="relative h-32 w-32 shrink-0 rounded-full" :style="donutStyle">
+                        <div class="absolute inset-[17px] flex flex-col items-center justify-center rounded-full bg-[#111c2e]">
+                            <span class="text-2xl font-bold text-slate-100">{{ stats.totalCompanies }}</span><span class="text-[10px] text-slate-500">workspaces</span>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div><p class="text-xs text-slate-400">Activation rate</p><p class="text-xl font-bold text-emerald-300">{{ stats.activeRate }}%</p></div>
+                        <div><p class="text-xs text-slate-400">Suspended share</p><p class="text-lg font-semibold text-slate-100">{{ stats.suspendedRate }}%</p></div>
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-400">
+                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-300"></span>Active · {{ stats.activeCompanies }}</p>
+                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-[#416f61]"></span>Setting up · {{ stats.settingUpCompanies }}</p>
+                    <p class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-400"></span>Suspended · {{ stats.suspendedCompanies }}</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <article class="hx-card p-5 sm:p-6 xl:col-span-2">
+                <div class="mb-4 flex items-center justify-between">
+                    <div><h2 class="font-semibold text-slate-100">Recently registered companies</h2><p class="mt-1 text-xs text-slate-400">Workspace metadata and access status</p></div>
+                    <Link :href="route('platform.companies.index')" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">All companies →</Link>
+                </div>
                 <div v-if="recentCompanies.length" class="overflow-x-auto">
                     <table class="w-full min-w-[520px] text-left text-sm">
-                        <thead>
-                            <tr class="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-500">
-                                <th class="px-3 py-3 font-semibold">Company</th>
-                                <th class="px-3 py-3 font-semibold">Domain</th>
-                                <th class="px-3 py-3 font-semibold">Registered</th>
-                            </tr>
-                        </thead>
+                        <thead><tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500"><th class="px-2 py-3">Company / Workspace</th><th class="px-2 py-3">Status</th><th class="px-2 py-3">Registered</th><th class="px-2 py-3">Domains</th></tr></thead>
                         <tbody>
-                            <tr
-                                v-for="company in recentCompanies"
-                                :key="company.id"
-                                class="border-b border-slate-800/70 last:border-0"
-                            >
-                                <td class="px-3 py-4 font-medium text-slate-200">{{ company.companyName }}</td>
-                                <td class="px-3 py-4 text-cyan-300">
-                                    <span v-if="company.domains.length">{{ company.domains.join(', ') }}</span>
-                                    <span v-else class="text-slate-500">No domain</span>
-                                </td>
-                                <td class="px-3 py-4 text-slate-400">{{ company.createdAt || '—' }}</td>
+                            <tr v-for="company in recentCompanies" :key="company.id" class="border-b border-slate-800/70 last:border-0">
+                                <td class="px-2 py-3 font-semibold text-slate-200">{{ company.companyName }}</td>
+                                <td class="px-2 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-semibold capitalize" :class="company.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : company.status === 'suspended' ? 'bg-rose-400/10 text-rose-300' : 'bg-amber-400/10 text-amber-300'">{{ company.status.replace('_',' ') }}</span></td>
+                                <td class="px-2 py-3 text-xs text-slate-400">{{ company.createdAt || '—' }}</td>
+                                <td class="px-2 py-3 text-xs text-slate-400">{{ company.domains.join(', ') || '—' }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <div v-else class="flex min-h-40 flex-col items-center justify-center text-center">
-                    <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-sm font-bold text-slate-400">CO</span>
-                    <p class="text-sm font-medium text-slate-300">No companies registered yet</p>
-                    <p class="mt-1 text-xs text-slate-500">New company registrations will appear here.</p>
-                </div>
+                <div v-else class="py-12 text-center text-sm text-slate-500">No companies registered yet.</div>
+                <p class="mt-3 text-[10px] text-slate-500">Showing {{ recentCompanies.length }} recent companies · company metadata only</p>
             </article>
 
             <article class="hx-card p-5 sm:p-6">
-                <h2 class="font-semibold text-white">Platform Shortcuts</h2>
-                <p class="mt-1 text-sm text-slate-400">Go directly to an available workspace</p>
-
-                <div class="mt-5 space-y-3">
-                    <Link
-                        :href="route('platform.companies.index')"
-                        class="group flex items-center gap-3 rounded-xl border border-slate-800 p-3 transition hover:border-cyan-400/30 hover:bg-cyan-400/5"
-                    >
-                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400/10 text-xs font-bold text-cyan-300">CO</span>
-                        <span class="min-w-0 flex-1">
-                            <span class="block text-sm font-semibold text-slate-200">Company Management</span>
-                            <span class="mt-1 block text-xs text-slate-500">Review status and manage access</span>
-                        </span>
-                        <span class="text-slate-500 transition group-hover:text-cyan-300">→</span>
-                    </Link>
-
-                    <Link
-                        v-if="canViewActivityLogs"
-                        :href="route('platform.activity-logs.index')"
-                        class="group flex items-center gap-3 rounded-xl border border-slate-800 p-3 transition hover:border-cyan-400/30 hover:bg-cyan-400/5"
-                    >
-                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-400/10 text-xs font-bold text-cyan-300">AC</span>
-                        <span class="min-w-0 flex-1">
-                            <span class="block text-sm font-semibold text-slate-200">Activity Logs</span>
-                            <span class="mt-1 block text-xs text-slate-500">Inspect administrative status changes</span>
-                        </span>
-                        <span class="text-slate-500 transition group-hover:text-cyan-300">→</span>
-                    </Link>
+                <h2 class="font-semibold text-slate-100">Registration activity</h2>
+                <p class="mt-1 text-xs text-slate-400">Daily signups · Last seven days</p>
+                <div class="mt-7 flex h-36 items-end justify-between gap-2">
+                    <div v-for="day in registrationActivity" :key="day.label" class="flex flex-1 flex-col items-center gap-2">
+                        <span class="text-[10px] text-slate-400">{{ day.count }}</span>
+                        <div class="flex h-24 w-full items-end justify-center"><div class="w-full max-w-7 rounded-t-md bg-emerald-300/50 transition hover:bg-emerald-300" :style="{ height: Math.max(5, (day.count/maxDay)*100)+'%' }"></div></div>
+                        <span class="text-[10px] text-slate-500">{{ day.label }}</span>
+                    </div>
                 </div>
+                <div class="mt-5 border-t border-slate-800 pt-4"><p class="text-xs text-slate-400">New this week</p><p class="mt-1 text-xl font-bold text-emerald-300">{{ registrationActivity.reduce((sum,d)=>sum+d.count,0) }}</p></div>
+            </article>
+        </section>
 
-                <div class="mt-5 rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-4">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">More modules</p>
-                    <p class="mt-2 text-sm leading-6 text-slate-500">
-                        Subscriptions, billing, platform users, notifications and settings will be connected as their backend modules are implemented.
-                    </p>
+        <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <article v-if="canViewActivityLogs" class="hx-card p-5 sm:p-6 xl:col-span-2">
+                <div class="mb-5 flex items-center justify-between"><div><h2 class="font-semibold text-slate-100">Recent admin activity</h2><p class="mt-1 text-xs text-slate-400">Platform actions, recorded with context</p></div><Link :href="route('platform.activity-logs.index')" class="text-xs font-semibold text-emerald-300">Full log →</Link></div>
+                <div v-if="recentActivity.length" class="space-y-3">
+                    <div v-for="entry in recentActivity" :key="entry.id" class="flex gap-3 border-b border-slate-800 pb-3 last:border-0">
+                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full" :class="entry.newStatus === 'suspended' ? 'bg-rose-400' : 'bg-emerald-300'"></span>
+                        <div class="min-w-0"><p class="text-sm text-slate-200">{{ entry.event === 'company.suspended' ? 'Workspace access suspended' : 'Company registration reviewed / activated' }}</p><p class="mt-1 text-xs text-slate-500">{{ entry.companyName }} · {{ entry.actor }} · {{ entry.createdAt }}</p></div>
+                    </div>
+                </div>
+                <p v-else class="text-sm text-slate-500">No recorded platform actions yet.</p>
+            </article>
+            <article class="hx-card p-5 sm:p-6">
+                <h2 class="font-semibold text-slate-100">Platform health</h2><p class="mt-1 text-xs text-slate-400">Key platform metrics</p>
+                <div class="mt-5 space-y-4 text-xs">
+                    <div class="flex justify-between"><span class="text-slate-400">Activation rate</span><span class="font-semibold text-emerald-300">{{ stats.activeRate }}%</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Tenant users</span><span class="font-semibold text-slate-200">{{ stats.totalTenantUsers.toLocaleString() }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Registrations today</span><span class="font-semibold text-slate-200">{{ stats.newCompaniesToday }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Suspended share</span><span class="font-semibold text-slate-200">{{ stats.suspendedRate }}%</span></div>
                 </div>
             </article>
         </section>
