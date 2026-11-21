@@ -7,6 +7,7 @@ namespace App\Modules\Leave\Services;
 use App\Models\User;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Leave\Models\LeaveRequest;
+use App\Modules\Leave\Models\LeaveSetting;
 use App\Modules\Leave\Models\LeaveType;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -15,12 +16,26 @@ use Illuminate\Validation\ValidationException;
 class LeaveService
 {
     /**
-     * Working days between two dates, inclusive. Weekend days come from
-     * config('humexa.leave.weekend_days') (Carbon day numbers, 0 = Sunday).
+     * The company's weekend (Carbon day numbers, 0 = Sunday). Falls back to the
+     * config default until the company saves its own setting.
+     *
+     * @return list<int>
      */
-    public function workingDays(Carbon $start, Carbon $end): float
+    public function weekendDays(string $tenantId): array
     {
-        $weekend = config('humexa.leave.weekend_days', [5, 6]);
+        $saved = LeaveSetting::query()->where('tenant_id', $tenantId)->value('weekend_days');
+
+        return array_map('intval', is_array($saved) ? $saved : config('humexa.leave.weekend_days', [5, 6]));
+    }
+
+    /**
+     * Working days between two dates, inclusive.
+     *
+     * @param list<int>|null $weekend
+     */
+    public function workingDays(Carbon $start, Carbon $end, ?array $weekend = null): float
+    {
+        $weekend ??= config('humexa.leave.weekend_days', [5, 6]);
         $days = 0;
 
         for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
@@ -93,7 +108,7 @@ class LeaveService
             throw ValidationException::withMessages(['end_date' => 'Split requests that cross a calendar year.']);
         }
 
-        $days = $this->workingDays($start, $end);
+        $days = $this->workingDays($start, $end, $this->weekendDays($tenantId));
 
         if ($days <= 0) {
             throw ValidationException::withMessages(['start_date' => 'The selected dates contain no working days.']);

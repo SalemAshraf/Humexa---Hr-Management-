@@ -42,6 +42,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
             Route::prefix('/leave')->middleware('tenant.can:leave.view')->name('leave.')->controller(LeaveController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
+                Route::put('/settings', 'updateSettings')->middleware('tenant.can:leave.manage')->name('settings.update');
                 Route::post('/types', 'storeType')->middleware('tenant.can:leave.manage')->name('types.store');
                 Route::put('/types/{type}', 'updateType')->whereNumber('type')->middleware('tenant.can:leave.manage')->name('types.update');
                 Route::post('/requests', 'storeRequest')->middleware('tenant.can:leave.manage')->name('requests.store');

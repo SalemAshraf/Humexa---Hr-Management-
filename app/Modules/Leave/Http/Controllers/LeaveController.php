@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Leave\Models\LeaveRequest;
+use App\Modules\Leave\Models\LeaveSetting;
 use App\Modules\Leave\Models\LeaveType;
 use App\Modules\Leave\Services\LeaveService;
 use Illuminate\Http\RedirectResponse;
@@ -89,8 +90,30 @@ class LeaveController extends Controller
                 'approve' => $user->can('leave.approve'),
                 'own_employee_id' => $myEmployeeId,
             ],
+            'settings' => [
+                'weekend_days' => $this->leave->weekendDays($tenantId),
+                'is_default' => ! LeaveSetting::query()->where('tenant_id', $tenantId)->exists(),
+            ],
             'year' => $year,
         ]);
+    }
+
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+        $this->user($request);
+
+        $data = $request->validate([
+            'weekend_days' => ['present', 'array', 'max:6'],
+            'weekend_days.*' => ['integer', 'between:0,6', 'distinct'],
+        ]);
+
+        LeaveSetting::updateOrCreate(
+            ['tenant_id' => $tenantId],
+            ['weekend_days' => array_values(array_map('intval', $data['weekend_days']))],
+        );
+
+        return back()->with('success', 'Weekend days saved. They apply to new requests only.');
     }
 
     public function storeType(Request $request): RedirectResponse

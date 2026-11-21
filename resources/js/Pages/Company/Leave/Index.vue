@@ -11,8 +11,13 @@ const props = defineProps({
     employees: { type: Array, default: () => [] },
     balances: { type: Array, default: () => [] },
     abilities: { type: Object, required: true },
+    settings: { type: Object, required: true },
     year: { type: Number, required: true },
 });
+
+const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const weekendForm = useForm({ weekend_days: [...props.settings.weekend_days] });
+const saveWeekend = () => weekendForm.put('/leave/settings', { preserveScroll: true });
 
 const statusStyles = {
     pending: 'bg-amber-50 text-amber-700',
@@ -92,7 +97,19 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
         </section>
 
         <section v-if="abilities.manage && showTypes" class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 class="text-base font-bold text-slate-900">Leave types</h2>
+            <h2 class="text-base font-bold text-slate-900">Company weekend</h2>
+            <p class="mt-1 text-xs text-slate-500">
+                Days ticked here are not counted as leave days.
+                <span v-if="settings.is_default" class="font-semibold text-amber-600">Not confirmed yet: the default (Friday and Saturday) is in use. Check it matches your company policy.</span>
+            </p>
+            <form class="mt-3 flex flex-wrap items-center gap-3" @submit.prevent="saveWeekend">
+                <label v-for="(name, i) in dayNames" :key="i" class="flex items-center gap-1.5 text-sm text-slate-700">
+                    <input v-model="weekendForm.weekend_days" :value="i" type="checkbox" class="rounded" /> {{ name }}
+                </label>
+                <button class="rounded-lg bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white" :disabled="weekendForm.processing">Save weekend</button>
+            </form>
+            <p class="mt-2 text-xs text-slate-400">Annual-day amounts are whatever your company sets. They are not checked against any labor law.</p>
+            <h2 class="mt-6 text-base font-bold text-slate-900">Leave types</h2>
             <ul class="mt-3 divide-y divide-slate-100">
                 <li v-for="type in types" :key="type.id" class="flex items-center justify-between py-2 text-sm">
                     <span :class="type.is_active ? 'text-slate-800' : 'text-slate-400 line-through'">
@@ -122,9 +139,13 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                     <option value="" disabled>Leave type</option>
                     <option v-for="t in types.filter((x) => x.is_active)" :key="t.id" :value="t.id">{{ t.name }}</option>
                 </select>
-                <input v-model="requestForm.start_date" type="date" class="rounded-lg border-slate-300 text-sm" />
-                <input v-model="requestForm.end_date" type="date" class="rounded-lg border-slate-300 text-sm" />
-                <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" :disabled="requestForm.processing">Submit</button>
+                <label class="text-xs font-medium text-slate-500">Start date
+                    <input v-model="requestForm.start_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                </label>
+                <label class="text-xs font-medium text-slate-500">End date
+                    <input v-model="requestForm.end_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm" />
+                </label>
+                <button class="self-end rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" :disabled="requestForm.processing">Submit</button>
                 <input v-model="requestForm.reason" placeholder="Reason (optional)" class="rounded-lg border-slate-300 text-sm md:col-span-5" />
             </form>
             <p v-for="(msg, key) in requestForm.errors" :key="key" class="mt-2 text-xs text-red-600">{{ msg }}</p>
@@ -145,7 +166,23 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                     @click="setStatus(tab.value)"
                 >{{ tab.label }}</button>
             </div>
-            <div class="overflow-x-auto">
+            <ul class="divide-y divide-slate-100 sm:hidden" data-testid="leave-cards">
+                <li v-for="r in requests.data" :key="r.id" class="space-y-2 p-4">
+                    <div class="flex items-start justify-between gap-2">
+                        <div><p class="font-semibold text-slate-800">{{ r.employee }}</p><p class="text-xs text-slate-400">{{ r.type }} · {{ r.days }} day(s)</p></div>
+                        <span class="rounded-full px-2.5 py-1 text-xs font-semibold capitalize" :class="statusStyles[r.status]">{{ r.status }}</span>
+                    </div>
+                    <p class="text-xs text-slate-500">{{ r.start_date }} → {{ r.end_date }}</p>
+                    <div v-if="r.can_review" class="flex items-center gap-2">
+                        <input v-model="note[r.id]" placeholder="Note" class="min-w-0 flex-1 rounded-lg border-slate-300 py-1 text-xs" />
+                        <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="review(r.id, 'approve')">Approve</button>
+                        <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="review(r.id, 'reject')">Reject</button>
+                    </div>
+                    <button v-else-if="r.can_cancel" class="text-xs font-semibold text-slate-500" @click="cancel(r.id)">Cancel request</button>
+                </li>
+                <li v-if="!requests.data.length" class="p-8 text-center text-sm text-slate-500">No leave requests here yet.</li>
+            </ul>
+            <div class="hidden overflow-x-auto sm:block">
                 <table class="min-w-full text-sm" data-testid="leave-table">
                     <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                         <tr>

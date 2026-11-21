@@ -93,6 +93,7 @@ test('dashboard analytics count only this company and respect permissions', func
             ->where('analytics.headcount.current', 2)
             ->where('analytics.headcount.on_probation', 1)
             ->where('analytics.attendance.expected', 2)
+            ->where('analytics.leave.pending', 0)
         );
 
     $this->actingAs($employee, 'tenant')
@@ -101,5 +102,6 @@ test('dashboard analytics count only this company and respect permissions', func
         ->assertInertia(fn ($page) => $page
             ->where('analytics.headcount', null)
             ->where('analytics.attendance', null)
+            ->where('analytics.leave', null)
         );
 });

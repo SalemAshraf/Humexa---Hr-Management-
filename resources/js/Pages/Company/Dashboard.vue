@@ -14,7 +14,7 @@ const props = defineProps({
     },
     analytics: {
         type: Object,
-        default: () => ({ headcount: null, attendance: null }),
+        default: () => ({ headcount: null, attendance: null, leave: null }),
     },
 });
 
@@ -55,34 +55,19 @@ const formattedCreatedAt = computed(() => {
     }).format(date);
 });
 
-const statCards = computed(() => [
-    {
-        label: 'Team Accounts',
-        value: Number(props.stats.teamAccounts ?? 0).toLocaleString(),
-        description: 'User accounts in this workspace',
-        shortcut: 'US',
-    },
-    {
-        label: 'Workspace Status',
-        value: isActive.value ? 'Active' : 'Suspended',
-        description: 'Current company access status',
-        shortcut: 'ST',
-        status: isActive.value ? 'success' : 'danger',
-    },
-    {
-        label: 'Workspace Created',
-        value: formattedCreatedAt.value,
-        description: 'Company registration date',
-        shortcut: 'DT',
-    },
-    {
-        label: 'Workspace Domain',
-        value: props.company.domain || '—',
-        description: 'Your company sign-in address',
-        shortcut: 'DM',
-        compact: true,
-    },
-]);
+const kpis = computed(() => {
+    const list = [];
+    const h = props.analytics?.headcount;
+    const at = props.analytics?.attendance;
+    const lv = props.analytics?.leave;
+    if (h) list.push({ label: 'Employees', value: h.current, hint: `${h.on_probation} on probation`, href: '/employees', tone: 'text-slate-900' });
+    if (at) list.push({ label: 'Attendance today', value: `${presentRate.value}%`, hint: `${at.present} of ${at.expected} expected recorded, ${at.late} late`, href: '/attendance', tone: 'text-emerald-700' });
+    if (lv) {
+        list.push({ label: 'Leave waiting for approval', value: lv.pending, hint: 'Open the leave page to review', href: '/leave', tone: lv.pending ? 'text-amber-600' : 'text-slate-900' });
+        list.push({ label: 'On leave today', value: lv.on_leave_today, hint: 'Approved leave covering today', href: '/leave', tone: 'text-slate-900' });
+    }
+    return list;
+});
 
 const modules = [
     {
@@ -148,86 +133,14 @@ const modules = [
             </div>
         </section>
 
-        <!-- Company identity card -->
-        <section class="mb-7 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-[#12334A] px-5 py-6 sm:px-7 sm:py-8">
-                <div class="pointer-events-none absolute -end-12 -top-24 h-64 w-64 rounded-full border-[36px] border-cyan-400/10" />
-                <div class="pointer-events-none absolute end-24 -bottom-24 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
-
-                <div class="relative flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
-                            YOUR ORGANIZATION
-                        </p>
-                        <h2 class="mt-2 truncate text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                            {{ company.name }}
-                        </h2>
-                        <p class="mt-2 break-all text-sm text-slate-300">
-                            {{ company.domain }}
-                        </p>
-                    </div>
-
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-2xl font-black text-cyan-200 shadow-xl backdrop-blur">
-                        {{ company.name?.charAt(0)?.toUpperCase() || 'H' }}
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-                <div class="px-5 py-4 sm:px-7">
-                    <p class="text-xs font-medium text-slate-500">Workspace status</p>
-                    <p class="mt-1 text-sm font-semibold capitalize" :class="isActive ? 'text-emerald-700' : 'text-red-700'">
-                        {{ company.status || 'Unknown' }}
-                    </p>
-                </div>
-                <div class="px-5 py-4 sm:px-7">
-                    <p class="text-xs font-medium text-slate-500">Registered on</p>
-                    <p class="mt-1 text-sm font-semibold text-slate-800">{{ formattedCreatedAt }}</p>
-                </div>
-                <div class="px-5 py-4 sm:px-7">
-                    <p class="text-xs font-medium text-slate-500">Workspace type</p>
-                    <p class="mt-1 text-sm font-semibold text-slate-800">Humexa HRMS</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Workspace stats -->
-        <section class="mb-8">
-            <div class="mb-4">
-                <h2 class="text-base font-bold text-slate-900">Workspace at a glance</h2>
-                <p class="mt-1 text-sm text-slate-500">
-                    Live information currently available for your company.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <article
-                    v-for="stat in statCards"
-                    :key="stat.label"
-                    class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                >
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-slate-500">{{ stat.label }}</p>
-                            <p
-                                class="mt-3 break-words font-bold tracking-tight"
-                                :class="[
-                                    stat.compact ? 'text-base' : 'text-2xl',
-                                    stat.status === 'success' ? 'text-emerald-700' : '',
-                                    stat.status === 'danger' ? 'text-red-700' : 'text-slate-900',
-                                ]"
-                            >
-                                {{ stat.value }}
-                            </p>
-                            <p class="mt-2 text-xs leading-5 text-slate-400">{{ stat.description }}</p>
-                        </div>
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-xs font-bold text-cyan-800">
-                            {{ stat.shortcut }}
-                        </span>
-                    </div>
-                    <div class="pointer-events-none absolute -bottom-8 -end-8 h-24 w-24 rounded-full bg-cyan-500/5 blur-2xl transition group-hover:bg-cyan-500/10" />
-                </article>
-            </div>
+        <!-- Key numbers -->
+        <section v-if="kpis.length" class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-testid="kpi-row">
+            <component :is="k.href ? Link : 'article'" v-for="k in kpis" :key="k.label" :href="k.href"
+                class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <p class="text-sm font-medium text-slate-500">{{ k.label }}</p>
+                <p class="mt-3 text-3xl font-bold tracking-tight" :class="k.tone">{{ k.value }}</p>
+                <p class="mt-2 text-xs text-slate-400">{{ k.hint }}</p>
+            </component>
         </section>
 
         <!-- Workforce analytics -->
@@ -336,19 +249,5 @@ const modules = [
             </div>
         </section>
 
-        <!-- Empty state / roadmap -->
-        <section class="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-6 sm:p-8">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-cyan-700 shadow-sm ring-1 ring-slate-200">
-                    HX
-                </div>
-                <div class="min-w-0">
-                    <h2 class="font-semibold text-slate-900">Your workspace is ready</h2>
-                    <p class="mt-1 max-w-3xl text-sm leading-6 text-slate-500">
-                        Your company workspace is connected and secure. Employee, attendance, leave and payroll data will appear here as those modules are implemented and enabled.
-                    </p>
-                </div>
-            </div>
-        </section>
     </CompanyLayout>
 </template>

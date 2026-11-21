@@ -174,3 +174,26 @@ test('a plain employee account cannot open the leave module', function () {
     ($this->as)($staff)->get("{$this->base}/leave")->assertForbidden();
     ($this->as)($staff)->post("{$this->base}/leave/requests", [])->assertForbidden();
 });
+
+test('the company weekend setting changes day counting, is permission gated and stays per company', function () {
+    $emp = ($this->mkEmployee)($this->tid, 'Weekend');
+    $manager = ($this->mkUser)(TenantRoleCatalog::MANAGER, 'mgr2@tenant-test.example');
+
+    ($this->as)($manager)->put("{$this->base}/leave/settings", ['weekend_days' => [0]])->assertForbidden();
+
+    ($this->as)($this->reg['user'])->put("{$this->base}/leave/settings", ['weekend_days' => [0]])->assertSessionHasNoErrors();
+    ($this->as)($this->reg['user'])->put("{$this->base}/leave/settings", ['weekend_days' => [9]])->assertSessionHasErrors('weekend_days.0');
+
+    // Sun 2026-11-22 to Sat 2026-11-28 with only Sunday off is 6 working days, but the type allows 5.
+    $this->annual->update(['annual_days' => 10]);
+    ($this->as)($this->reg['user'])->post("{$this->base}/leave/requests", [
+        'employee_id' => $emp->id, 'leave_type_id' => $this->annual->id,
+        'start_date' => '2026-11-22', 'end_date' => '2026-11-28',
+    ])->assertSessionHasNoErrors();
+    expect(LeaveRequest::first()->days)->toBe(6.0);
+
+    $other = app(RegisterCompanyAction::class)->execute(
+        companyName: 'Weekend Other Co', adminName: 'Other', email: 'wk-other@tenant-test.example', password: 'StrongPassword123!',
+    );
+    expect(app(\App\Modules\Leave\Services\LeaveService::class)->weekendDays((string) $other['tenant']->id))->toBe([5, 6]);
+});

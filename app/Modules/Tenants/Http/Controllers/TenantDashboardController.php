@@ -48,6 +48,9 @@ class TenantDashboardController extends Controller
                 'headcount' => $user->can('employees.view')
                     ? $analytics->headcount((string) $tenant->getTenantKey())
                     : null,
+                'leave' => $user->can('leave.manage')
+                    ? $analytics->leave((string) $tenant->getTenantKey())
+                    : null,
                 'attendance' => $user->can('attendance.view')
                     ? $analytics->attendanceToday((string) $tenant->getTenantKey())
                     : null,

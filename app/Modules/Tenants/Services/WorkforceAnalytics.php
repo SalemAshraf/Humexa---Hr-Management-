@@ -7,6 +7,7 @@ namespace App\Modules\Tenants\Services;
 use App\Modules\Attendance\Models\AttendanceRecord;
 use App\Modules\Attendance\Models\AttendanceSession;
 use App\Modules\Employees\Models\Employee;
+use App\Modules\Leave\Models\LeaveRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -130,6 +131,20 @@ class WorkforceAnalytics
             'checked_in_now' => $checkedIn,
             'late' => $late,
             'absent_or_missing' => max(0, $expected - $present),
+        ];
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function leave(string $tenantId, ?Carbon $now = null): array
+    {
+        $today = ($now ?? now())->toDateString();
+
+        return [
+            'pending' => LeaveRequest::query()->where('tenant_id', $tenantId)->where('status', LeaveRequest::PENDING)->count(),
+            'on_leave_today' => LeaveRequest::query()->where('tenant_id', $tenantId)->where('status', LeaveRequest::APPROVED)
+                ->whereDate('start_date', '<=', $today)->whereDate('end_date', '>=', $today)->count(),
         ];
     }
 }
