@@ -70,6 +70,7 @@ class AttendanceMobileAction
     {
         $earth=6371000; $dLat=deg2rad($lat2-$lat1); $dLon=deg2rad($lon2-$lon1);
         $a=sin($dLat/2)**2+cos(deg2rad($lat1))*cos(deg2rad($lat2))*sin($dLon/2)**2;
-        return $earth*2*atan2(sqrt($a),sqrt(1-$a));
+        $a = min(1.0, max(0.0, $a));
+        return $earth * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 }
