@@ -15,7 +15,7 @@ Route::domain('{tenant}.humexa.test')->middleware([
     EnsureTenantActive::class,
 ])->prefix('v1')->group(function(){
     Route::middleware('auth:sanctum')->prefix('attendance')->group(function(){
-        Route::get('/policy',[AttendanceController::class,'policy']);
+        Route::post('/auth/logout',[MobileAuthController::class,'logout']);\n        Route::get('/policy',[AttendanceController::class,'policy']);
         Route::get('/status',[AttendanceController::class,'status']);
         Route::get('/history',[AttendanceController::class,'history']);
         Route::post('/check-in',[AttendanceController::class,'checkIn']);
