@@ -55,3 +55,51 @@ test('a user belonging to another tenant cannot access this company dashboard', 
         ->get('http://' . $this->registration['domain'] . '/dashboard')
         ->assertForbidden();
 });
+
+test('dashboard analytics count only this company and respect permissions', function () {
+    $other = app(RegisterCompanyAction::class)->execute(
+        companyName: 'Analytics Other Co',
+        adminName: 'Other Admin',
+        email: 'analytics-other@tenant-test.example',
+        password: 'StrongPassword123!',
+    );
+
+    $make = fn (array $reg, string $first, string $status = 'active') => app(\App\Modules\Employees\Actions\CreateEmployeeAction::class)->execute(
+        data: ['first_name' => $first, 'last_name' => 'Person', 'employment_status' => $status, 'hire_date' => now()->toDateString()],
+        tenantId: (string) $reg['tenant']->id,
+        actorId: null,
+    );
+
+    $make($this->registration, 'One');
+    $make($this->registration, 'Two', 'probation');
+    $make($this->registration, 'Gone', 'resigned');
+    $make($other, 'Foreign');
+    $make($other, 'Foreign2');
+
+    $employee = $this->tenant->run(function () {
+        $user = new User(['name' => 'Plain Staff', 'email' => 'plain@tenant-test.example', 'password' => 'StrongPassword123!']);
+        $user->forceFill(['tenant_id' => $this->tenant->id, 'account_type' => User::ACCOUNT_TYPE_TENANT])->save();
+        $user->assignRole(\App\Modules\Users\Support\TenantRoleCatalog::EMPLOYEE);
+
+        return $user;
+    });
+
+    $url = 'http://' . $this->registration['domain'] . '/dashboard';
+
+    $this->actingAs($this->admin, 'tenant')
+        ->withSession(['tenant_session_version' => 1])
+        ->get($url)
+        ->assertInertia(fn ($page) => $page
+            ->where('analytics.headcount.current', 2)
+            ->where('analytics.headcount.on_probation', 1)
+            ->where('analytics.attendance.expected', 2)
+        );
+
+    $this->actingAs($employee, 'tenant')
+        ->withSession(['tenant_session_version' => 1])
+        ->get($url)
+        ->assertInertia(fn ($page) => $page
+            ->where('analytics.headcount', null)
+            ->where('analytics.attendance', null)
+        );
+});

@@ -12,6 +12,27 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    analytics: {
+        type: Object,
+        default: () => ({ headcount: null, attendance: null }),
+    },
+});
+
+const headcount = computed(() => props.analytics?.headcount ?? null);
+const attendance = computed(() => props.analytics?.attendance ?? null);
+
+const maxDepartment = computed(() =>
+    Math.max(1, ...(headcount.value?.by_department ?? []).map((row) => row.total)),
+);
+const maxMonthly = computed(() =>
+    Math.max(1, ...(headcount.value?.monthly ?? []).flatMap((row) => [row.hires, row.exits])),
+);
+const presentRate = computed(() => {
+    if (!attendance.value || !attendance.value.expected) {
+        return 0;
+    }
+
+    return Math.min(100, Math.round((attendance.value.present / attendance.value.expected) * 100));
 });
 
 const isActive = computed(() => props.company.status === 'active');
@@ -205,6 +226,70 @@ const modules = [
                     <div class="pointer-events-none absolute -bottom-8 -end-8 h-24 w-24 rounded-full bg-cyan-500/5 blur-2xl transition group-hover:bg-cyan-500/10" />
                 </article>
             </div>
+        </section>
+
+        <!-- Workforce analytics -->
+        <section v-if="headcount || attendance" class="mb-8 grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <article v-if="headcount" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2" data-testid="headcount-card">
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900">Workforce</h2>
+                        <p class="mt-1 text-sm text-slate-500">Current employees by department</p>
+                    </div>
+                    <p class="text-3xl font-bold text-slate-900">{{ headcount.current }}
+                        <span class="text-sm font-medium text-slate-500">employees</span>
+                    </p>
+                </div>
+
+                <ul class="mt-5 space-y-3">
+                    <li v-for="row in headcount.by_department" :key="row.name">
+                        <div class="mb-1 flex justify-between text-xs font-medium text-slate-600">
+                            <span class="truncate">{{ row.name }}</span>
+                            <span>{{ row.total }}</span>
+                        </div>
+                        <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+                            <div class="h-full rounded-full bg-emerald-500" :style="{ width: (row.total / maxDepartment) * 100 + '%' }" />
+                        </div>
+                    </li>
+                    <li v-if="!headcount.by_department.length" class="text-sm text-slate-500">
+                        Add employees to see the department split.
+                    </li>
+                </ul>
+
+                <div class="mt-6 border-t border-slate-100 pt-4">
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Hires and exits, last 6 months</p>
+                    <div class="flex items-end gap-3">
+                        <div v-for="m in headcount.monthly" :key="m.month" class="flex flex-1 flex-col items-center gap-1">
+                            <div class="flex h-24 w-full items-end justify-center gap-1">
+                                <div class="w-3 rounded-t bg-emerald-500" :style="{ height: (m.hires / maxMonthly) * 100 + '%', minHeight: m.hires ? '4px' : '0' }" :title="m.hires + ' hires'" />
+                                <div class="w-3 rounded-t bg-slate-800" :style="{ height: (m.exits / maxMonthly) * 100 + '%', minHeight: m.exits ? '4px' : '0' }" :title="m.exits + ' exits'" />
+                            </div>
+                            <span class="text-[10px] text-slate-500">{{ m.month }}</span>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-500">
+                        <span class="mr-3"><span class="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Hires</span>
+                        <span><span class="mr-1 inline-block h-2 w-2 rounded-full bg-slate-800" />Exits</span>
+                    </p>
+                </div>
+            </article>
+
+            <article v-if="attendance" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" data-testid="attendance-card">
+                <h2 class="text-base font-bold text-slate-900">Attendance today</h2>
+                <p class="mt-1 text-sm text-slate-500">Expected: active and probation employees</p>
+                <p class="mt-4 text-3xl font-bold text-slate-900">{{ presentRate }}%
+                    <span class="text-sm font-medium text-slate-500">recorded</span>
+                </p>
+                <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div class="h-full rounded-full bg-emerald-500" :style="{ width: presentRate + '%' }" />
+                </div>
+                <dl class="mt-5 grid grid-cols-2 gap-3 text-sm">
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Present</dt><dd class="font-semibold text-slate-900">{{ attendance.present }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Checked in now</dt><dd class="font-semibold text-slate-900">{{ attendance.checked_in_now }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Late</dt><dd class="font-semibold text-slate-900">{{ attendance.late }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">No record yet</dt><dd class="font-semibold text-slate-900">{{ attendance.absent_or_missing }}</dd></div>
+                </dl>
+            </article>
         </section>
 
         <!-- Modules -->

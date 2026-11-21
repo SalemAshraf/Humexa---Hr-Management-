@@ -6,13 +6,14 @@ namespace App\Modules\Tenants\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Tenants\Services\WorkforceAnalytics;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
 class TenantDashboardController extends Controller
 {
-    public function __invoke(Request $request): InertiaResponse
+    public function __invoke(Request $request, WorkforceAnalytics $analytics): InertiaResponse
     {
         abort_unless(tenancy()->initialized, 404);
 
@@ -41,6 +42,15 @@ class TenantDashboardController extends Controller
             ],
             'stats' => [
                 'teamAccounts' => $teamAccounts,
+            ],
+            // Each block is sent only to users who hold the matching permission.
+            'analytics' => [
+                'headcount' => $user->can('employees.view')
+                    ? $analytics->headcount((string) $tenant->getTenantKey())
+                    : null,
+                'attendance' => $user->can('attendance.view')
+                    ? $analytics->attendanceToday((string) $tenant->getTenantKey())
+                    : null,
             ],
         ]);
     }
