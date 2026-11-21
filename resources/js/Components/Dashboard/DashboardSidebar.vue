@@ -119,7 +119,7 @@ function isActive(item) {
                     type="button"
                     class="ms-auto rounded-lg p-2 transition-colors lg:hidden"
                     :class="isPlatform ? 'hover:bg-slate-800' : 'hover:bg-slate-100'"
-                    aria-label="Close sidebar"
+                    :aria-label="$t('Close sidebar')"
                     @click="emit('close-mobile')"
                 >
                     <svg
@@ -138,7 +138,7 @@ function isActive(item) {
             <!-- Navigation -->
             <nav
                 class="flex-1 space-y-1 overflow-y-auto px-3 py-5"
-                aria-label="Main navigation"
+                :aria-label="$t('Main navigation')"
             >
                 <template v-for="item in items" :key="item.label">
                     <Link
@@ -241,7 +241,7 @@ function isActive(item) {
                         <path d="m15 18-6-6 6-6" />
                     </svg>
 
-                    <span v-if="!collapsed">Collapse sidebar</span>
+                    <span v-if="!collapsed">{{ $t('Collapse sidebar') }}</span>
                 </button>
             </div>
         </aside>

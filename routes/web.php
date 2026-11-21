@@ -8,6 +8,8 @@ use Inertia\Inertia;
 use App\Modules\Tenants\Http\Controllers\PlatformDashboardController;
 use App\Modules\Tenants\Http\Controllers\PlatformTenantController;
 
+Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->middleware('throttle:30,1')->name('locale');
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),

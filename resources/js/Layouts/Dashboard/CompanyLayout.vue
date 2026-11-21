@@ -4,6 +4,7 @@ import { usePage } from '@inertiajs/vue3';
 import DashboardSidebar from '@/Components/Dashboard/DashboardSidebar.vue';
 import DashboardHeader from '@/Components/Dashboard/DashboardHeader.vue';
 import { useSidebar } from '@/Composables/useSidebar';
+import { t } from '@/lib/i18n';
 
 defineProps({
     title: { type: String, default: 'Dashboard' },
@@ -37,9 +38,10 @@ const allNavigationItems = [
     { label: 'Notifications', href: '/notifications', shortcut: 'NO' },
     { label: 'Team & roles', permission: 'roles.manage', href: '/team', shortcut: 'TR' },
     { label: 'Settings', permission: 'settings.manage', href: '/settings', shortcut: 'SE' },
+    { label: 'My account', href: '/account', shortcut: 'AC' },
 ];
 
-const navigationItems = computed(() => allNavigationItems.filter((item) => allowed(item.permission) && !(item.hideForOwner && page.props.is_owner)));
+const navigationItems = computed(() => allNavigationItems.filter((item) => allowed(item.permission) && !(item.hideForOwner && page.props.is_owner)).map((item) => ({ ...item, label: t(item.label) })));
 
 function handleSidebarToggle() {
     if (window.matchMedia('(min-width: 1024px)').matches) {
@@ -53,15 +55,15 @@ function handleSidebarToggle() {
 </script>
 
 <template>
-    <div class="hx-dashboard min-h-screen" data-theme="company" :dir="direction">
+    <div class="hx-dashboard min-h-screen" data-theme="company" :dir="page.props.dir ?? direction">
         <DashboardSidebar
             :items="navigationItems"
             :collapsed="isCollapsed && !isMobileOpen"
             :mobile-open="isMobileOpen"
             theme="company"
-            :direction="direction"
-            title="Humexa"
-            subtitle="Company Workspace"
+            :direction="page.props.dir ?? direction"
+            :title="$t('Humexa')"
+            :subtitle="$t('Company Workspace')"
             @toggle-collapse="toggleCollapsed"
             @close-mobile="closeMobile"
         />
@@ -76,7 +78,7 @@ function handleSidebarToggle() {
                 theme="company"
                 :logout-url="'/logout'"
                 :collapsed="isCollapsed"
-                :direction="direction"
+                :direction="page.props.dir ?? direction"
                 @toggle-sidebar="handleSidebarToggle"
             />
 

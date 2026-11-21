@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'accepted' => 'يجب قبول :attribute.',
+    'confirmed' => 'تأكيد :attribute غير مطابق.',
+    'date' => ':attribute ليس تاريخًا صحيحًا.',
+    'date_format' => ':attribute لا يطابق الصيغة :format.',
+    'after' => 'يجب أن يكون :attribute تاريخًا بعد :date.',
+    'after_or_equal' => 'يجب أن يكون :attribute تاريخًا بعد :date أو مساويًا له.',
+    'before' => 'يجب أن يكون :attribute تاريخًا قبل :date.',
+    'before_or_equal' => 'يجب أن يكون :attribute تاريخًا قبل :date أو مساويًا له.',
+    'email' => 'يجب أن يكون :attribute بريدًا إلكترونيًا صحيحًا.',
+    'exists' => 'القيمة المحددة في :attribute غير صحيحة.',
+    'in' => 'القيمة المحددة في :attribute غير صحيحة.',
+    'integer' => 'يجب أن يكون :attribute عددًا صحيحًا.',
+    'numeric' => 'يجب أن يكون :attribute رقمًا.',
+    'required' => 'حقل :attribute مطلوب.',
+    'string' => 'يجب أن يكون :attribute نصًا.',
+    'unique' => ':attribute مستخدم من قبل.',
+    'boolean' => 'يجب أن تكون قيمة :attribute صحيحة أو خاطئة.',
+    'array' => 'يجب أن يكون :attribute مصفوفة.',
+    'image' => 'يجب أن يكون :attribute صورة.',
+    'mimes' => 'يجب أن يكون :attribute ملفًا من النوع: :values.',
+    'regex' => 'صيغة :attribute غير صحيحة.',
+    'min' => [
+        'numeric' => 'يجب ألا يقل :attribute عن :min.',
+        'file' => 'يجب ألا يقل حجم :attribute عن :min كيلوبايت.',
+        'string' => 'يجب ألا يقل طول :attribute عن :min حرفًا.',
+        'array' => 'يجب أن يحتوي :attribute على :min عناصر على الأقل.',
+    ],
+    'max' => [
+        'numeric' => 'يجب ألا يزيد :attribute عن :max.',
+        'file' => 'يجب ألا يزيد حجم :attribute عن :max كيلوبايت.',
+        'string' => 'يجب ألا يزيد طول :attribute عن :max حرفًا.',
+        'array' => 'يجب ألا يحتوي :attribute على أكثر من :max عناصر.',
+    ],
+    'between' => [
+        'numeric' => 'يجب أن يكون :attribute بين :min و :max.',
+        'string' => 'يجب أن يكون طول :attribute بين :min و :max حرفًا.',
+    ],
+    'password' => ['letters' => 'يجب أن يحتوي :attribute على حرف واحد على الأقل.', 'mixed' => 'يجب أن يحتوي :attribute على حرف كبير وحرف صغير.', 'numbers' => 'يجب أن يحتوي :attribute على رقم واحد على الأقل.', 'symbols' => 'يجب أن يحتوي :attribute على رمز واحد على الأقل.'],
+    'attributes' => [
+        'name' => 'الاسم', 'email' => 'البريد الإلكتروني', 'password' => 'كلمة المرور', 'current_password' => 'كلمة المرور الحالية',
+        'locale' => 'اللغة', 'company_name' => 'اسم الشركة', 'first_name' => 'الاسم الأول', 'last_name' => 'اسم العائلة',
+        'start_date' => 'تاريخ البداية', 'end_date' => 'تاريخ النهاية', 'reason' => 'السبب', 'leave_type_id' => 'نوع الإجازة',
+        'title' => 'العنوان', 'phone' => 'الهاتف', 'hire_date' => 'تاريخ التعيين',
+    ],
+];

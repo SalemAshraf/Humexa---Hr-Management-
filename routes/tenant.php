@@ -42,6 +42,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             return 'Tenant ID: ' . tenant('id');
         })->name('tenant.home');
 
+        Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->middleware('throttle:30,1')->name('tenant.locale');
         Route::get('/login', [TenantAuthController::class, 'create'])->name('tenant.login');
         Route::post('/login', [TenantAuthController::class, 'store'])->name('tenant.login.store');
 
@@ -50,6 +51,8 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::post('/password/change', [TenantPasswordController::class, 'update'])->name('tenant.password.update');
 
             Route::get('/dashboard', TenantDashboardController::class)->name('tenant.dashboard');
+            Route::get('/account', [\App\Modules\Users\Http\Controllers\TenantAccountController::class, 'edit'])->name('account.edit');
+            Route::put('/account', [\App\Modules\Users\Http\Controllers\TenantAccountController::class, 'update'])->middleware('throttle:20,1')->name('account.update');
             Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
 

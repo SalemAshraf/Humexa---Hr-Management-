@@ -2,6 +2,7 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount } from 'vue';
 import { usePage, Link, router } from '@inertiajs/vue3';
+import LanguageSwitch from '@/Components/LanguageSwitch.vue';
 
 const props = defineProps({
     title: {
@@ -66,7 +67,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                 :class="isPlatform
                     ? 'text-slate-300 hover:bg-slate-800'
                     : 'text-slate-600 hover:bg-slate-100'"
-                aria-label="Toggle sidebar"
+                :aria-label="$t('Toggle sidebar')"
                 @click="emit('toggle-sidebar')"
             >
                 <svg
@@ -98,6 +99,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
 
         <!-- Right section -->
         <div class="flex shrink-0 items-center gap-2 sm:gap-4">
+            <LanguageSwitch :dark="isPlatform" />
+
             <!-- Search -->
             <component
                 :is="isPlatform ? 'button' : Link"
@@ -106,7 +109,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                 :class="isPlatform
                     ? 'border-slate-700 text-slate-400 hover:bg-slate-800'
                     : 'border-slate-200 text-slate-500 hover:bg-slate-50'"
-                aria-label="Search"
+                :aria-label="$t('Search')"
             >
                 <svg
                     class="h-4 w-4"
@@ -120,14 +123,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                     <path d="m20 20-4-4" />
                 </svg>
 
-                <span>Search</span>
+                <span>{{ $t('Search') }}</span>
 
                 <kbd
                     class="rounded border px-1.5 py-0.5 text-xs"
                     :class="isPlatform ? 'border-slate-700' : 'border-slate-200'"
-                >
-                    Ctrl K
-                </kbd>
+                >{{ $t('Ctrl K') }}</kbd>
             </component>
 
             <!-- Notifications -->
@@ -138,7 +139,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                 :class="isPlatform
                     ? 'text-slate-300 hover:bg-slate-800'
                     : 'text-slate-600 hover:bg-slate-100'"
-                aria-label="Notifications"
+                :aria-label="$t('Notifications')"
             >
                 <svg
                     class="h-5 w-5"
@@ -212,7 +213,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                     <path d="M10 17l5-5-5-5M15 12H3" />
                     <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
                 </svg>
-                <span class="hidden sm:inline">Logout</span>
+                <span class="hidden sm:inline">{{ $t('Logout') }}</span>
             </Link>
         </div>
     </header>

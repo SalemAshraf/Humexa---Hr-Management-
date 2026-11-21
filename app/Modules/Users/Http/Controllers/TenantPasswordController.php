@@ -45,6 +45,7 @@ class TenantPasswordController extends Controller
             'must_change_password' => false,
             'password_changed_at' => now(),
         ])->save();
+        $user->tokens()->delete(); // a changed password ends mobile sign-ins made with the old one
 
         return redirect('/dashboard')->with('success', 'Password changed.');
     }

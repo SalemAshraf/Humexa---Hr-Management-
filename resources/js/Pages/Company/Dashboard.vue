@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
+import { t } from '@/lib/i18n';
 
 const props = defineProps({
     company: {
@@ -60,44 +61,40 @@ const kpis = computed(() => {
     const h = props.analytics?.headcount;
     const at = props.analytics?.attendance;
     const lv = props.analytics?.leave;
-    if (h) list.push({ label: 'Employees', value: h.current, hint: `${h.on_probation} on probation`, href: '/employees', tone: 'text-slate-900' });
-    if (at) list.push({ label: 'Attendance today', value: `${presentRate.value}%`, hint: `${at.present} of ${at.expected} expected recorded, ${at.late} late`, href: '/attendance', tone: 'text-emerald-700' });
+    if (h) list.push({ label: t('Employees'), value: h.current, hint: t('{n} on probation', { n: h.on_probation }), href: '/employees', tone: 'text-slate-900' });
+    if (at) list.push({ label: t('Attendance today'), value: `${presentRate.value}%`, hint: t('{p} of {e} expected recorded, {l} late', { p: at.present, e: at.expected, l: at.late }), href: '/attendance', tone: 'text-emerald-700' });
     if (lv) {
-        list.push({ label: 'Leave waiting for approval', value: lv.pending, hint: 'Open the leave page to review', href: '/leave', tone: lv.pending ? 'text-amber-600' : 'text-slate-900' });
-        list.push({ label: 'On leave today', value: lv.on_leave_today, hint: 'Approved leave covering today', href: '/leave', tone: 'text-slate-900' });
+        list.push({ label: t('Leave waiting for approval'), value: lv.pending, hint: t('Open the leave page to review'), href: '/leave', tone: lv.pending ? 'text-amber-600' : 'text-slate-900' });
+        list.push({ label: t('On leave today'), value: lv.on_leave_today, hint: t('Approved leave covering today'), href: '/leave', tone: 'text-slate-900' });
     }
     return list;
 });
 
 const page = usePage();
 const allModules = [
-    { name: 'Employee Management', description: 'Employee profiles, employment details and documents', shortcut: 'EM', href: '/employees', permission: 'employees.view' },
-    { name: 'Attendance', description: 'Check-in, shifts, working hours and overtime', shortcut: 'AT', href: '/attendance', permission: 'attendance.view' },
-    { name: 'Leave Management', description: 'Leave policies, balances and approval workflows', shortcut: 'LV', href: '/leave', permission: 'leave.view' },
-    { name: 'Recruitment', description: 'Openings, candidates and hiring stages', shortcut: 'RE', href: '/recruitment', permission: 'recruitment.view' },
-    { name: 'Performance', description: 'Review cycles, ratings and goals', shortcut: 'PE', href: '/performance', permission: 'performance.view' },
-    { name: 'Payroll estimator', description: 'Experimental salary estimates. Not verified for real payroll.', shortcut: 'PA', href: '/payroll', permission: 'payroll.view', note: 'Experimental' },
-    { name: 'Reports', description: 'Workforce numbers for a period, with CSV download', shortcut: 'RP', href: '/reports', permission: 'reports.view' },
-    { name: 'Document expiry', description: 'Employee documents that expired or expire soon', shortcut: 'DX', href: '/documents/expiry', permission: 'employees.manage' },
+    { name: t('Employee Management'), description: t('Employee profiles, employment details and documents'), shortcut: 'EM', href: '/employees', permission: 'employees.view' },
+    { name: t('Attendance'), description: t('Check-in, shifts, working hours and overtime'), shortcut: 'AT', href: '/attendance', permission: 'attendance.view' },
+    { name: t('Leave Management'), description: t('Leave policies, balances and approval workflows'), shortcut: 'LV', href: '/leave', permission: 'leave.view' },
+    { name: t('Recruitment'), description: t('Openings, candidates and hiring stages'), shortcut: 'RE', href: '/recruitment', permission: 'recruitment.view' },
+    { name: t('Performance'), description: t('Review cycles, ratings and goals'), shortcut: 'PE', href: '/performance', permission: 'performance.view' },
+    { name: t('Payroll estimator'), description: t('Experimental salary estimates. Not verified for real payroll.'), shortcut: 'PA', href: '/payroll', permission: 'payroll.view', note: t('Experimental') },
+    { name: t('Reports'), description: t('Workforce numbers for a period, with CSV download'), shortcut: 'RP', href: '/reports', permission: 'reports.view' },
+    { name: t('Document expiry'), description: t('Employee documents that expired or expire soon'), shortcut: 'DX', href: '/documents/expiry', permission: 'employees.manage' },
 ];
 const modules = computed(() => allModules.filter((m) => !m.permission || !!page.props.can?.[m.permission]));
 </script>
 
 <template>
-    <Head title="Company Overview" />
+    <Head :title="$t('Company Overview')" />
 
-    <CompanyLayout title="Overview" subtitle="Your company workspace">
+    <CompanyLayout :title="$t('Overview')" :subtitle="$t('Your company workspace')">
         <!-- Page heading -->
         <section class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">
-                    COMPANY WORKSPACE
-                </p>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                    Welcome back
-                </h1>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{{ $t('COMPANY WORKSPACE') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Welcome back') }}</h1>
                 <p class="mt-2 text-sm text-slate-500">
-                    Here's what's happening in {{ company.name }}.
+                    {{ $t("Here's what's happening in {name}.", { name: company.name }) }}
                 </p>
             </div>
 
@@ -111,7 +108,7 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
                     class="h-2 w-2 rounded-full"
                     :class="isActive ? 'bg-emerald-500' : 'bg-red-500'"
                 />
-                {{ isActive ? 'Workspace active' : 'Workspace suspended' }}
+                {{ isActive ? $t('Workspace active') : $t('Workspace suspended') }}
             </div>
         </section>
 
@@ -130,11 +127,11 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
             <article v-if="headcount" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2" data-testid="headcount-card">
                 <div class="flex flex-wrap items-end justify-between gap-3">
                     <div>
-                        <h2 class="text-base font-bold text-slate-900">Workforce</h2>
-                        <p class="mt-1 text-sm text-slate-500">Current employees by department</p>
+                        <h2 class="text-base font-bold text-slate-900">{{ $t('Workforce') }}</h2>
+                        <p class="mt-1 text-sm text-slate-500">{{ $t('Current employees by department') }}</p>
                     </div>
                     <p class="text-3xl font-bold text-slate-900">{{ headcount.current }}
-                        <span class="text-sm font-medium text-slate-500">employees</span>
+                        <span class="text-sm font-medium text-slate-500">{{ $t('employees') }}</span>
                     </p>
                 </div>
 
@@ -148,13 +145,11 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
                             <div class="h-full rounded-full bg-emerald-500" :style="{ width: (row.total / maxDepartment) * 100 + '%' }" />
                         </div>
                     </li>
-                    <li v-if="!headcount.by_department.length" class="text-sm text-slate-500">
-                        Add employees to see the department split.
-                    </li>
+                    <li v-if="!headcount.by_department.length" class="text-sm text-slate-500">{{ $t('Add employees to see the department split.') }}</li>
                 </ul>
 
                 <div class="mt-6 border-t border-slate-100 pt-4">
-                    <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Hires and exits, last 6 months</p>
+                    <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $t('Hires and exits, last 6 months') }}</p>
                     <div class="flex items-end gap-3">
                         <div v-for="m in headcount.monthly" :key="m.month" class="flex flex-1 flex-col items-center gap-1">
                             <div class="flex h-24 w-full items-end justify-center gap-1">
@@ -165,26 +160,26 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
                         </div>
                     </div>
                     <p class="mt-2 text-xs text-slate-500">
-                        <span class="mr-3"><span class="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Hires</span>
-                        <span><span class="mr-1 inline-block h-2 w-2 rounded-full bg-slate-800" />Exits</span>
+                        <span class="mr-3"><span class="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />{{ $t('Hires') }}</span>
+                        <span><span class="mr-1 inline-block h-2 w-2 rounded-full bg-slate-800" />{{ $t('Exits') }}</span>
                     </p>
                 </div>
             </article>
 
             <article v-if="attendance" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" data-testid="attendance-card">
-                <h2 class="text-base font-bold text-slate-900">Attendance today</h2>
-                <p class="mt-1 text-sm text-slate-500">Expected: active and probation employees</p>
+                <h2 class="text-base font-bold text-slate-900">{{ $t('Attendance today') }}</h2>
+                <p class="mt-1 text-sm text-slate-500">{{ $t('Expected: active and probation employees') }}</p>
                 <p class="mt-4 text-3xl font-bold text-slate-900">{{ presentRate }}%
-                    <span class="text-sm font-medium text-slate-500">recorded</span>
+                    <span class="text-sm font-medium text-slate-500">{{ $t('recorded') }}</span>
                 </p>
                 <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
                     <div class="h-full rounded-full bg-emerald-500" :style="{ width: presentRate + '%' }" />
                 </div>
                 <dl class="mt-5 grid grid-cols-2 gap-3 text-sm">
-                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Present</dt><dd class="font-semibold text-slate-900">{{ attendance.present }}</dd></div>
-                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Checked in now</dt><dd class="font-semibold text-slate-900">{{ attendance.checked_in_now }}</dd></div>
-                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">Late</dt><dd class="font-semibold text-slate-900">{{ attendance.late }}</dd></div>
-                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">No record yet</dt><dd class="font-semibold text-slate-900">{{ attendance.absent_or_missing }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">{{ $t('Present') }}</dt><dd class="font-semibold text-slate-900">{{ attendance.present }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">{{ $t('Checked in now') }}</dt><dd class="font-semibold text-slate-900">{{ attendance.checked_in_now }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">{{ $t('Late') }}</dt><dd class="font-semibold text-slate-900">{{ attendance.late }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs text-slate-500">{{ $t('No record yet') }}</dt><dd class="font-semibold text-slate-900">{{ attendance.absent_or_missing }}</dd></div>
                 </dl>
             </article>
         </section>
@@ -193,10 +188,8 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
         <section class="mb-8">
             <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
                 <div>
-                    <h2 class="text-base font-bold text-slate-900">Your HR modules</h2>
-                    <p class="mt-1 text-sm text-slate-500">
-                        The tools your role can open.
-                    </p>
+                    <h2 class="text-base font-bold text-slate-900">{{ $t('Your HR modules') }}</h2>
+                    <p class="mt-1 text-sm text-slate-500">{{ $t('The tools your role can open.') }}</p>
                 </div>
             </div>
 
@@ -218,9 +211,7 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
                             <span v-if="module.note" class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                                 {{ module.note }}
                             </span>
-                            <span v-else class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                                Available
-                            </span>
+                            <span v-else class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">{{ $t('Available') }}</span>
                         </div>
                         <p class="mt-2 text-xs leading-5 text-slate-500">{{ module.description }}</p>
                     </div>

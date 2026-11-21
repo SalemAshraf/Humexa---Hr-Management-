@@ -15,9 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // The language cookie holds only "en" or "ar" and is validated on read.
+        $middleware->encryptCookies(except: ['locale']);
 
         $middleware->redirectGuestsTo(function (Request $request): string {
             if (tenancy()->initialized) {

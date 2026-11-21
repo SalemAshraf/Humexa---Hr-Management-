@@ -39,6 +39,10 @@ public function store(PortalLoginRequest $request): RedirectResponse
         (int) tenant()->getAttribute('session_version')
     );
 
+    // The account's saved language applies on this device from now on.
+    $saved = (string) ($request->user('tenant')?->locale ?? 'en');
+    \Illuminate\Support\Facades\Cookie::queue('locale', in_array($saved, ['en', 'ar'], true) ? $saved : 'en', 60 * 24 * 365);
+
     return redirect()->intended('/dashboard');
 }
 

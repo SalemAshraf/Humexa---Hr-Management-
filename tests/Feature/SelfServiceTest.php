@@ -135,7 +135,7 @@ test('a manager sees attendance only for direct reports, HR sees everyone, and a
 
 test('route audit: a permissionless account is refused on every company route except its own space', function () {
     [$u] = ($this->account)('audit@tenant-test.example', 'Audit');
-    $allowed = ['/', 'login', 'logout', 'password/change', 'dashboard', 'me', 'me/leave', 'me/leave/{leaveRequest}/cancel', 'notifications', 'search'];
+    $allowed = ['/', 'login', 'logout', 'password/change', 'dashboard', 'me', 'me/leave', 'me/leave/{leaveRequest}/cancel', 'notifications', 'search', 'account', 'locale'];
 
     $checked = 0;
     $leaks = [];

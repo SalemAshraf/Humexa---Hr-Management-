@@ -37,6 +37,12 @@ class HandleInertiaRequests extends Middleware
                     ->mapWithKeys(fn ($permission) => [$permission => $user->can($permission)]);
             },
 
+            'locale' => fn () => app()->getLocale(),
+            'dir' => fn () => app()->getLocale() === 'ar' ? 'rtl' : 'ltr',
+            'translations' => function () {
+                return app()->getLocale() === 'en' ? (object) [] : (object) app('translator')->getLoader()->load(app()->getLocale(), '*', '*');
+            },
+
             'is_owner' => function () use ($request) {
                 $user = $request->user('tenant');
 
