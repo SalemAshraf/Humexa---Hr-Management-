@@ -1,11 +1,31 @@
 <?php
 
 declare(strict_types=1);
+
 namespace App\Modules\Attendance\Models;
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class OvertimeRequest extends Model
 {
     protected $hidden = ['tenant_id'];
-    protected $fillable=['tenant_id','attendance_record_id','employee_id','requested_minutes','reason','status','reviewed_by_user_id','reviewed_at','review_note'];
-    protected function casts():array{return ['requested_minutes'=>'integer','reviewed_at'=>'datetime'];}
+
+    protected $fillable = [
+        'tenant_id', 'attendance_session_id', 'employee_id', 'requested_minutes',
+        'reason', 'status', 'reviewed_by_user_id', 'reviewed_at', 'review_note',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'requested_minutes' => 'integer',
+            'reviewed_at' => 'datetime',
+        ];
+    }
+
+    public function session(): BelongsTo
+    {
+        return $this->belongsTo(AttendanceSession::class, 'attendance_session_id');
+    }
 }
