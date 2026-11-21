@@ -31,6 +31,7 @@ class TenantAttendanceDashboardController extends Controller
         );
 
         $today = now()->toDateString();
+        $scope = $this->scopeIds($tenantId, $user);
 
         $policy = AttendancePolicy::query()
             ->where('tenant_id', $tenantId)
@@ -43,6 +44,7 @@ class TenantAttendanceDashboardController extends Controller
             'stats' => [
                 'total_employees' => Employee::query()
                     ->where('tenant_id', $tenantId)
+                    ->when($scope !== null, fn ($q) => $q->whereIn('id', $scope))
                     ->whereNotIn('employment_status', [
                         Employee::STATUS_RESIGNED,
                         Employee::STATUS_TERMINATED,
@@ -50,11 +52,13 @@ class TenantAttendanceDashboardController extends Controller
                     ->count(),
                 'with_records' => AttendanceRecord::query()
                     ->where('tenant_id', $tenantId)
+                    ->when($scope !== null, fn ($q) => $q->whereIn('employee_id', $scope))
                     ->whereDate('attendance_date', $today)
                     ->distinct('employee_id')
                     ->count('employee_id'),
                 'currently_checked_in' => AttendanceSession::query()
                     ->where('tenant_id', $tenantId)
+                    ->when($scope !== null, fn ($q) => $q->whereIn('employee_id', $scope))
                     ->whereNotNull('check_in_at')
                     ->whereNull('check_out_at')
                     ->distinct('employee_id')
@@ -69,5 +73,19 @@ class TenantAttendanceDashboardController extends Controller
                 'overtime_requires_approval' => (bool) ($policy?->overtime_requires_approval ?? true),
             ],
         ]);
+    }
+
+    /** Null means the whole company. Without attendance.manage a person sees only their direct reports. */
+    private function scopeIds(string $tenantId, $user): ?array
+    {
+        if ($user->can('attendance.manage')) {
+            return null;
+        }
+        $own = \App\Modules\Employees\Models\Employee::query()->where('tenant_id', $tenantId)->where('user_id', $user->id)->value('id');
+        if ($own === null) {
+            return [];
+        }
+
+        return \App\Modules\Employees\Models\Employee::query()->where('tenant_id', $tenantId)->where('manager_id', $own)->pluck('id')->all();
     }
 }

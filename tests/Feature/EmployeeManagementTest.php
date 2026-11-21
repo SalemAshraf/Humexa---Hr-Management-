@@ -383,6 +383,13 @@ test('HR links a login account to an employee: same company only, one employee p
     // the same account cannot be linked to a second employee
     $this->put($base . '/' . $ids[1], employeePayload(['first_name' => 'Two', 'user_id' => $a['user']->id]))->assertSessionHasErrors('user_id');
 
+    // unlinking ends that account's app tokens
+    $a['user']->createToken('phone', ['attendance:mobile']);
+    $this->put($base . '/' . $ids[0], employeePayload(['first_name' => 'One', 'user_id' => '']))->assertSessionHasNoErrors();
+    expect($a['user']->tokens()->count())->toBe(0);
+    $this->put($base . '/' . $ids[0], employeePayload(['first_name' => 'One', 'user_id' => $a['user']->id]))->assertSessionHasNoErrors();
+    $a['user']->createToken('phone2', ['attendance:mobile']);
+
     // and it is no longer offered in the picker
     $this->get($base . '/' . $ids[1] . '/edit')->assertInertia(fn ($p) => $p->where('accounts', fn ($acc) => collect($acc)->where('id', $a['user']->id)->isEmpty()));
 });

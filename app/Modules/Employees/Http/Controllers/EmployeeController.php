@@ -207,11 +207,28 @@ class EmployeeController extends Controller
         $record = $this->employeeQuery()->findOrFail($employee);
         $this->authorize('update', $record);
 
+        $before = $record->user_id;
+
         $action->execute(
             $record,
             $request->validated(),
             $request->user('tenant')?->getKey()
         );
+
+        // Changing which login belongs to an employee changes what both accounts can reach.
+        // End their app tokens and open sessions so the change takes effect immediately.
+        $after = $record->fresh()->user_id;
+        if ((int) $before !== (int) $after) {
+            foreach (array_filter([$before, $after]) as $uid) {
+                $account = User::query()->where('tenant_id', (string) tenant()->getTenantKey())->find($uid);
+                if ($account) {
+                    $account->tokens()->delete();
+                    if ((int) $uid !== (int) $request->user('tenant')?->getKey()) {
+                        \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $uid)->delete();
+                    }
+                }
+            }
+        }
 
         return redirect('/employees/' . $record->id)->with('success', 'Employee updated successfully.');
     }

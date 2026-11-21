@@ -110,3 +110,25 @@ test('an employee account lands on My space and cannot open company modules', fu
     }
     ($this->as)($u)->get("{$this->base}/notifications")->assertOk();
 });
+
+test('a manager sees attendance only for direct reports, HR sees everyone, and a stranger gets nothing', function () {
+    $mgrUser = $this->reg['tenant']->run(function () {
+        $u = new User(['name' => 'm', 'email' => 'mgr-att@tenant-test.example', 'password' => 'StrongPassword123!']);
+        $u->forceFill(['tenant_id' => $this->tid, 'account_type' => User::ACCOUNT_TYPE_TENANT])->save();
+        $u->assignRole(TenantRoleCatalog::MANAGER);
+
+        return $u;
+    });
+    $act = fn (array $d) => app(CreateEmployeeAction::class)->execute(data: $d + ['last_name' => 'Att', 'employment_status' => 'active', 'hire_date' => '2026-01-05'], tenantId: $this->tid, actorId: null);
+    $boss = $act(['first_name' => 'Boss', 'user_id' => $mgrUser->id]);
+    $report = $act(['first_name' => 'Report', 'manager_id' => $boss->id]);
+    $stranger = $act(['first_name' => 'Stranger']);
+    foreach ([$report, $stranger] as $e) {
+        \App\Modules\Attendance\Models\AttendanceRecord::create(['tenant_id' => $this->tid, 'employee_id' => $e->id, 'attendance_date' => now()->toDateString(), 'status' => 'present']);
+    }
+
+    ($this->as)($mgrUser)->get("{$this->base}/attendance/records")->assertInertia(fn ($p) => $p->has('records.data', 1)->where('records.data.0.employee.id', $report->id));
+    ($this->as)($mgrUser)->get("{$this->base}/attendance")->assertInertia(fn ($p) => $p->where('stats.total_employees', 1)->where('stats.with_records', 1));
+    ($this->as)($this->reg['user'])->get("{$this->base}/attendance/records")->assertInertia(fn ($p) => $p->has('records.data', 2));
+    ($this->as)($mgrUser)->get("{$this->base}/attendance/requests")->assertForbidden();
+});

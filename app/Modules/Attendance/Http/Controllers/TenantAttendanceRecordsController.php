@@ -35,8 +35,11 @@ class TenantAttendanceRecordsController extends Controller
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
+        $scope = $this->scopeIds($tenantId, $user);
+
         $query = AttendanceRecord::query()
             ->where('tenant_id', $tenantId)
+            ->when($scope !== null, fn ($q) => $q->whereIn('employee_id', $scope))
             ->with([
                 'employee:id,tenant_id,employee_number,first_name,middle_name,last_name,department_id,branch_id',
                 'employee.department:id,name',
@@ -88,5 +91,19 @@ class TenantAttendanceRecordsController extends Controller
                 'search' => $filters['search'] ?? '',
             ],
         ]);
+    }
+
+    /** Null means the whole company. Without attendance.manage a person sees only their direct reports. */
+    private function scopeIds(string $tenantId, $user): ?array
+    {
+        if ($user->can('attendance.manage')) {
+            return null;
+        }
+        $own = \App\Modules\Employees\Models\Employee::query()->where('tenant_id', $tenantId)->where('user_id', $user->id)->value('id');
+        if ($own === null) {
+            return [];
+        }
+
+        return \App\Modules\Employees\Models\Employee::query()->where('tenant_id', $tenantId)->where('manager_id', $own)->pluck('id')->all();
     }
 }
