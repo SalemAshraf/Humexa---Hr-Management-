@@ -54,6 +54,16 @@ const submitType = () =>
 const toggleType = (type) =>
     router.put(`/leave/types/${type.id}`, { ...type, is_active: !type.is_active }, { preserveScroll: true });
 
+const removeType = (type) => confirm(`Delete "${type.name}"? Only types with no requests can be deleted.`) && router.delete(`/leave/types/${type.id}`, { preserveScroll: true });
+
+const editing = ref(null);
+const editForm = useForm({ leave_type_id: '', start_date: '', end_date: '', reason: '' });
+const startEdit = (r) => {
+    editing.value = editing.value === r.id ? null : r.id;
+    editForm.defaults({ leave_type_id: r.leave_type_id, start_date: r.start_date, end_date: r.end_date, reason: r.reason ?? '' }).reset();
+};
+const saveEdit = (r) => editForm.put(`/leave/requests/${r.id}`, { preserveScroll: true, onSuccess: () => { editing.value = null; } });
+
 const note = reactive({});
 const review = (id, decision) =>
     router.post(`/leave/requests/${id}/review`, { decision, note: note[id] ?? null }, { preserveScroll: true });
@@ -110,12 +120,13 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
             </form>
             <p class="mt-2 text-xs text-slate-400">Annual-day amounts are whatever your company sets. They are not checked against any labor law.</p>
             <h2 class="mt-6 text-base font-bold text-slate-900">Leave types</h2>
+            <p v-if="$page.props.errors.type" class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{{ $page.props.errors.type }}</p>
             <ul class="mt-3 divide-y divide-slate-100">
                 <li v-for="type in types" :key="type.id" class="flex items-center justify-between py-2 text-sm">
                     <span :class="type.is_active ? 'text-slate-800' : 'text-slate-400 line-through'">
                         {{ type.name }} · {{ type.annual_days }} days/year · {{ type.is_paid ? 'Paid' : 'Unpaid' }}
                     </span>
-                    <button class="text-xs font-semibold text-cyan-700" @click="toggleType(type)">{{ type.is_active ? 'Deactivate' : 'Activate' }}</button>
+                    <span class="flex items-center gap-3"><button class="text-xs font-semibold text-cyan-700" @click="toggleType(type)">{{ type.is_active ? 'Deactivate' : 'Activate' }}</button><button class="text-xs font-semibold text-red-600" @click="removeType(type)">Delete</button></span>
                 </li>
                 <li v-if="!types.length" class="py-2 text-sm text-slate-500">No leave types yet. Add one below (for example Annual leave).</li>
             </ul>
@@ -166,6 +177,14 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                     @click="setStatus(tab.value)"
                 >{{ tab.label }}</button>
             </div>
+            <form v-if="editing" class="grid grid-cols-1 gap-3 border-b border-slate-100 bg-slate-50 p-4 md:grid-cols-5" @submit.prevent="saveEdit({ id: editing })">
+                <label class="text-xs font-medium text-slate-500">Type<select v-model="editForm.leave_type_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm"><option v-for="t in types.filter((x) => x.is_active)" :key="t.id" :value="t.id">{{ t.name }}</option></select></label>
+                <label class="text-xs font-medium text-slate-500">From<input v-model="editForm.start_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
+                <label class="text-xs font-medium text-slate-500">To<input v-model="editForm.end_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required /></label>
+                <label class="text-xs font-medium text-slate-500">Reason<input v-model="editForm.reason" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                <div class="flex items-end gap-2"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="editForm.processing">Save changes</button><button type="button" class="text-sm font-semibold text-slate-500" @click="editing = null">Close</button></div>
+                <p v-for="(m, k) in editForm.errors" :key="k" class="text-xs text-red-600 md:col-span-5">{{ m }}</p>
+            </form>
             <ul class="divide-y divide-slate-100 sm:hidden" data-testid="leave-cards">
                 <li v-for="r in requests.data" :key="r.id" class="space-y-2 p-4">
                     <div class="flex items-start justify-between gap-2">
@@ -178,7 +197,7 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                         <button class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white" @click="review(r.id, 'approve')">Approve</button>
                         <button class="rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="review(r.id, 'reject')">Reject</button>
                     </div>
-                    <button v-else-if="r.can_cancel" class="text-xs font-semibold text-slate-500" @click="cancel(r.id)">Cancel request</button>
+                    <div v-else-if="r.can_cancel" class="flex gap-3"><button v-if="r.can_edit" class="text-xs font-semibold text-cyan-700" @click="startEdit(r)">Edit</button><button class="text-xs font-semibold text-slate-500" @click="cancel(r.id)">Cancel request</button></div>
                 </li>
                 <li v-if="!requests.data.length" class="p-8 text-center text-sm text-slate-500">No leave requests here yet.</li>
             </ul>
@@ -203,7 +222,7 @@ const scopeLabel = computed(() => (props.summary.scope === 'company' ? 'All empl
                                     <button class="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-semibold text-white" @click="review(r.id, 'approve')">Approve</button>
                                     <button class="rounded-lg bg-white px-3 py-1 text-xs font-semibold text-red-600 ring-1 ring-red-200" @click="review(r.id, 'reject')">Reject</button>
                                 </div>
-                                <button v-else-if="r.can_cancel" class="text-xs font-semibold text-slate-500 hover:text-red-600" @click="cancel(r.id)">Cancel</button>
+                                <template v-else-if="r.can_cancel"><button v-if="r.can_edit" class="mr-3 text-xs font-semibold text-cyan-700" @click="startEdit(r)">Edit</button><button class="text-xs font-semibold text-slate-500 hover:text-red-600" @click="cancel(r.id)">Cancel</button></template>
                             </td>
                         </tr>
                         <tr v-if="!requests.data.length"><td colspan="6" class="px-4 py-10 text-center text-slate-500">No leave requests here yet.</td></tr>

@@ -57,6 +57,8 @@ class LeaveController extends Controller
             'status' => $r->status,
             'review_note' => $r->review_note,
             'can_review' => $r->status === LeaveRequest::PENDING && $this->mayReview($tenantId, $user, $r),
+            'can_edit' => $manageAll && $r->status === LeaveRequest::PENDING,
+            'leave_type_id' => $r->leave_type_id,
             'can_cancel' => $manageAll && in_array($r->status, [LeaveRequest::PENDING, LeaveRequest::APPROVED], true),
         ]);
 
@@ -148,6 +150,48 @@ class LeaveController extends Controller
         $model->update($data);
 
         return back()->with('success', 'Leave type updated.');
+    }
+
+    public function destroyType(Request $request): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+        $this->user($request);
+        $model = LeaveType::query()->where('tenant_id', $tenantId)->findOrFail((int) $request->route('type'));
+
+        if (LeaveRequest::query()->where('tenant_id', $tenantId)->where('leave_type_id', $model->id)->exists()) {
+            return back()->withErrors(['type' => 'This leave type has requests, so it cannot be deleted. Deactivate it instead.']);
+        }
+
+        $model->delete();
+
+        return back()->with('success', 'Leave type deleted.');
+    }
+
+    /** Change a pending request. It is re-checked like a new one, and the old row is kept as cancelled history. */
+    public function updateRequest(Request $request): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+        $user = $this->user($request);
+
+        $old = LeaveRequest::query()->where('tenant_id', $tenantId)->findOrFail((int) $request->route('leaveRequest'));
+        abort_unless($old->status === LeaveRequest::PENDING, 422, 'Only a pending request can be changed. Cancel an approved one and submit a new request.');
+
+        $data = $request->validate([
+            'leave_type_id' => ['required', 'integer'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $type = LeaveType::query()->where('tenant_id', $tenantId)->findOrFail($data['leave_type_id']);
+        $employee = Employee::query()->where('tenant_id', $tenantId)->findOrFail($old->employee_id);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($old, $employee, $type, $data, $tenantId, $user) {
+            $old->forceFill(['status' => LeaveRequest::CANCELLED, 'review_note' => 'Replaced by an edited request.'])->save();
+            $this->leave->submit($tenantId, $employee, $type, Carbon::parse($data['start_date']), Carbon::parse($data['end_date']), $data['reason'] ?? null, $user);
+        });
+
+        return back()->with('success', 'Leave request changed.');
     }
 
     public function storeRequest(Request $request): RedirectResponse

@@ -56,4 +56,39 @@ class EmployeeIdentityRecordController extends Controller
 
         return back()->with('success', 'Employee identity record saved successfully.');
     }
+
+    /** Change country and dates only. The number itself is replaced through store, which keeps history. */
+    public function update(\Illuminate\Http\Request $request): RedirectResponse
+    {
+        $employee = $this->employee();
+        $this->authorize('update', $employee);
+
+        $data = $request->validate([
+            'issuing_country' => ['nullable', 'string', 'max:100'],
+            'issue_date' => ['nullable', 'date'],
+            'expiry_date' => ['nullable', 'date', 'after_or_equal:issue_date'],
+        ]);
+
+        $this->identity($employee)->forceFill($data)->save();
+
+        return back()->with('success', 'Identity record updated.');
+    }
+
+    public function destroy(): RedirectResponse
+    {
+        $employee = $this->employee();
+        $this->authorize('update', $employee);
+
+        $this->identity($employee)->delete();
+
+        return back()->with('success', 'Identity record deleted.');
+    }
+
+    private function identity(Employee $employee): \App\Modules\Employees\Models\EmployeeIdentityRecord
+    {
+        return \App\Modules\Employees\Models\EmployeeIdentityRecord::query()
+            ->where('tenant_id', (string) $employee->tenant_id)
+            ->where('employee_id', $employee->id)
+            ->findOrFail((string) request()->route('identity'));
+    }
 }

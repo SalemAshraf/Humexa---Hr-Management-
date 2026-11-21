@@ -197,3 +197,35 @@ test('the company weekend setting changes day counting, is permission gated and 
     );
     expect(app(\App\Modules\Leave\Services\LeaveService::class)->weekendDays((string) $other['tenant']->id))->toBe([5, 6]);
 });
+
+test('a pending request can be changed, an approved one cannot, and unused leave types can be deleted', function () {
+    $emp = ($this->mkEmployee)($this->tid, 'Edit');
+    $owner = $this->reg['user'];
+    $post = ['employee_id' => $emp->id, 'leave_type_id' => $this->annual->id, 'start_date' => '2026-11-22', 'end_date' => '2026-11-23'];
+
+    ($this->as)($owner)->post("{$this->base}/leave/requests", $post)->assertRedirect();
+    $first = LeaveRequest::where('tenant_id', $this->tid)->firstOrFail();
+
+    ($this->as)($owner)->put("{$this->base}/leave/requests/{$first->id}", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-11-22', 'end_date' => '2026-11-24', 'reason' => 'Longer'])->assertRedirect();
+    expect($first->fresh()->status)->toBe('cancelled');
+    $new = LeaveRequest::where('tenant_id', $this->tid)->where('status', 'pending')->firstOrFail();
+    expect((float) $new->days)->toBe(3.0)->and($new->reason)->toBe('Longer');
+
+    // a bad edit rolls back: the pending request stays pending
+    ($this->as)($owner)->put("{$this->base}/leave/requests/{$new->id}", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-11-27', 'end_date' => '2026-11-28'])->assertSessionHasErrors('start_date');
+    expect($new->fresh()->status)->toBe('pending');
+
+    ($this->as)($owner)->post("{$this->base}/leave/requests/{$new->id}/review", ['decision' => 'approve']);
+    ($this->as)($owner)->put("{$this->base}/leave/requests/{$new->id}", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-11-22', 'end_date' => '2026-11-22'])->assertStatus(422);
+
+    ($this->as)($owner)->delete("{$this->base}/leave/types/{$this->annual->id}")->assertSessionHasErrors('type');
+    expect(LeaveType::find($this->annual->id))->not->toBeNull();
+
+    $unused = LeaveType::create(['tenant_id' => $this->tid, 'name' => 'Unused', 'annual_days' => 1, 'is_paid' => true, 'is_active' => true]);
+    ($this->as)($owner)->delete("{$this->base}/leave/types/{$unused->id}")->assertRedirect();
+    expect(LeaveType::find($unused->id))->toBeNull();
+
+    $mgr = ($this->mkUser)(TenantRoleCatalog::MANAGER, 'mgr-leave-edit@tenant-test.example');
+    ($this->as)($mgr)->delete("{$this->base}/leave/types/{$this->annual->id}")->assertForbidden();
+    ($this->as)($mgr)->put("{$this->base}/leave/requests/{$new->id}", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-11-22', 'end_date' => '2026-11-22'])->assertForbidden();
+});

@@ -194,6 +194,35 @@ async function deleteContact(item) {
     finally { saving.value = false; }
 }
 
+const editingIdentity = ref(null);
+const identityEdit = reactive({ issuing_country: '', issue_date: '', expiry_date: '' });
+function startIdentityEdit(item) {
+    editingIdentity.value = editingIdentity.value === item.id ? null : item.id;
+    Object.assign(identityEdit, { issuing_country: item.issuing_country ?? '', issue_date: item.issue_date ?? '', expiry_date: item.expiry_date ?? '' });
+}
+async function saveIdentityEdit(item) {
+    saving.value = true;
+    try {
+        await window.axios.put(endpoints.value.identities + '/' + item.id, { ...identityEdit, issuing_country: identityEdit.issuing_country || null, issue_date: identityEdit.issue_date || null, expiry_date: identityEdit.expiry_date || null }, { headers: { Accept: 'application/json' } });
+        editingIdentity.value = null;
+        successMessage.value = 'Identity record updated.';
+        await load();
+    } catch (error) {
+        errorMessage.value = error.response?.data?.message || 'The identity record could not be updated.';
+    } finally { saving.value = false; }
+}
+async function deleteIdentity(item) {
+    if (!window.confirm('Delete this identity record? This cannot be undone.')) return;
+    saving.value = true;
+    try {
+        await window.axios.delete(endpoints.value.identities + '/' + item.id, { headers: { Accept: 'application/json' } });
+        successMessage.value = 'Identity record deleted.';
+        await load();
+    } catch (error) {
+        errorMessage.value = error.response?.data?.message || 'The identity record could not be deleted.';
+    } finally { saving.value = false; }
+}
+
 async function saveIdentity() {
     saving.value = true;
     resetMessages();
@@ -426,7 +455,7 @@ watch(() => [props.section, props.employeeId], loadSection, { immediate: true })
             </form>
             <div v-if="!loading && !identities.length" class="mt-6 rounded-xl bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">No identity records have been added.</div>
             <div class="mt-4 overflow-x-auto rounded-xl border border-slate-200">
-                <table v-if="identities.length" class="w-full min-w-[600px] text-left text-sm"><thead class="bg-slate-50 text-xs text-slate-500"><tr><th class="px-4 py-3">Type</th><th class="px-4 py-3">Masked number</th><th class="px-4 py-3">Issuing country</th><th class="px-4 py-3">Validity</th><th class="px-4 py-3">Record</th></tr></thead><tbody class="divide-y divide-slate-100"><tr v-for="item in identities" :key="item.id"><td class="px-4 py-3 font-semibold text-slate-800">{{ item.identity_type === 'national_id' ? 'National ID' : 'Passport' }}</td><td class="px-4 py-3 font-mono text-slate-700">{{ item.masked_number }}</td><td class="px-4 py-3 text-slate-600">{{ item.issuing_country || '—' }}</td><td class="px-4 py-3 text-xs text-slate-600">{{ dateLabel(item.issue_date) }} – {{ dateLabel(item.expiry_date) }}</td><td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-bold" :class="item.is_current ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'">{{ item.is_current ? 'Current' : 'History' }}</span></td></tr></tbody></table>
+                <table v-if="identities.length" class="w-full min-w-[600px] text-left text-sm"><thead class="bg-slate-50 text-xs text-slate-500"><tr><th class="px-4 py-3">Type</th><th class="px-4 py-3">Masked number</th><th class="px-4 py-3">Issuing country</th><th class="px-4 py-3">Validity</th><th class="px-4 py-3">Record</th><th v-if="canUpdate" class="px-4 py-3"></th></tr></thead><tbody class="divide-y divide-slate-100"><template v-for="item in identities" :key="item.id"><tr><td class="px-4 py-3 font-semibold text-slate-800">{{ item.identity_type === 'national_id' ? 'National ID' : 'Passport' }}</td><td class="px-4 py-3 font-mono text-slate-700">{{ item.masked_number }}</td><td class="px-4 py-3 text-slate-600">{{ item.issuing_country || '—' }}</td><td class="px-4 py-3 text-xs text-slate-600">{{ dateLabel(item.issue_date) }} – {{ dateLabel(item.expiry_date) }}</td><td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-[10px] font-bold" :class="item.is_current ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'">{{ item.is_current ? 'Current' : 'History' }}</span></td><td v-if="canUpdate" class="whitespace-nowrap px-4 py-3 text-xs font-semibold"><button class="mr-3 text-cyan-700" @click="startIdentityEdit(item)">{{ editingIdentity === item.id ? 'Close' : 'Edit' }}</button><button class="text-red-600" @click="deleteIdentity(item)">Delete</button></td></tr><tr v-if="editingIdentity === item.id"><td colspan="6" class="bg-slate-50 px-4 py-3"><form class="grid grid-cols-1 gap-3 md:grid-cols-4" @submit.prevent="saveIdentityEdit(item)"><label class="text-xs font-semibold text-slate-600">Issuing country<input v-model="identityEdit.issuing_country" maxlength="100" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></label><label class="text-xs font-semibold text-slate-600">Issue date<input v-model="identityEdit.issue_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></label><label class="text-xs font-semibold text-slate-600">Expiry date<input v-model="identityEdit.expiry_date" type="date" class="mt-1 w-full rounded-lg border-slate-300 text-sm"></label><div class="flex items-end"><button :disabled="saving" class="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white">Save changes</button></div><p class="text-xs text-slate-500 md:col-span-4">To change the number itself, add a new record above. The old number stays in history.</p></form></td></tr></template></tbody></table>
             </div>
         </template>
 

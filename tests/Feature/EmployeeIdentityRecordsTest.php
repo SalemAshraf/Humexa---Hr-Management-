@@ -220,3 +220,24 @@ test('identity validation rejects unsupported type, short number, and expiry bef
 
     $this->assertDatabaseCount('employee_identity_records', 0);
 });
+
+
+test('identity record dates can be edited and a record deleted, only within the tenant', function () {
+    $registration = registerIdentityRecordTenant('Identity Edit Co', 'identity-edit@example.test');
+    actAsIdentityRecordTenant($this, $registration);
+    $employeeId = createIdentityRecordTestEmployee($this, $registration);
+    $base = 'http://' . $registration['domain'] . '/employees/' . $employeeId . '/identity-records';
+
+    $this->post($base, identityRecordPayload())->assertRedirect();
+    $id = DB::table('employee_identity_records')->where('employee_id', $employeeId)->value('id');
+
+    $this->put($base . '/' . $id, ['issuing_country' => 'Egypt', 'issue_date' => '2020-02-02', 'expiry_date' => '2019-01-01'])->assertSessionHasErrors('expiry_date');
+    $this->put($base . '/' . $id, ['issuing_country' => 'Jordan', 'issue_date' => '2020-02-02', 'expiry_date' => '2030-02-02'])->assertRedirect();
+    $row = DB::table('employee_identity_records')->where('id', $id)->first();
+    expect($row->issuing_country)->toBe('Jordan')->and(substr((string) $row->expiry_date, 0, 10))->toBe('2030-02-02');
+
+    $this->delete($base . '/99999')->assertNotFound();
+
+    $this->delete($base . '/' . $id)->assertRedirect();
+    expect(DB::table('employee_identity_records')->where('id', $id)->exists())->toBeFalse();
+});

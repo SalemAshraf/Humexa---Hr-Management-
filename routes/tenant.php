@@ -124,6 +124,8 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::put('/settings', 'updateSettings')->middleware('tenant.can:leave.manage')->name('settings.update');
                 Route::post('/types', 'storeType')->middleware('tenant.can:leave.manage')->name('types.store');
                 Route::put('/types/{type}', 'updateType')->whereNumber('type')->middleware('tenant.can:leave.manage')->name('types.update');
+                Route::delete('/types/{type}', 'destroyType')->whereNumber('type')->middleware('tenant.can:leave.manage')->name('types.destroy');
+                Route::put('/requests/{leaveRequest}', 'updateRequest')->whereNumber('leaveRequest')->middleware('tenant.can:leave.manage')->name('requests.update');
                 Route::post('/requests', 'storeRequest')->middleware('tenant.can:leave.manage')->name('requests.store');
                 Route::post('/requests/{leaveRequest}/review', 'review')->whereNumber('leaveRequest')->middleware('tenant.can:leave.approve')->name('requests.review');
                 Route::post('/requests/{leaveRequest}/cancel', 'cancel')->whereNumber('leaveRequest')->middleware('tenant.can:leave.manage')->name('requests.cancel');
@@ -198,6 +200,8 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                     ->group(function () {
                         Route::get('/', 'index')->name('index');
                         Route::post('/', 'store')->name('store');
+                        Route::put('/{identity}', 'update')->whereNumber('identity')->name('update');
+                        Route::delete('/{identity}', 'destroy')->whereNumber('identity')->name('destroy');
                     });
 
                 Route::prefix('/{employee}/profile-photo')
