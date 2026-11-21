@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
+import { formatDate } from '@/lib/date';
 import EmployeeProfilePhoto from '@/Components/Employees/EmployeeProfilePhoto.vue';
 import EmployeeRecordsPanel from '@/Components/Employees/EmployeeRecordsPanel.vue';
 
@@ -147,7 +148,7 @@ function archiveEmployee() {
                     <div><dt class="text-xs font-medium text-slate-500">Department</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.department?.name || '—' }}</dd></div>
                     <div><dt class="text-xs font-medium text-slate-500">Position</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.position?.name || '—' }}</dd></div>
                     <div><dt class="text-xs font-medium text-slate-500">Branch</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.branch?.name || '—' }}</dd></div>
-                    <div><dt class="text-xs font-medium text-slate-500">Hire date</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.hire_date || '—' }}</dd></div>
+                    <div><dt class="text-xs font-medium text-slate-500">Hire date</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ formatDate(employee.hire_date) }}</dd></div>
                 </dl>
             </article>
 
@@ -172,7 +173,7 @@ function archiveEmployee() {
                 <ol v-if="employee.employment_histories?.length" class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <li v-for="history in employee.employment_histories" :key="history.id" class="rounded-xl border border-slate-100 bg-slate-50 p-4">
                         <p class="text-sm font-bold text-slate-800">{{ statusLabel(history.new_status) }}</p>
-                        <p class="mt-1 text-xs text-slate-500">{{ history.effective_date || history.created_at }}</p>
+                        <p class="mt-1 text-xs text-slate-500">{{ formatDate(history.effective_date || history.created_at) }}</p>
                         <p v-if="history.reason" class="mt-2 text-sm text-slate-600">{{ history.reason }}</p>
                         <p v-if="history.changed_by" class="mt-2 text-xs text-slate-400">Updated by {{ history.changed_by.name }}</p>
                     </li>
@@ -216,7 +217,7 @@ function archiveEmployee() {
             <dl class="mt-6 grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
                 <div><dt class="text-xs font-medium text-slate-500">Employee number</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.employee_number || '—' }}</dd></div>
                 <div><dt class="text-xs font-medium text-slate-500">Employment status</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ statusLabel(employee.employment_status) }}</dd></div>
-                <div><dt class="text-xs font-medium text-slate-500">Hire date</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.hire_date || '—' }}</dd></div>
+                <div><dt class="text-xs font-medium text-slate-500">Hire date</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ formatDate(employee.hire_date) }}</dd></div>
                 <div><dt class="text-xs font-medium text-slate-500">Probation end date</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.probation_end_date || '—' }}</dd></div>
                 <div><dt class="text-xs font-medium text-slate-500">Termination date</dt><dd class="mt-1 text-sm font-semibold text-slate-800">{{ employee.termination_date || '—' }}</dd></div>
                 <div class="sm:col-span-2 lg:col-span-3"><dt class="text-xs font-medium text-slate-500">Termination reason</dt><dd class="mt-1 whitespace-pre-line text-sm font-semibold text-slate-800">{{ employee.termination_reason || '—' }}</dd></div>
