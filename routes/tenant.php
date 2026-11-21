@@ -89,6 +89,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
                 Route::prefix('/{employee}/addresses')
                     ->whereNumber('employee')
+                    ->middleware('tenant.can:employees.manage') // personal data: HR only, managers get no access
                     ->name('addresses.')
                     ->controller(EmployeeAddressController::class)
                     ->group(function () {
@@ -100,6 +101,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
                 Route::prefix('/{employee}/emergency-contacts')
                     ->whereNumber('employee')
+                    ->middleware('tenant.can:employees.manage') // personal data: HR only, managers get no access
                     ->name('emergency-contacts.')
                     ->controller(EmployeeEmergencyContactController::class)
                     ->group(function () {
@@ -111,6 +113,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
                 Route::prefix('/{employee}/identity-records')
                     ->whereNumber('employee')
+                    ->middleware('tenant.can:employees.manage') // personal data: HR only, managers get no access
                     ->name('identity-records.')
                     ->controller(EmployeeIdentityRecordController::class)
                     ->group(function () {
@@ -130,6 +133,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
 
                 Route::prefix('/{employee}/documents')
                     ->whereNumber('employee')
+                    ->middleware('tenant.can:employees.manage') // personal data: HR only, managers get no access
                     ->name('documents.')
                     ->controller(EmployeeDocumentController::class)
                     ->group(function () {
