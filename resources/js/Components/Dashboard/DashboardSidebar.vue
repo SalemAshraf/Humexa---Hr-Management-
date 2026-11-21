@@ -1,5 +1,6 @@
 
 <script setup>
+import AfradIcon from '@/Components/AfradIcon.vue';
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
@@ -28,7 +29,7 @@ const props = defineProps({
     },
     title: {
         type: String,
-        default: 'Humexa',
+        default: 'Afrad',
     },
     subtitle: {
         type: String,
@@ -95,12 +96,7 @@ function isActive(item) {
                 class="flex h-[72px] shrink-0 items-center border-b px-5"
                 :class="isPlatform ? 'border-slate-800' : 'border-slate-200'"
             >
-                <div
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-lg font-bold text-white"
-                    aria-hidden="true"
-                >
-                    H
-                </div>
+                <AfradIcon class="h-10 w-10 shrink-0" aria-hidden="true" />
 
                 <div v-if="!collapsed" class="ms-3 min-w-0">
                     <h1 class="truncate text-lg font-bold tracking-wide">

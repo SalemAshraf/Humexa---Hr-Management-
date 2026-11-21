@@ -1,4 +1,5 @@
 <script setup>
+import AfradIcon from '@/Components/AfradIcon.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 
@@ -77,10 +78,10 @@ const securityPoints = [
 const faqs = [
     {
         q: 'Is my company data separated from other companies?',
-        a: 'Yes. Humexa is built as a multi-tenant platform where each organization has its own workspace, and its data is kept isolated from every other organization.',
+        a: 'Yes. Afrad is built as a multi-tenant platform where each organization has its own workspace, and its data is kept isolated from every other organization.',
     },
     {
-        q: 'Which HR tasks can I manage in Humexa?',
+        q: 'Which HR tasks can I manage in Afrad?',
         a: 'Employee records, attendance, leave requests and balances, payroll workflows, and reporting, all inside one workspace.',
     },
     {
@@ -112,7 +113,7 @@ const activeAssistant = ref('claude');
 const aiPoints = [
     'Planned: not available yet. No Claude or ChatGPT connection exists today',
     'Planned: answers would come only from your own workspace data',
-    'Planned: would follow the same roles and permissions as Humexa',
+    'Planned: would follow the same roles and permissions as Afrad',
 ];
 const aiPanel = ref(null);
 const aiVisible = ref(false);
@@ -183,10 +184,10 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
 <template>
     <Head>
-        <title>{{ $t('Humexa | HR software for growing companies') }}</title>
+        <title>{{ $t('Afrad | HR software for growing companies') }}</title>
         <meta
             name="description"
-            content="Manage employees, attendance, leave, and payroll in one workspace with Humexa."
+            content="Manage employees, attendance, leave, and payroll in one workspace with Afrad."
         />
         <meta name="theme-color" content="#F6F8FB" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -208,8 +209,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
         <header :class="['sticky top-0 z-30 border-b border-[#DDE3EC] bg-[#F6F8FB]/80 backdrop-blur-md transition-shadow duration-300', scrolled ? 'shadow-[0_8px_24px_-16px_rgba(15,27,51,0.35)]' : '']">
             <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 lg:px-8" :aria-label="$t('Main')">
                 <a href="#" :class="['flex items-center gap-2.5 rounded-md', focusRing]">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1F4FD8] text-base font-extrabold text-white">H</span>
-                    <span class="text-lg font-extrabold tracking-tight">{{ $t('Humexa') }}</span>
+                    <AfradIcon class="h-8 w-8" aria-hidden="true" />
+                    <span class="text-lg font-extrabold tracking-tight">{{ $t('Afrad') }}</span>
                 </a>
 
                 <div class="hidden items-center gap-8 text-sm font-medium text-[#4A5875] md:flex">
@@ -400,7 +401,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                     </div>
 
                                     <div class="hero-in inline-flex items-center gap-2 rounded-full border border-[#DDE3EC] bg-[#F6F8FB] px-3 py-1.5 text-xs font-semibold text-[#4A5875]" style="--d: 600ms">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#0E9F8E]"></span>{{ $t('Humexa: Leave balances') }}</div>
+                                        <span class="h-1.5 w-1.5 rounded-full bg-[#0E9F8E]"></span>{{ $t('Afrad: Leave balances') }}</div>
 
                                     <div class="typing flex gap-1.5 px-1" aria-hidden="true">
                                         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -440,7 +441,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                 <div v-reveal class="grid items-center gap-10 rounded-2xl bg-[#0F1B33] p-8 text-white sm:p-12 lg:grid-cols-2 lg:gap-16 lg:p-14">
                     <div>
                         <h2 class="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('Your employee data stays yours.') }}</h2>
-                        <p class="mt-5 max-w-md leading-7 text-[#B8C3D9]">{{ $t('Humexa is built around a multi-tenant architecture that keeps every company\'s workspace and data separate from everyone else\'s.') }}</p>
+                        <p class="mt-5 max-w-md leading-7 text-[#B8C3D9]">{{ $t('Afrad is built around a multi-tenant architecture that keeps every company\'s workspace and data separate from everyone else\'s.') }}</p>
                     </div>
 
                     <ul class="space-y-4">
@@ -484,7 +485,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
         <!-- Footer -->
         <footer class="border-t border-[#DDE3EC]">
             <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-[#6B7894] sm:flex-row lg:px-8">
-                <p>© {{ new Date().getFullYear() }} Humexa. All rights reserved.</p>
+                <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
                 <a href="/platform/login" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('Platform administration') }}</a>
             </div>
         </footer>

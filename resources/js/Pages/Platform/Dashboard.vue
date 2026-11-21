@@ -43,7 +43,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
     <PlatformLayout :title="$t('Overview')" :subtitle="$t('Platform management and system insights')">
         <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
             <div>
-                <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-300">{{ $t('Humexa Control Center') }}</p>
+                <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-300">{{ $t('Afrad Control Center') }}</p>
                 <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Platform growth, at a glance.') }}</h1>
                 <p class="mt-1 text-sm text-slate-400">{{ $t('Company workspaces, registration activity and platform health.') }}</p>
             </div>

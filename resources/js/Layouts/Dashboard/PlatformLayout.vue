@@ -54,7 +54,7 @@ function handleSidebarToggle() {
             theme="platform"
             :logout-url="route('platform.logout')"
             :direction="page.props.dir ?? direction"
-            title="Humexa"
+            :title="$t('Afrad')"
             :subtitle="$t('Platform Administration')"
             @toggle-collapse="toggleCollapsed"
             @close-mobile="closeMobile"

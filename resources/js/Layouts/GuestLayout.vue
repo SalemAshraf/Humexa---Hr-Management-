@@ -20,7 +20,7 @@ import { Link } from '@inertiajs/vue3';
                         <ApplicationLogo class="h-11 w-11 fill-cyan-400" />
 
                         <span class="text-2xl font-bold tracking-tight">
-                            Humexa<span class="text-cyan-400">.</span>
+                            {{ $t('Afrad') }}
                         </span>
                     </Link>
                 </div>
@@ -80,7 +80,7 @@ import { Link } from '@inertiajs/vue3';
                 </div>
 
                 <div class="relative text-xs text-slate-500">
-                    © {{ new Date().getFullYear() }} Humexa. All rights reserved.
+                    © {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}
                 </div>
             </section>
 
@@ -91,7 +91,7 @@ import { Link } from '@inertiajs/vue3';
                     <ApplicationLogo class="h-10 w-10 fill-cyan-400" />
 
                     <span class="text-2xl font-bold tracking-tight">
-                        Humexa<span class="text-cyan-400">.</span>
+                        {{ $t('Afrad') }}
                     </span>
                 </div>
 

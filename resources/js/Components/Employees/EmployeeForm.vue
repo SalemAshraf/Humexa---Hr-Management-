@@ -164,7 +164,7 @@ function submit() {
 
         <section class="border-t border-slate-100 pt-6">
             <h2 class="font-bold text-slate-900">{{ $t('Login account') }}</h2>
-            <p class="mt-1 text-sm text-slate-500">{{ $t('Optional. An employee can exist without a Humexa login.') }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ $t('Optional. An employee can exist without an Afrad login.') }}</p>
             <label class="mt-4 block text-sm font-medium text-slate-700">{{ $t('Link tenant user account') }}<select v-model="form.user_id" class="mt-1.5 w-full rounded-xl border-slate-300 text-sm md:max-w-xl">
                     <option value="">{{ $t('No login account') }}</option><option v-for="item in accounts" :key="item.id" :value="item.id">{{ item.name }} ({{ item.email }})</option>
                     <option v-if="employee?.user" :value="employee.user_id">{{ employee.user.name }} ({{ employee.user.email }})</option>

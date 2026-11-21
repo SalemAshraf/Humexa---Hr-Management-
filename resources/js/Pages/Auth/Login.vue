@@ -64,7 +64,7 @@ const submit = () => {
 
                 <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">{{ $t('Welcome Back') }}</p>
 
-                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Sign in to Humexa') }}</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Sign in to Afrad') }}</h2>
 
                 <p class="mt-2 text-sm leading-5 text-slate-400">{{ $t('Access your company workspace and manage your team.') }}</p>
             </div>
@@ -199,7 +199,7 @@ const submit = () => {
                             />
                         </svg>
 
-                        {{ form.processing ? $t('Signing in...') : $t('Sign In to Humexa') }}
+                        {{ form.processing ? $t('Signing in...') : $t('Sign In to Afrad') }}
 
                         <svg
                             v-if="!form.processing"

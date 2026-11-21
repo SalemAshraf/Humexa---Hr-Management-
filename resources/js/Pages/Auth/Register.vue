@@ -43,7 +43,7 @@ const submit = () => {
                     </svg>
                 </div>
 
-                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">{{ $t('Get started with Humexa') }}</p>
+                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">{{ $t('Get started with Afrad') }}</p>
 
                 <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Create your company account') }}</h2>
 

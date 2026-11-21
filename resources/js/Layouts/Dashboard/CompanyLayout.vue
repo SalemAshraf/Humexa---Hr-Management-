@@ -62,7 +62,7 @@ function handleSidebarToggle() {
             :mobile-open="isMobileOpen"
             theme="company"
             :direction="page.props.dir ?? direction"
-            :title="$t('Humexa')"
+            :title="$t('Afrad')"
             :subtitle="$t('Company Workspace')"
             @toggle-collapse="toggleCollapsed"
             @close-mobile="closeMobile"

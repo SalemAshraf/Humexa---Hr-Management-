@@ -80,7 +80,7 @@ function changeStatus(company, action) {
             <div class="mb-5">
                 <h2 class="font-semibold text-white">{{ $t('Registered Companies') }}</h2>
                 <p class="mt-1 text-sm text-slate-400">
-                    {{ $t('{n} companies registered on Humexa', { n: companies.total }) }}
+                    {{ $t('{n} companies registered on Afrad', { n: companies.total }) }}
                 </p>
             </div>
 

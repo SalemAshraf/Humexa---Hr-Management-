@@ -38,7 +38,7 @@ function submit() {
                 <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-400/20 bg-cyan-400/10 text-lg font-black text-cyan-300">
                     H
                 </div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-400">{{ $t('Humexa Control Center') }}</p>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-cyan-400">{{ $t('Afrad Control Center') }}</p>
                 <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Platform sign in') }}</h1>
                 <p class="mt-2 text-sm leading-6 text-slate-400">{{ $t('Sign in with your authorized platform administrator account.') }}</p>
             </div>
@@ -107,7 +107,7 @@ function submit() {
             </form>
 
             <div class="mt-7 border-t border-white/10 pt-5">
-                <p class="text-center text-xs leading-5 text-slate-500">{{ $t('Restricted area. Access is available only to authorized Humexa platform administrators.') }}</p>
+                <p class="text-center text-xs leading-5 text-slate-500">{{ $t('Restricted area. Access is available only to authorized Afrad platform administrators.') }}</p>
             </div>
         </div>
     </GuestLayout>

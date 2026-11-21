@@ -7,10 +7,9 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { t } from './lib/i18n';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${title} - ${t('Afrad')}`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,
