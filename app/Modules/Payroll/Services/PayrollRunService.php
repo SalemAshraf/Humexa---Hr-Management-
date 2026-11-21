@@ -82,7 +82,8 @@ class PayrollRunService
                     'insurance_employee' => $result['insurance_employee'], 'insurance_employer' => $result['insurance_employer'],
                     'annual_net_income' => $result['annual_net_income'], 'income_tax' => $result['income_tax'],
                     'after_tax_levy' => $result['after_tax_levy'], 'net_pay' => $result['net_pay'],
-                    'details' => ['compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured],
+                    'details' => ['compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured, 'estimate_only' => true,
+                        'rules_snapshot' => $rules->only(['id', 'name', 'effective_from', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'month_days_basis', 'tax_tables']), 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
                 ]);
             }
         });

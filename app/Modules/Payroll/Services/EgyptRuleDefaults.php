@@ -13,7 +13,7 @@ final class EgyptRuleDefaults
     public static function attributes(): array
     {
         return [
-            'name' => 'Egypt 2026 (draft, confirm before use)',
+            'name' => 'Egypt 2026 ESTIMATOR (unverified starting values)',
             'country' => 'EG',
             'effective_from' => '2026-01-01',
             'insurance_employee_rate' => 0.11,
@@ -36,9 +36,10 @@ final class EgyptRuleDefaults
                 'Personal exemption 20,000 a year and the private insurance cap (15% of net income or 10,000): Egyptian Tax Authority page https://eta.gov.eg/ar/node/1382',
             ]),
             'open_questions' => implode("\n", [
-                'Law 151 of 2026 amends the income tax law. A secondary source says it does not touch salary bands, but its text was not read here.',
-                'Martyrs fund (reported as 0.05% of gross, after tax) and comprehensive health insurance (reported as 1% where it applies) are left at 0. Set them if your accountant confirms they apply to you.',
+                'Law 151 of 2026 (official text read: https://eta.gov.eg/sites/default/files/2026-08/law.no_.151.of_.2026.pdf) lists the articles it amends, adds and repeals. Article 8 (rates) and Article 13 (exemption) are not among them. The salary chapter article numbers were not mapped independently, so this is not a full clearance.',
+                'Martyrs fund (reported as 0.05% of gross) and comprehensive health insurance (reported as 1% where it applies) are left at 0, so net pay is probably overstated. Law 151 of 2026 also mentions a health insurance solidarity contribution (for business income). No official source for the salary levies was read.',
                 'The tax method is simplified: each month is the annual tax on the month figure times 12, divided by 12. The tax authority method uses a running total with true-ups.',
+                'The higher tax tables (net income above 600,000) and the 11%/18.75% insurance rates were not read from an official table or law text here.',
                 'Insurable wage is whatever is registered per employee, kept between the limits. Rules on which pay elements count are not modelled.',
                 'Income tax on end of service pay, two-job withholding and stamp duty are not modelled.',
             ]),

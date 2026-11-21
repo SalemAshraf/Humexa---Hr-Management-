@@ -23,4 +23,9 @@ class Payslip extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
+    public function run(): BelongsTo
+    {
+        return $this->belongsTo(PayrollRun::class, 'payroll_run_id');
+    }
 }

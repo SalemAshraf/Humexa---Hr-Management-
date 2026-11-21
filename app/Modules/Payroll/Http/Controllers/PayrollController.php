@@ -92,7 +92,7 @@ class PayrollController extends Controller
 
         $rules->forceFill(['confirmed_by_user_id' => $request->user('tenant')->id, 'confirmed_at' => now()])->save();
 
-        return back()->with('status', 'Rules confirmed.');
+        return back()->with('status', 'Rules marked as reviewed.');
     }
 
     public function storeCompensation(Request $request): RedirectResponse
@@ -120,13 +120,18 @@ class PayrollController extends Controller
     public function storeRun(Request $request): RedirectResponse
     {
         $tenantId = $this->tenantId();
-        $rules = $this->activeRules($tenantId, create: false);
+        $data = $request->validate(['year' => ['required', 'integer', 'between:2020,2100'], 'month' => ['required', 'integer', 'between:1,12']]);
 
-        if ($rules === null || ! $rules->isConfirmed()) {
-            return back()->withErrors(['run' => 'Confirm the payroll rules before creating a run.']);
+        $monthEnd = \Illuminate\Support\Carbon::create((int) $data['year'], (int) $data['month'], 1)->endOfMonth()->toDateString();
+        $rules = PayrollRuleSet::query()->where('tenant_id', $tenantId)->whereDate('effective_from', '<=', $monthEnd)->orderByDesc('effective_from')->orderByDesc('id')->first();
+
+        if ($rules === null) {
+            return back()->withErrors(['run' => 'No rule set is effective for that month.']);
         }
 
-        $data = $request->validate(['year' => ['required', 'integer', 'between:2020,2100'], 'month' => ['required', 'integer', 'between:1,12']]);
+        if (! $rules->isConfirmed()) {
+            return back()->withErrors(['run' => 'Mark the payroll rules as reviewed before creating an estimate.']);
+        }
 
         if (PayrollRun::where('tenant_id', $tenantId)->where('year', $data['year'])->where('month', $data['month'])->exists()) {
             return back()->withErrors(['run' => 'A run for that month already exists.']);
@@ -220,13 +225,13 @@ class PayrollController extends Controller
         $run = $this->run($request);
 
         $rows = Payslip::query()->where('payroll_run_id', $run->id)->with('employee:id,tenant_id,employee_number,first_name,middle_name,last_name')->orderBy('id')->get();
-        $name = sprintf('payroll-%04d-%02d.csv', $run->year, $run->month);
+        $name = sprintf('payroll-ESTIMATE-%04d-%02d.csv', $run->year, $run->month);
 
         return response()->streamDownload(function () use ($rows) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, array_merge(['employee_number', 'employee'], self::PAYSLIP_FIELDS));
+            fputcsv($out, array_merge(['employee_number', 'employee'], self::PAYSLIP_FIELDS, ['note']));
             foreach ($rows as $p) {
-                fputcsv($out, array_map([$this, 'csvSafe'], array_merge([$p->employee?->employee_number, $p->employee?->full_name], array_values($p->only(self::PAYSLIP_FIELDS)))));
+                fputcsv($out, array_map([$this, 'csvSafe'], array_merge([$p->employee?->employee_number, $p->employee?->full_name], array_values($p->only(self::PAYSLIP_FIELDS)), ['ESTIMATE ONLY, amounts in EGP, not verified payroll'])));
             }
             fclose($out);
         }, $name, ['Content-Type' => 'text/csv']);

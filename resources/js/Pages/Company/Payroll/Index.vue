@@ -18,7 +18,7 @@ const now = new Date();
 const runForm = useForm({ year: now.getFullYear(), month: now.getMonth() + 1 });
 const createRun = () => runForm.post('/payroll/runs', { preserveScroll: true });
 
-const confirmRules = () => confirm('Confirm that these rates, limits and tax tables are correct for your company? Check them with your accountant first.') && router.post('/payroll/rules/confirm', {}, { preserveScroll: true });
+const confirmRules = () => confirm('Mark these values as reviewed? This records that your company checked them with its accountant. It does not verify them.') && router.post('/payroll/rules/confirm', {}, { preserveScroll: true });
 
 const showRules = ref(false);
 const ruleForm = useForm({
@@ -53,23 +53,25 @@ const flash = computed(() => window.history.state?.props?.flash);
         <section class="mb-6">
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">MONEY</p>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Payroll</h1>
-            <p class="mt-2 text-sm text-slate-500">Monthly runs with social insurance and salary tax for Egypt. Rates are editable and must be confirmed by your company before a run can be created.</p>
+            <p class="mt-2 text-sm text-slate-500">Estimated monthly pay with social insurance and salary tax for Egypt. Rates are editable. Your company must mark them as reviewed before an estimate can be created.</p>
         </section>
+
+                <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"><b>Experimental estimator.</b> These figures are not verified payroll and must not be used to pay staff. The Egypt values are unverified starting points, the tax method is simplified, and some levies are not included. Amounts are in EGP.</p>
 
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ m }}</p>
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $page.props.flash.status }}</p>
 
-        <section v-if="rules" class="mb-6 rounded-2xl border bg-white p-5 shadow-sm" :class="rules.confirmed ? 'border-emerald-200' : 'border-amber-300'">
+        <section v-if="rules" class="mb-6 rounded-2xl border bg-white p-5 shadow-sm" :class="'border-amber-300'">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-base font-bold text-slate-900">{{ rules.name }}</h2>
-                    <p class="mt-1 text-sm" :class="rules.confirmed ? 'text-emerald-700' : 'text-amber-700'">
-                        {{ rules.confirmed ? `Confirmed ${formatDate(rules.confirmed_at)}` : 'Not confirmed. These are starting values read from public sources. Review them before creating a run.' }}
+                    <p class="mt-1 text-sm" :class="'text-amber-700'">
+                        {{ rules.confirmed ? `Marked as reviewed by your company on ${formatDate(rules.confirmed_at)}. This is not a verification of the values.` : 'Not reviewed. These are unverified starting values. Check them before creating an estimate.' }}
                     </p>
                 </div>
                 <div v-if="abilities.manage" class="flex gap-3 text-xs font-semibold">
                     <button class="text-cyan-700" @click="showRules = !showRules">{{ showRules ? 'Close' : 'Edit rules' }}</button>
-                    <button v-if="!rules.confirmed" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white" @click="confirmRules">Confirm rules</button>
+                    <button v-if="!rules.confirmed" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white" @click="confirmRules">Mark rules as reviewed</button>
                 </div>
             </div>
             <dl class="mt-4 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
@@ -96,7 +98,7 @@ const flash = computed(() => window.history.state?.props?.flash);
                 </label>
                 <div class="flex items-center gap-3 md:col-span-4">
                     <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="ruleForm.processing">Save rules</button>
-                    <p class="text-xs text-slate-500">Saving clears the confirmation.</p>
+                    <p class="text-xs text-slate-500">Saving clears the reviewed mark.</p>
                 </div>
                 <p v-for="(m, k) in ruleForm.errors" :key="k" class="text-xs text-red-600 md:col-span-4">{{ m }}</p>
             </form>
@@ -112,20 +114,20 @@ const flash = computed(() => window.history.state?.props?.flash);
 
         <section class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-1">
-                <h2 class="text-base font-bold text-slate-900">Payroll runs</h2>
-                <form v-if="abilities.manage" class="mt-3 flex items-end gap-2" @submit.prevent="createRun">
+                <h2 class="text-base font-bold text-slate-900">Estimate runs</h2>
+                <form v-if="abilities.manage" class="mt-3 flex flex-wrap items-end gap-2" @submit.prevent="createRun">
                     <label class="text-xs font-medium text-slate-500">Month
                         <select v-model="runForm.month" class="mt-1 rounded-lg border-slate-300 text-sm"><option v-for="m in 12" :key="m" :value="m">{{ monthName(m) }}</option></select>
                     </label>
                     <label class="text-xs font-medium text-slate-500">Year<input v-model="runForm.year" type="number" class="mt-1 w-24 rounded-lg border-slate-300 text-sm" /></label>
-                    <button class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!rules?.confirmed || runForm.processing">Create run</button>
+                    <button class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!rules?.confirmed || runForm.processing">Create estimate</button>
                 </form>
-                <p v-if="abilities.manage && !rules?.confirmed" class="mt-2 text-xs text-amber-700">Confirm the rules first.</p>
+                <p v-if="abilities.manage && !rules?.confirmed" class="mt-2 text-xs text-amber-700">Mark the rules as reviewed first.</p>
                 <ul class="mt-4 divide-y divide-slate-100">
                     <li v-for="r in runs" :key="r.id" class="flex items-center justify-between py-3 text-sm">
                         <Link :href="`/payroll/runs/${r.id}`" class="font-semibold text-cyan-700">{{ monthName(r.month) }} {{ r.year }}</Link>
-                        <span class="text-xs text-slate-500">{{ r.employees }} people · {{ money(r.net_total) }}
-                            <span class="ml-1 rounded-full px-2 py-0.5 font-semibold" :class="r.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'">{{ r.status }}</span></span>
+                        <span class="text-xs text-slate-500">{{ r.employees }} people · EGP {{ money(r.net_total) }}
+                            <span class="ml-1 rounded-full px-2 py-0.5 font-semibold" :class="r.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'">{{ r.status === 'approved' ? 'locked' : r.status }}</span></span>
                     </li>
                     <li v-if="!runs.length" class="py-6 text-center text-sm text-slate-500">No runs yet.</li>
                 </ul>
@@ -133,7 +135,7 @@ const flash = computed(() => window.history.state?.props?.flash);
 
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:col-span-2">
                 <div class="border-b border-slate-100 p-5">
-                    <h2 class="text-base font-bold text-slate-900">Salaries</h2>
+                    <h2 class="text-base font-bold text-slate-900">Salaries (EGP a month)</h2>
                     <p class="text-xs text-slate-500"><span v-if="withoutSalary" class="font-semibold text-amber-700">{{ withoutSalary }} without a salary. They are left out of runs. </span>A new salary takes effect from its date and older runs are not changed.</p>
                 </div>
                 <ul class="divide-y divide-slate-100">

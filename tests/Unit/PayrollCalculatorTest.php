@@ -49,3 +49,15 @@ test('insurable wage is clamped, unpaid leave reduces pay, uninsured pays no ins
     $levied = $calc->calculate(egyptRules(['after_tax_levy_rate' => 0.0005]), ['basic' => 10000.0, 'insured' => false] + $base);
     expect($levied['after_tax_levy'])->toBe(5.0);
 });
+
+test('net income is rounded down to the nearest 10 before the table is chosen', function () {
+    $calc = new PayrollCalculator;
+    $base = ['allowances' => 0.0, 'unpaid_days' => 0.0, 'earnings_taxable' => 0.0, 'earnings_exempt' => 0.0, 'deductions' => 0.0, 'insurable_wage' => null, 'insured' => false];
+    // 12 x 3,334.58 = 40,014.96 less 20,000 exemption = 20,014.96 -> 20,010
+    $r = $calc->calculate(egyptRules(), ['basic' => 3334.58] + $base);
+    expect($r['annual_net_income'])->toBe(20010.0);
+    // 12 x 5,000 = 60,000 less 20,000 = 40,000 -> still the 0% band
+    expect($calc->calculate(egyptRules(), ['basic' => 5000.0] + $base)['income_tax'])->toBe(0.0);
+    // 12 x 5,010 = 60,120 less 20,000 = 40,120 -> 10% of 120 = 12 a year = 1.00 a month
+    expect($calc->calculate(egyptRules(), ['basic' => 5010.0] + $base)['income_tax'])->toBe(1.0);
+});
