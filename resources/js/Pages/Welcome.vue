@@ -183,7 +183,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
 <template>
     <Head>
-        <title>Humexa | HR software for growing companies</title>
+        <title>{{ $t('Humexa | HR software for growing companies') }}</title>
         <meta
             name="description"
             content="Manage employees, attendance, leave, and payroll in one workspace with Humexa."
@@ -206,34 +206,30 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
         <!-- Header -->
         <header :class="['sticky top-0 z-30 border-b border-[#DDE3EC] bg-[#F6F8FB]/80 backdrop-blur-md transition-shadow duration-300', scrolled ? 'shadow-[0_8px_24px_-16px_rgba(15,27,51,0.35)]' : '']">
-            <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 lg:px-8" aria-label="Main">
+            <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 lg:px-8" :aria-label="$t('Main')">
                 <a href="#" :class="['flex items-center gap-2.5 rounded-md', focusRing]">
                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1F4FD8] text-base font-extrabold text-white">H</span>
-                    <span class="text-lg font-extrabold tracking-tight">Humexa</span>
+                    <span class="text-lg font-extrabold tracking-tight">{{ $t('Humexa') }}</span>
                 </a>
 
                 <div class="hidden items-center gap-8 text-sm font-medium text-[#4A5875] md:flex">
-                    <a href="#features" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">Features</a>
-                    <a href="#ai" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">AI</a>
-                    <a href="#how-it-works" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">How it works</a>
-                    <a href="#security" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">Security</a>
-                    <a href="#faq" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">FAQ</a>
+                    <a href="#features" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('Features') }}</a>
+                    <a href="#ai" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('AI') }}</a>
+                    <a href="#how-it-works" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('How it works') }}</a>
+                    <a href="#security" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('Security') }}</a>
+                    <a href="#faq" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('FAQ') }}</a>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <a
                         href="/platform/login"
                         :class="['hidden rounded-lg px-4 py-2 text-sm font-semibold text-[#0F1B33] transition-colors hover:bg-[#E8EDF5] sm:block', focusRing]"
-                    >
-                        Sign in
-                    </a>
+                    >{{ $t('Sign in') }}</a>
                     <Link
                         v-if="canRegister"
                         :href="route('register')"
                         :class="['inline-flex rounded-lg bg-[#1F4FD8] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1A43B8]', focusRing]"
-                    >
-                        Get started
-                    </Link>
+                    >{{ $t('Get started') }}</Link>
                 </div>
             </nav>
             <div class="h-0.5 origin-left bg-[#1F4FD8]" :style="{ transform: `scaleX(${progress})` }" aria-hidden="true"></div>
@@ -244,24 +240,18 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
             <section class="mx-auto grid max-w-6xl items-center gap-14 px-6 pb-24 pt-16 lg:grid-cols-[1fr_1.05fr] lg:gap-16 lg:px-8 lg:pb-32 lg:pt-24">
                 <div>
                     <h1 class="max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-[56px]">
-                        <span class="hero-in block" style="--d: 0ms">HR for your whole company,</span>
-                        <span class="hero-in block" style="--d: 120ms">in one place.</span>
+                        <span class="hero-in block" style="--d: 0ms">{{ $t('HR for your whole company,') }}</span>
+                        <span class="hero-in block" style="--d: 120ms">{{ $t('in one place.') }}</span>
                     </h1>
-                    <p class="hero-in mt-6 max-w-lg text-lg leading-8 text-[#4A5875]" style="--d: 240ms">
-                        Employee records, attendance, leave, and payroll in a single workspace, so your HR team spends less time chasing spreadsheets.
-                    </p>
+                    <p class="hero-in mt-6 max-w-lg text-lg leading-8 text-[#4A5875]" style="--d: 240ms">{{ $t('Employee records, attendance, leave, and payroll in a single workspace, so your HR team spends less time chasing spreadsheets.') }}</p>
 
                     <div class="hero-in mt-9 flex flex-col gap-3 sm:flex-row" style="--d: 360ms">
-                        <Link v-if="canRegister" :href="route('register')" :class="btnPrimary">
-                            Create your workspace
-                        </Link>
-                        <a href="#features" :class="btnSecondary">See what's included</a>
+                        <Link v-if="canRegister" :href="route('register')" :class="btnPrimary">{{ $t('Create your workspace') }}</Link>
+                        <a href="#features" :class="btnSecondary">{{ $t('See what\'s included') }}</a>
                     </div>
 
                     <p class="hero-in mt-6 flex items-center gap-2 text-sm text-[#4A5875]" style="--d: 480ms">
-                        <svg class="h-4 w-4 text-[#0E9F8E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>
-                        Each company gets its own isolated workspace.
-                    </p>
+                        <svg class="h-4 w-4 text-[#0E9F8E]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="icons.check" /></svg>{{ $t('Each company gets its own isolated workspace.') }}</p>
                 </div>
 
                 <!-- Product preview -->
@@ -272,21 +262,19 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                 <span class="relative flex h-2 w-2" aria-hidden="true">
                                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75 motion-reduce:animate-none"></span>
                                     <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                                </span>
-                                Today's attendance
-                            </span>
-                            <span class="text-xs text-[#6B7894]">Sample data</span>
+                                </span>{{ $t('Today\'s attendance') }}</span>
+                            <span class="text-xs text-[#6B7894]">{{ $t('Sample data') }}</span>
                         </div>
 
                         <div class="overflow-x-auto">
                             <table class="w-full min-w-[420px] text-left text-sm">
-                                <caption class="sr-only">Sample attendance list</caption>
+                                <caption class="sr-only">{{ $t('Sample attendance list') }}</caption>
                                 <thead>
                                     <tr class="text-xs text-[#6B7894]">
-                                        <th scope="col" class="px-5 py-3 font-semibold">Employee</th>
-                                        <th scope="col" class="px-3 py-3 font-semibold">Department</th>
-                                        <th scope="col" class="px-3 py-3 font-semibold">Status</th>
-                                        <th scope="col" class="px-5 py-3 text-right font-semibold">Check-in</th>
+                                        <th scope="col" class="px-5 py-3 font-semibold">{{ $t('Employee') }}</th>
+                                        <th scope="col" class="px-3 py-3 font-semibold">{{ $t('Department') }}</th>
+                                        <th scope="col" class="px-3 py-3 font-semibold">{{ $t('Status') }}</th>
+                                        <th scope="col" class="px-5 py-3 text-right font-semibold">{{ $t('Check-in') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-[#EEF1F6]">
@@ -307,9 +295,9 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                     <div class="float-slow mt-4 rounded-xl border border-[#DDE3EC] bg-white p-5 shadow-[0_12px_30px_-18px_rgba(15,27,51,0.25)] sm:absolute sm:-bottom-10 sm:-left-8 sm:mt-0 sm:w-[300px]">
                         <div class="flex items-start justify-between gap-3">
                             <div>
-                                <p class="text-sm font-bold">Leave request</p>
-                                <p class="mt-1 text-sm text-[#4A5875]">Mona Adel · Annual leave</p>
-                                <p class="text-sm text-[#4A5875]">3 days, Nov 24 to 26</p>
+                                <p class="text-sm font-bold">{{ $t('Leave request') }}</p>
+                                <p class="mt-1 text-sm text-[#4A5875]">{{ $t('Mona Adel · Annual leave') }}</p>
+                                <p class="text-sm text-[#4A5875]">{{ $t('3 days, Nov 24 to 26') }}</p>
                             </div>
                         </div>
 
@@ -318,16 +306,12 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                 type="button"
                                 :class="['flex-1 rounded-lg bg-[#1F4FD8] px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1A43B8]', focusRing]"
                                 @click="leaveState = 'approved'"
-                            >
-                                Approve
-                            </button>
+                            >{{ $t('Approve') }}</button>
                             <button
                                 type="button"
                                 :class="['flex-1 rounded-lg border border-[#C9D2E0] px-3 py-2 text-sm font-semibold transition-colors hover:bg-[#EEF2F8]', focusRing]"
                                 @click="leaveState = 'declined'"
-                            >
-                                Decline
-                            </button>
+                            >{{ $t('Decline') }}</button>
                         </div>
                         <div v-else class="mt-4 flex items-center justify-between" role="status">
                             <span
@@ -336,15 +320,13 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                     leaveState === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600',
                                 ]"
                             >
-                                {{ leaveState === 'approved' ? 'Approved' : 'Declined' }}
+                                {{ leaveState === $t('approved') ? $t('Approved') : $t('Declined') }}
                             </span>
                             <button
                                 type="button"
                                 :class="['rounded text-sm font-semibold text-[#1F4FD8] hover:underline', focusRing]"
                                 @click="leaveState = 'pending'"
-                            >
-                                Undo
-                            </button>
+                            >{{ $t('Undo') }}</button>
                         </div>
                     </div>
                 </div>
@@ -354,12 +336,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
             <section id="features" class="border-y border-[#DDE3EC] bg-white">
                 <div class="mx-auto grid max-w-6xl gap-12 px-6 py-24 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:px-8">
                     <div v-reveal class="lg:sticky lg:top-28 lg:self-start">
-                        <h2 class="max-w-sm text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-                            Everything your HR team does every week.
-                        </h2>
-                        <p class="mt-5 max-w-sm leading-7 text-[#4A5875]">
-                            Start with the module you need first and bring the rest in as your company grows.
-                        </p>
+                        <h2 class="max-w-sm text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('Everything your HR team does every week.') }}</h2>
+                        <p class="mt-5 max-w-sm leading-7 text-[#4A5875]">{{ $t('Start with the module you need first and bring the rest in as your company grows.') }}</p>
                     </div>
 
                     <ul class="divide-y divide-[#E6EBF2] border-y border-[#E6EBF2]">
@@ -380,12 +358,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
             <section id="ai" class="mx-auto max-w-6xl px-6 py-24 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
                     <div v-reveal>
-                        <h2 class="max-w-md text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-                            Ask Humexa from Claude or ChatGPT.
-                        </h2>
-                        <p class="mt-5 max-w-md leading-7 text-[#4A5875]">
-                            Connect your workspace to the AI assistant your team already uses. Ask in plain language and get answers from your own HR data, without opening a report.
-                        </p>
+                        <h2 class="max-w-md text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('Ask Humexa from Claude or ChatGPT.') }}</h2>
+                        <p class="mt-5 max-w-md leading-7 text-[#4A5875]">{{ $t('Connect your workspace to the AI assistant your team already uses. Ask in plain language and get answers from your own HR data, without opening a report.') }}</p>
                         <ul class="mt-8 space-y-4">
                             <li v-for="point in aiPoints" :key="point" class="flex items-start gap-3">
                                 <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF0FD] text-[#1F4FD8]">
@@ -399,7 +373,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                     <div ref="aiPanel" v-reveal="150" class="rounded-2xl bg-[#EAF0FD] p-4 sm:p-8">
                         <div class="overflow-hidden rounded-xl border border-[#DDE3EC] bg-white shadow-[0_20px_50px_-20px_rgba(15,27,51,0.25)]">
                             <div class="flex items-center justify-between gap-3 border-b border-[#E6EBF2] px-4 py-3">
-                                <div role="tablist" aria-label="AI assistant" class="inline-flex rounded-lg bg-[#F1F4F9] p-1">
+                                <div role="tablist" :aria-label="$t('AI assistant')" class="inline-flex rounded-lg bg-[#F1F4F9] p-1">
                                     <button
                                         v-for="a in assistants"
                                         :key="a.id"
@@ -416,21 +390,17 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
                                         {{ a.name }}
                                     </button>
                                 </div>
-                                <span class="text-xs text-[#6B7894]">Sample conversation</span>
+                                <span class="text-xs text-[#6B7894]">{{ $t('Sample conversation') }}</span>
                             </div>
 
                             <div class="min-h-[340px] p-5 sm:p-6" aria-live="polite">
                                 <div v-if="aiVisible" :key="activeAssistant" class="space-y-4">
                                     <div class="flex justify-end">
-                                        <div class="hero-in max-w-[85%] rounded-2xl rounded-br-md bg-[#0F1B33] px-4 py-3 text-sm leading-6 text-white" style="--d: 0ms">
-                                            Who is on leave next week, and who has more than 15 days of annual leave left?
-                                        </div>
+                                        <div class="hero-in max-w-[85%] rounded-2xl rounded-br-md bg-[#0F1B33] px-4 py-3 text-sm leading-6 text-white" style="--d: 0ms">{{ $t('Who is on leave next week, and who has more than 15 days of annual leave left?') }}</div>
                                     </div>
 
                                     <div class="hero-in inline-flex items-center gap-2 rounded-full border border-[#DDE3EC] bg-[#F6F8FB] px-3 py-1.5 text-xs font-semibold text-[#4A5875]" style="--d: 600ms">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-[#0E9F8E]"></span>
-                                        Humexa: Leave balances
-                                    </div>
+                                        <span class="h-1.5 w-1.5 rounded-full bg-[#0E9F8E]"></span>{{ $t('Humexa: Leave balances') }}</div>
 
                                     <div class="typing flex gap-1.5 px-1" aria-hidden="true">
                                         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -438,12 +408,12 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
                                     <div class="hero-in max-w-[92%] rounded-2xl rounded-bl-md bg-[#F1F4F9] px-4 py-3 text-sm leading-6" style="--d: 1700ms">
                                         <p class="text-xs font-bold text-[#6B7894]">{{ assistants.find((a) => a.id === activeAssistant).name }}</p>
-                                        <p class="mt-1.5">Two people are on leave next week:</p>
+                                        <p class="mt-1.5">{{ $t('Two people are on leave next week:') }}</p>
                                         <ul class="mt-1.5 list-disc space-y-0.5 pl-5">
-                                            <li>Karim Samir (Sales), all week</li>
-                                            <li>Mona Adel (Finance), Nov 24 to 26</li>
+                                            <li>{{ $t('Karim Samir (Sales), all week') }}</li>
+                                            <li>{{ $t('Mona Adel (Finance), Nov 24 to 26') }}</li>
                                         </ul>
-                                        <p class="mt-2.5">Three employees have more than 15 days of annual leave left: Ahmed Hassan, Nour Khaled, and Youssef Ali.</p>
+                                        <p class="mt-2.5">{{ $t('Three employees have more than 15 days of annual leave left: Ahmed Hassan, Nour Khaled, and Youssef Ali.') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -454,9 +424,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
             <!-- How it works -->
             <section id="how-it-works" class="mx-auto max-w-6xl px-6 py-24 lg:px-8">
-                <h2 v-reveal class="max-w-xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-                    Up and running in three steps.
-                </h2>
+                <h2 v-reveal class="max-w-xl text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('Up and running in three steps.') }}</h2>
 
                 <ol class="mt-14 grid gap-10 md:grid-cols-3 md:gap-8">
                     <li v-for="(s, i) in steps" :key="s.title" v-reveal="i * 120"><div class="group border-t-2 border-[#0F1B33] pt-6 transition-colors duration-300 hover:border-[#1F4FD8]">
@@ -471,12 +439,8 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
             <section id="security" class="mx-auto max-w-6xl px-6 pb-24 lg:px-8">
                 <div v-reveal class="grid items-center gap-10 rounded-2xl bg-[#0F1B33] p-8 text-white sm:p-12 lg:grid-cols-2 lg:gap-16 lg:p-14">
                     <div>
-                        <h2 class="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-                            Your employee data stays yours.
-                        </h2>
-                        <p class="mt-5 max-w-md leading-7 text-[#B8C3D9]">
-                            Humexa is built around a multi-tenant architecture that keeps every company's workspace and data separate from everyone else's.
-                        </p>
+                        <h2 class="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{{ $t('Your employee data stays yours.') }}</h2>
+                        <p class="mt-5 max-w-md leading-7 text-[#B8C3D9]">{{ $t('Humexa is built around a multi-tenant architecture that keeps every company\'s workspace and data separate from everyone else\'s.') }}</p>
                     </div>
 
                     <ul class="space-y-4">
@@ -492,7 +456,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
 
             <!-- FAQ -->
             <section id="faq" class="mx-auto max-w-3xl px-6 pb-24 lg:px-8">
-                <h2 v-reveal class="text-3xl font-extrabold tracking-tight sm:text-4xl">Common questions</h2>
+                <h2 v-reveal class="text-3xl font-extrabold tracking-tight sm:text-4xl">{{ $t('Common questions') }}</h2>
 
                 <div class="mt-10 divide-y divide-[#DDE3EC] border-y border-[#DDE3EC]">
                     <details v-for="(item, i) in faqs" :key="item.q" v-reveal="i * 80" class="group py-5">
@@ -509,12 +473,10 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
             <section class="border-t border-[#DDE3EC] bg-white">
                 <div v-reveal class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-6 py-16 sm:flex-row sm:items-center lg:px-8">
                     <div>
-                        <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">Ready to move HR out of spreadsheets?</h2>
-                        <p class="mt-2 text-[#4A5875]">Create a workspace for your company and invite your team.</p>
+                        <h2 class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ $t('Ready to move HR out of spreadsheets?') }}</h2>
+                        <p class="mt-2 text-[#4A5875]">{{ $t('Create a workspace for your company and invite your team.') }}</p>
                     </div>
-                    <Link v-if="canRegister" :href="route('register')" :class="[btnPrimary, 'shrink-0']">
-                        Create your workspace
-                    </Link>
+                    <Link v-if="canRegister" :href="route('register')" :class="[btnPrimary, 'shrink-0']">{{ $t('Create your workspace') }}</Link>
                 </div>
             </section>
         </main>
@@ -523,7 +485,7 @@ const btnSecondary = `inline-flex items-center justify-center rounded-lg border 
         <footer class="border-t border-[#DDE3EC]">
             <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-[#6B7894] sm:flex-row lg:px-8">
                 <p>© {{ new Date().getFullYear() }} Humexa. All rights reserved.</p>
-                <a href="/platform/login" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">Platform administration</a>
+                <a href="/platform/login" :class="['rounded transition-colors hover:text-[#0F1B33]', focusRing]">{{ $t('Platform administration') }}</a>
             </div>
         </footer>
     </div>

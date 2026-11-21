@@ -49,7 +49,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Sign In" />
+        <Head :title="$t('Sign In')" />
 
         <div class="rounded-3xl border border-white/10 bg-[#111C30]/90 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-7">
 
@@ -62,17 +62,11 @@ const submit = () => {
                     </svg>
                 </div>
 
-                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">
-                    Welcome Back
-                </p>
+                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">{{ $t('Welcome Back') }}</p>
 
-                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                    Sign in to Humexa
-                </h2>
+                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Sign in to Humexa') }}</h2>
 
-                <p class="mt-2 text-sm leading-5 text-slate-400">
-                    Access your company workspace and manage your team.
-                </p>
+                <p class="mt-2 text-sm leading-5 text-slate-400">{{ $t('Access your company workspace and manage your team.') }}</p>
             </div>
 
             <!-- Status -->
@@ -109,7 +103,7 @@ const submit = () => {
                         type="email"
                         class="mt-2 block w-full !border-white/10 !bg-[#0B1425] !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                         v-model="form.email"
-                        placeholder="you@company.com"
+                        :placeholder="$t('you@company.com')"
                         required
                         autofocus
                         autocomplete="username"
@@ -134,9 +128,7 @@ const submit = () => {
                             v-if="canResetPassword"
                             :href="route('password.request')"
                             class="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
-                        >
-                            Forgot password?
-                        </Link>
+                        >{{ $t('Forgot password?') }}</Link>
                     </div>
 
                     <div class="relative">
@@ -145,7 +137,7 @@ const submit = () => {
                             :type="showPassword ? 'text' : 'password'"
                             class="block w-full !border-white/10 !bg-[#0B1425] !pe-16 !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                             v-model="form.password"
-                            placeholder="Enter your password"
+                            :placeholder="$t('Enter your password')"
                             required
                             autocomplete="current-password"
                         />
@@ -156,7 +148,7 @@ const submit = () => {
                             :aria-label="showPassword ? 'Hide password' : 'Show password'"
                             class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 transition hover:text-cyan-400 focus:outline-none focus:text-cyan-400"
                         >
-                            {{ showPassword ? 'Hide' : 'Show' }}
+                            {{ showPassword ? $t('Hide') : $t('Show') }}
                         </button>
                     </div>
 
@@ -174,9 +166,7 @@ const submit = () => {
                             v-model:checked="form.remember"
                         />
 
-                        <span class="text-sm text-slate-400">
-                            Remember me
-                        </span>
+                        <span class="text-sm text-slate-400">{{ $t('Remember me') }}</span>
                     </label>
                 </div>
 
@@ -209,7 +199,7 @@ const submit = () => {
                             />
                         </svg>
 
-                        {{ form.processing ? 'Signing in...' : 'Sign In to Humexa' }}
+                        {{ form.processing ? $t('Signing in...') : $t('Sign In to Humexa') }}
 
                         <svg
                             v-if="!form.processing"
@@ -227,23 +217,16 @@ const submit = () => {
                         v-if="form.hasErrors"
                         class="mt-3 text-center text-xs text-red-400"
                         role="alert"
-                    >
-                        Please check your email and password.
-                    </p>
+                    >{{ $t('Please check your email and password.') }}</p>
                 </div>
             </form>
 
             <!-- Registration link -->
             <div v-if="showRegistrationLink" class="mt-6 border-t border-white/10 pt-5 text-center">
-                <p class="text-sm text-slate-400">
-                    Don't have a company account?
-
-                    <Link
+                <p class="text-sm text-slate-400">{{ $t('Don\'t have a company account?') }}<Link
                         :href="route('register')"
                         class="ms-1 font-semibold text-cyan-400 transition hover:text-cyan-300"
-                    >
-                        Create account
-                    </Link>
+                    >{{ $t('Create account') }}</Link>
                 </p>
             </div>
         </div>

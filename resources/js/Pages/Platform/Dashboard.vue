@@ -39,22 +39,21 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
 </script>
 
 <template>
-    <Head title="Platform Overview" />
-    <PlatformLayout title="Overview" subtitle="Platform management and system insights">
+    <Head :title="$t('Platform Overview')" />
+    <PlatformLayout :title="$t('Overview')" :subtitle="$t('Platform management and system insights')">
         <div class="mb-5 flex flex-wrap items-end justify-between gap-4">
             <div>
-                <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-300">Humexa Control Center</p>
-                <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">Platform growth, at a glance.</h1>
-                <p class="mt-1 text-sm text-slate-400">Company workspaces, registration activity and platform health.</p>
+                <p class="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-300">{{ $t('Humexa Control Center') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Platform growth, at a glance.') }}</h1>
+                <p class="mt-1 text-sm text-slate-400">{{ $t('Company workspaces, registration activity and platform health.') }}</p>
             </div>
-            <Link :href="route('platform.companies.index')" class="inline-flex items-center rounded-xl bg-emerald-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">
-                Manage companies <span class="ms-2">→</span>
+            <Link :href="route('platform.companies.index')" class="inline-flex items-center rounded-xl bg-emerald-300 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-200">{{ $t('Manage companies') }}<span class="ms-2">→</span>
             </Link>
         </div>
 
         <div class="mb-5 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-xs">
-            <div><span class="font-bold tracking-wide text-slate-200">UI CONCEPT</span><span class="ms-3 text-slate-500">Live platform data · Development</span></div>
-            <span class="text-slate-500">Super admin view</span>
+            <div><span class="font-bold tracking-wide text-slate-200">{{ $t('UI CONCEPT') }}</span><span class="ms-3 text-slate-500">{{ $t('Live platform data · Development') }}</span></div>
+            <span class="text-slate-500">{{ $t('Super admin view') }}</span>
         </div>
 
         <section class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -71,11 +70,11 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
         <section class="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
             <article class="hx-card p-5 sm:p-6 xl:col-span-2">
                 <div class="mb-4">
-                    <h2 class="font-semibold text-slate-100">Company growth</h2>
-                    <p class="mt-1 text-xs text-slate-400">New registered workspaces · Last six months</p>
+                    <h2 class="font-semibold text-slate-100">{{ $t('Company growth') }}</h2>
+                    <p class="mt-1 text-xs text-slate-400">{{ $t('New registered workspaces · Last six months') }}</p>
                 </div>
                 <div class="overflow-hidden">
-                    <svg viewBox="0 0 620 190" class="w-full" role="img" aria-label="Monthly company registrations trend">
+                    <svg viewBox="0 0 620 190" class="w-full" role="img" :aria-label="$t('Monthly company registrations trend')">
                         <g stroke="#263449" stroke-width="1">
                             <line x1="32" y1="34" x2="600" y2="34"/><line x1="32" y1="74" x2="600" y2="74"/>
                             <line x1="32" y1="114" x2="600" y2="114"/><line x1="32" y1="160" x2="600" y2="160"/>
@@ -89,21 +88,21 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                         </g>
                     </svg>
                 </div>
-                <p class="mt-2 text-[10px] text-slate-500">Workspace metadata only · employee records are not exposed at platform level</p>
+                <p class="mt-2 text-[10px] text-slate-500">{{ $t('Workspace metadata only · employee records are not exposed at platform level') }}</p>
             </article>
 
             <article class="hx-card p-5 sm:p-6">
-                <h2 class="font-semibold text-slate-100">Workspace status</h2>
+                <h2 class="font-semibold text-slate-100">{{ $t('Workspace status') }}</h2>
                 <p class="mt-1 text-xs text-slate-400">{{ stats.totalCompanies }} registered workspaces</p>
                 <div class="my-6 flex items-center justify-center gap-5">
                     <div class="relative h-32 w-32 shrink-0 rounded-full" :style="donutStyle">
                         <div class="absolute inset-[17px] flex flex-col items-center justify-center rounded-full bg-[#111c2e]">
-                            <span class="text-2xl font-bold text-slate-100">{{ stats.totalCompanies }}</span><span class="text-[10px] text-slate-500">workspaces</span>
+                            <span class="text-2xl font-bold text-slate-100">{{ stats.totalCompanies }}</span><span class="text-[10px] text-slate-500">{{ $t('workspaces') }}</span>
                         </div>
                     </div>
                     <div class="space-y-3">
-                        <div><p class="text-xs text-slate-400">Activation rate</p><p class="text-xl font-bold text-emerald-300">{{ stats.activeRate }}%</p></div>
-                        <div><p class="text-xs text-slate-400">Suspended share</p><p class="text-lg font-semibold text-slate-100">{{ stats.suspendedRate }}%</p></div>
+                        <div><p class="text-xs text-slate-400">{{ $t('Activation rate') }}</p><p class="text-xl font-bold text-emerald-300">{{ stats.activeRate }}%</p></div>
+                        <div><p class="text-xs text-slate-400">{{ $t('Suspended share') }}</p><p class="text-lg font-semibold text-slate-100">{{ stats.suspendedRate }}%</p></div>
                     </div>
                 </div>
                 <div class="space-y-2 text-xs text-slate-400">
@@ -117,12 +116,12 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
         <section class="mb-5 grid grid-cols-1 gap-4 xl:grid-cols-3">
             <article class="hx-card p-5 sm:p-6 xl:col-span-2">
                 <div class="mb-4 flex items-center justify-between">
-                    <div><h2 class="font-semibold text-slate-100">Recently registered companies</h2><p class="mt-1 text-xs text-slate-400">Workspace metadata and access status</p></div>
-                    <Link :href="route('platform.companies.index')" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">All companies →</Link>
+                    <div><h2 class="font-semibold text-slate-100">{{ $t('Recently registered companies') }}</h2><p class="mt-1 text-xs text-slate-400">{{ $t('Workspace metadata and access status') }}</p></div>
+                    <Link :href="route('platform.companies.index')" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">{{ $t('All companies →') }}</Link>
                 </div>
                 <div v-if="recentCompanies.length" class="overflow-x-auto">
                     <table class="w-full min-w-[520px] text-left text-sm">
-                        <thead><tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500"><th class="px-2 py-3">Company / Workspace</th><th class="px-2 py-3">Status</th><th class="px-2 py-3">Registered</th><th class="px-2 py-3">Domains</th></tr></thead>
+                        <thead><tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500"><th class="px-2 py-3">{{ $t('Company / Workspace') }}</th><th class="px-2 py-3">{{ $t('Status') }}</th><th class="px-2 py-3">{{ $t('Registered') }}</th><th class="px-2 py-3">{{ $t('Domains') }}</th></tr></thead>
                         <tbody>
                             <tr v-for="company in recentCompanies" :key="company.id" class="border-b border-slate-800/70 last:border-0">
                                 <td class="px-2 py-3 font-semibold text-slate-200">{{ company.companyName }}</td>
@@ -133,13 +132,13 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                         </tbody>
                     </table>
                 </div>
-                <div v-else class="py-12 text-center text-sm text-slate-500">No companies registered yet.</div>
+                <div v-else class="py-12 text-center text-sm text-slate-500">{{ $t('No companies registered yet.') }}</div>
                 <p class="mt-3 text-[10px] text-slate-500">Showing {{ recentCompanies.length }} recent companies · company metadata only</p>
             </article>
 
             <article class="hx-card p-5 sm:p-6">
-                <h2 class="font-semibold text-slate-100">Registration activity</h2>
-                <p class="mt-1 text-xs text-slate-400">Daily signups · Last seven days</p>
+                <h2 class="font-semibold text-slate-100">{{ $t('Registration activity') }}</h2>
+                <p class="mt-1 text-xs text-slate-400">{{ $t('Daily signups · Last seven days') }}</p>
                 <div class="mt-7 flex h-36 items-end justify-between gap-2">
                     <div v-for="day in registrationActivity" :key="day.label" class="flex flex-1 flex-col items-center gap-2">
                         <span class="text-[10px] text-slate-400">{{ day.count }}</span>
@@ -147,28 +146,28 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                         <span class="text-[10px] text-slate-500">{{ day.label }}</span>
                     </div>
                 </div>
-                <div class="mt-5 border-t border-slate-800 pt-4"><p class="text-xs text-slate-400">New this week</p><p class="mt-1 text-xl font-bold text-emerald-300">{{ registrationActivity.reduce((sum,d)=>sum+d.count,0) }}</p></div>
+                <div class="mt-5 border-t border-slate-800 pt-4"><p class="text-xs text-slate-400">{{ $t('New this week') }}</p><p class="mt-1 text-xl font-bold text-emerald-300">{{ registrationActivity.reduce((sum,d)=>sum+d.count,0) }}</p></div>
             </article>
         </section>
 
         <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
             <article v-if="canViewActivityLogs" class="hx-card p-5 sm:p-6 xl:col-span-2">
-                <div class="mb-5 flex items-center justify-between"><div><h2 class="font-semibold text-slate-100">Recent admin activity</h2><p class="mt-1 text-xs text-slate-400">Platform actions, recorded with context</p></div><Link :href="route('platform.activity-logs.index')" class="text-xs font-semibold text-emerald-300">Full log →</Link></div>
+                <div class="mb-5 flex items-center justify-between"><div><h2 class="font-semibold text-slate-100">{{ $t('Recent admin activity') }}</h2><p class="mt-1 text-xs text-slate-400">{{ $t('Platform actions, recorded with context') }}</p></div><Link :href="route('platform.activity-logs.index')" class="text-xs font-semibold text-emerald-300">{{ $t('Full log →') }}</Link></div>
                 <div v-if="recentActivity.length" class="space-y-3">
                     <div v-for="entry in recentActivity" :key="entry.id" class="flex gap-3 border-b border-slate-800 pb-3 last:border-0">
                         <span class="mt-1 h-2 w-2 shrink-0 rounded-full" :class="entry.newStatus === 'suspended' ? 'bg-rose-400' : 'bg-emerald-300'"></span>
-                        <div class="min-w-0"><p class="text-sm text-slate-200">{{ entry.event === 'company.suspended' ? 'Workspace access suspended' : 'Company registration reviewed / activated' }}</p><p class="mt-1 text-xs text-slate-500">{{ entry.companyName }} · {{ entry.actor }} · {{ entry.createdAt }}</p></div>
+                        <div class="min-w-0"><p class="text-sm text-slate-200">{{ entry.event === $t('company.suspended') ? $t('Workspace access suspended') : $t('Company registration reviewed / activated') }}</p><p class="mt-1 text-xs text-slate-500">{{ entry.companyName }} · {{ entry.actor }} · {{ entry.createdAt }}</p></div>
                     </div>
                 </div>
-                <p v-else class="text-sm text-slate-500">No recorded platform actions yet.</p>
+                <p v-else class="text-sm text-slate-500">{{ $t('No recorded platform actions yet.') }}</p>
             </article>
             <article class="hx-card p-5 sm:p-6">
-                <h2 class="font-semibold text-slate-100">Platform health</h2><p class="mt-1 text-xs text-slate-400">Key platform metrics</p>
+                <h2 class="font-semibold text-slate-100">{{ $t('Platform health') }}</h2><p class="mt-1 text-xs text-slate-400">{{ $t('Key platform metrics') }}</p>
                 <div class="mt-5 space-y-4 text-xs">
-                    <div class="flex justify-between"><span class="text-slate-400">Activation rate</span><span class="font-semibold text-emerald-300">{{ stats.activeRate }}%</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">Tenant users</span><span class="font-semibold text-slate-200">{{ stats.totalTenantUsers.toLocaleString() }}</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">Registrations today</span><span class="font-semibold text-slate-200">{{ stats.newCompaniesToday }}</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">Suspended share</span><span class="font-semibold text-slate-200">{{ stats.suspendedRate }}%</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">{{ $t('Activation rate') }}</span><span class="font-semibold text-emerald-300">{{ stats.activeRate }}%</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">{{ $t('Tenant users') }}</span><span class="font-semibold text-slate-200">{{ stats.totalTenantUsers.toLocaleString() }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">{{ $t('Registrations today') }}</span><span class="font-semibold text-slate-200">{{ stats.newCompaniesToday }}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">{{ $t('Suspended share') }}</span><span class="font-semibold text-slate-200">{{ stats.suspendedRate }}%</span></div>
                 </div>
             </article>
         </section>

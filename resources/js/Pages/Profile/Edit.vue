@@ -16,15 +16,13 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Profile" />
+    <Head :title="$t('Profile')" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Profile
-            </h2>
+            >{{ $t('Profile') }}</h2>
         </template>
 
         <div class="py-12">

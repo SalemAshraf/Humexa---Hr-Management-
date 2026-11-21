@@ -11,40 +11,30 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Platform Activity Logs" />
+    <Head :title="$t('Platform Activity Logs')" />
 
-    <PlatformLayout title="Activity Logs" subtitle="Audit trail for platform administration">
+    <PlatformLayout :title="$t('Activity Logs')" :subtitle="$t('Audit trail for platform administration')">
         <section class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400">
-                    SECURITY & AUDIT
-                </p>
-                <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                    Platform Activity Logs
-                </h1>
-                <p class="mt-2 text-sm text-slate-400">
-                    Review company access changes performed by platform administrators.
-                </p>
+                <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400">{{ $t('SECURITY & AUDIT') }}</p>
+                <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Platform Activity Logs') }}</h1>
+                <p class="mt-2 text-sm text-slate-400">{{ $t('Review company access changes performed by platform administrators.') }}</p>
             </div>
             <Link
                 :href="route('platform.companies.index')"
                 class="inline-flex items-center justify-center rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/40 hover:text-cyan-300"
-            >
-                Company Management
-            </Link>
+            >{{ $t('Company Management') }}</Link>
         </section>
 
         <section class="hx-card overflow-hidden p-5 sm:p-6">
             <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                    <h2 class="font-semibold text-white">Audit history</h2>
+                    <h2 class="font-semibold text-white">{{ $t('Audit history') }}</h2>
                     <p class="mt-1 text-sm text-slate-400">
                         {{ activity.total }} recorded events
                     </p>
                 </div>
-                <span class="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-400">
-                    Latest first
-                </span>
+                <span class="rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-400">{{ $t('Latest first') }}</span>
             </div>
 
             <div v-if="activity.data?.length" class="space-y-3">
@@ -61,11 +51,11 @@ defineProps({
                                     ? 'bg-red-400/10 text-red-300'
                                     : 'bg-emerald-400/10 text-emerald-300'"
                             >
-                                {{ entry.newStatus === 'suspended' ? 'SUS' : 'ACT' }}
+                                {{ entry.newStatus === $t('suspended') ? $t('SUS') : $t('ACT') }}
                             </span>
                             <div class="min-w-0">
                                 <h3 class="font-semibold text-slate-100">
-                                    {{ entry.event === 'company.suspended' ? 'Company suspended' : 'Company activated' }}
+                                    {{ entry.event === $t('company.suspended') ? $t('Company suspended') : $t('Company activated') }}
                                 </h3>
                                 <p class="mt-1 text-sm text-slate-400">{{ entry.companyName }}</p>
                                 <p class="mt-1 break-all text-xs text-slate-600">Tenant ID: {{ entry.tenantId }}</p>
@@ -76,12 +66,12 @@ defineProps({
 
                     <div class="mt-4 grid grid-cols-1 gap-3 border-t border-slate-800 pt-4 sm:grid-cols-2 xl:grid-cols-3">
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Performed by</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ $t('Performed by') }}</p>
                             <p class="mt-1 text-sm text-slate-200">{{ entry.actor }}</p>
                             <p v-if="entry.actorEmail" class="mt-0.5 break-all text-xs text-slate-500">{{ entry.actorEmail }}</p>
                         </div>
                         <div>
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status transition</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ $t('Status transition') }}</p>
                             <p class="mt-1 text-sm text-slate-200">
                                 <span class="capitalize">{{ entry.oldStatus || '—' }}</span>
                                 <span class="mx-2 text-slate-600">→</span>
@@ -91,22 +81,22 @@ defineProps({
                             </p>
                         </div>
                         <div v-if="entry.ipAddress">
-                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">IP address</p>
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ $t('IP address') }}</p>
                             <p class="mt-1 font-mono text-sm text-slate-300">{{ entry.ipAddress }}</p>
                         </div>
                     </div>
 
                     <div v-if="entry.reason" class="mt-4 rounded-xl bg-slate-950/60 px-4 py-3">
-                        <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Reason</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{{ $t('Reason') }}</p>
                         <p class="mt-1 whitespace-pre-wrap text-sm text-slate-300">{{ entry.reason }}</p>
                     </div>
                 </article>
             </div>
 
             <div v-else class="flex min-h-48 flex-col items-center justify-center text-center">
-                <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-sm font-bold text-slate-400">LOG</span>
-                <p class="text-sm font-semibold text-slate-200">No activity recorded</p>
-                <p class="mt-1 text-xs text-slate-500">Company suspension and activation events will appear here.</p>
+                <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-sm font-bold text-slate-400">{{ $t('LOG') }}</span>
+                <p class="text-sm font-semibold text-slate-200">{{ $t('No activity recorded') }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ $t('Company suspension and activation events will appear here.') }}</p>
             </div>
 
             <div v-if="activity.links?.length > 3" class="mt-6 flex flex-wrap gap-2 border-t border-slate-800 pt-5">

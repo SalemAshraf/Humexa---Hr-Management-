@@ -31,7 +31,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Create Company Account" />
+        <Head :title="$t('Create Company Account')" />
 
         <div class="rounded-3xl border border-white/10 bg-[#111C30]/90 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-7">
             <!-- Header -->
@@ -43,17 +43,11 @@ const submit = () => {
                     </svg>
                 </div>
 
-                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">
-                    Get started with Humexa
-                </p>
+                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">{{ $t('Get started with Humexa') }}</p>
 
-                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                    Create your company account
-                </h2>
+                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Create your company account') }}</h2>
 
-                <p class="mt-2 text-sm leading-5 text-slate-400">
-                    Set up your workspace and start managing your people in one place.
-                </p>
+                <p class="mt-2 text-sm leading-5 text-slate-400">{{ $t('Set up your workspace and start managing your people in one place.') }}</p>
             </div>
 
             <form @submit.prevent="submit" class="space-y-4">
@@ -64,9 +58,7 @@ const submit = () => {
                             01
                         </span>
 
-                        <h3 class="text-sm font-semibold text-white">
-                            Company information
-                        </h3>
+                        <h3 class="text-sm font-semibold text-white">{{ $t('Company information') }}</h3>
                     </div>
 
                     <div>
@@ -81,7 +73,7 @@ const submit = () => {
                             type="text"
                             class="mt-2 block w-full !border-white/10 !bg-[#0B1425] !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                             v-model="form.company_name"
-                            placeholder="e.g. Acme Corporation"
+                            :placeholder="$t('e.g. Acme Corporation')"
                             required
                             autofocus
                             autocomplete="organization"
@@ -103,9 +95,7 @@ const submit = () => {
                             02
                         </span>
 
-                        <h3 class="text-sm font-semibold text-white">
-                            Administrator account
-                        </h3>
+                        <h3 class="text-sm font-semibold text-white">{{ $t('Administrator account') }}</h3>
                     </div>
 
                     <div class="space-y-3">
@@ -122,7 +112,7 @@ const submit = () => {
                                 type="text"
                                 class="mt-2 block w-full !border-white/10 !bg-[#0B1425] !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                                 v-model="form.name"
-                                placeholder="Your full name"
+                                :placeholder="$t('Your full name')"
                                 required
                                 autocomplete="name"
                             />
@@ -146,7 +136,7 @@ const submit = () => {
                                 type="email"
                                 class="mt-2 block w-full !border-white/10 !bg-[#0B1425] !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                                 v-model="form.email"
-                                placeholder="you@company.com"
+                                :placeholder="$t('you@company.com')"
                                 required
                                 autocomplete="email"
                             />
@@ -173,7 +163,7 @@ const submit = () => {
                                         :type="showPassword ? 'text' : 'password'"
                                         class="block w-full !border-white/10 !bg-[#0B1425] !pe-16 !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                                         v-model="form.password"
-                                        placeholder="Min. 8 characters"
+                                        :placeholder="$t('Min. 8 characters')"
                                         required
                                         autocomplete="new-password"
                                     />
@@ -184,7 +174,7 @@ const submit = () => {
                                         :aria-label="showPassword ? 'Hide password' : 'Show password'"
                                         class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 transition hover:text-cyan-400 focus:outline-none focus:text-cyan-400"
                                     >
-                                        {{ showPassword ? 'Hide' : 'Show' }}
+                                        {{ showPassword ? $t('Hide') : $t('Show') }}
                                     </button>
                                 </div>
 
@@ -208,7 +198,7 @@ const submit = () => {
                                         :type="showPasswordConfirmation ? 'text' : 'password'"
                                         class="block w-full !border-white/10 !bg-[#0B1425] !pe-16 !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
                                         v-model="form.password_confirmation"
-                                        placeholder="Repeat password"
+                                        :placeholder="$t('Repeat password')"
                                         required
                                         autocomplete="new-password"
                                     />
@@ -219,7 +209,7 @@ const submit = () => {
                                         :aria-label="showPasswordConfirmation ? 'Hide confirm password' : 'Show confirm password'"
                                         class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 transition hover:text-cyan-400 focus:outline-none focus:text-cyan-400"
                                     >
-                                        {{ showPasswordConfirmation ? 'Hide' : 'Show' }}
+                                        {{ showPasswordConfirmation ? $t('Hide') : $t('Show') }}
                                     </button>
                                 </div>
 
@@ -261,7 +251,7 @@ const submit = () => {
                             />
                         </svg>
 
-                        {{ form.processing ? 'Creating your account...' : 'Create Company Account' }}
+                        {{ form.processing ? $t('Creating your account...') : $t('Create Company Account') }}
 
                         <svg
                             v-if="!form.processing"
@@ -279,23 +269,16 @@ const submit = () => {
                         v-if="form.hasErrors"
                         class="mt-2 text-center text-xs text-red-400"
                         role="alert"
-                    >
-                        Please review the highlighted fields.
-                    </p>
+                    >{{ $t('Please review the highlighted fields.') }}</p>
                 </div>
             </form>
 
             <!-- Login link -->
             <div class="mt-5 border-t border-white/10 pt-4 text-center">
-                <p class="text-sm text-slate-400">
-                    Already have an account?
-
-                    <Link
+                <p class="text-sm text-slate-400">{{ $t('Already have an account?') }}<Link
                         :href="route('login')"
                         class="ms-1 font-semibold text-cyan-400 transition hover:text-cyan-300"
-                    >
-                        Sign in
-                    </Link>
+                    >{{ $t('Sign in') }}</Link>
                 </p>
             </div>
         </div>

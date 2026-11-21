@@ -56,20 +56,16 @@ function changeStatus(company, action) {
 </script>
 
 <template>
-    <Head title="Manage Companies" />
+    <Head :title="$t('Manage Companies')" />
 
     <PlatformLayout
-        title="Companies"
-        subtitle="Manage tenant access and company status"
+        :title="$t('Companies')"
+        :subtitle="$t('Manage tenant access and company status')"
     >
         <section class="mb-8">
-            <p class="mb-2 text-sm font-medium text-cyan-400">PLATFORM ADMINISTRATION</p>
-            <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                Company Management
-            </h1>
-            <p class="mt-2 text-sm text-slate-400">
-                Suspend access without deleting company data, or reactivate a company securely.
-            </p>
+            <p class="mb-2 text-sm font-medium text-cyan-400">{{ $t('PLATFORM ADMINISTRATION') }}</p>
+            <h1 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Company Management') }}</h1>
+            <p class="mt-2 text-sm text-slate-400">{{ $t('Suspend access without deleting company data, or reactivate a company securely.') }}</p>
         </section>
 
         <div
@@ -82,7 +78,7 @@ function changeStatus(company, action) {
 
         <section class="hx-card overflow-hidden p-5 sm:p-6">
             <div class="mb-5">
-                <h2 class="font-semibold text-white">Registered Companies</h2>
+                <h2 class="font-semibold text-white">{{ $t('Registered Companies') }}</h2>
                 <p class="mt-1 text-sm text-slate-400">
                     {{ companies.total }} companies registered on Humexa
                 </p>
@@ -92,11 +88,11 @@ function changeStatus(company, action) {
                 <table class="w-full min-w-[850px] text-left text-sm">
                     <thead>
                         <tr class="border-b border-slate-800 text-slate-400">
-                            <th class="px-3 py-3 font-medium">Company</th>
-                            <th class="px-3 py-3 font-medium">Domain</th>
-                            <th class="px-3 py-3 font-medium">Status</th>
-                            <th class="px-3 py-3 font-medium">Registered</th>
-                            <th class="px-3 py-3 font-medium">Actions</th>
+                            <th class="px-3 py-3 font-medium">{{ $t('Company') }}</th>
+                            <th class="px-3 py-3 font-medium">{{ $t('Domain') }}</th>
+                            <th class="px-3 py-3 font-medium">{{ $t('Status') }}</th>
+                            <th class="px-3 py-3 font-medium">{{ $t('Registered') }}</th>
+                            <th class="px-3 py-3 font-medium">{{ $t('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -136,7 +132,7 @@ function changeStatus(company, action) {
                                         v-model="reasons[company.id]"
                                         type="text"
                                         maxlength="1000"
-                                        placeholder="Reason (optional)"
+                                        :placeholder="$t('Reason (optional)')"
                                         class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
                                     />
                                     <button
@@ -146,7 +142,7 @@ function changeStatus(company, action) {
                                         class="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-400/20 disabled:opacity-50"
                                         @click="changeStatus(company, 'suspend')"
                                     >
-                                        {{ processing[company.id] ? 'Processing...' : 'Suspend Company' }}
+                                        {{ processing[company.id] ? $t('Processing...') : $t('Suspend Company') }}
                                     </button>
                                     <button
                                         v-else-if="company.status === 'suspended' && canActivateCompanies"
@@ -155,7 +151,7 @@ function changeStatus(company, action) {
                                         class="rounded-lg border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-400/20 disabled:opacity-50"
                                         @click="changeStatus(company, 'activate')"
                                     >
-                                        {{ processing[company.id] ? 'Processing...' : 'Activate Company' }}
+                                        {{ processing[company.id] ? $t('Processing...') : $t('Activate Company') }}
                                     </button>
                                 </div>
                             </td>
@@ -164,9 +160,7 @@ function changeStatus(company, action) {
                 </table>
             </div>
 
-            <div v-else class="py-12 text-center text-sm text-slate-400">
-                No companies registered yet.
-            </div>
+            <div v-else class="py-12 text-center text-sm text-slate-400">{{ $t('No companies registered yet.') }}</div>
 
             <div v-if="companies.links?.length > 3" class="mt-5 flex flex-wrap gap-2">
                 <button
@@ -186,10 +180,8 @@ function changeStatus(company, action) {
 
         <section v-if="canViewActivityLogs" class="hx-card mt-6 p-5 sm:p-6">
             <div class="mb-5">
-                <h2 class="font-semibold text-white">Company Status Audit Log</h2>
-                <p class="mt-1 text-sm text-slate-400">
-                    Latest suspension and activation events
-                </p>
+                <h2 class="font-semibold text-white">{{ $t('Company Status Audit Log') }}</h2>
+                <p class="mt-1 text-sm text-slate-400">{{ $t('Latest suspension and activation events') }}</p>
             </div>
 
             <div v-if="activity.length" class="space-y-3">
@@ -200,7 +192,7 @@ function changeStatus(company, action) {
                 >
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="text-sm font-semibold text-slate-200">
-                            {{ entry.event === 'company.suspended' ? 'Company suspended' : 'Company activated' }}
+                            {{ entry.event === $t('company.suspended') ? $t('Company suspended') : $t('Company activated') }}
                         </p>
                         <span class="text-xs text-slate-500">{{ entry.createdAt }}</span>
                     </div>
@@ -212,7 +204,7 @@ function changeStatus(company, action) {
                     </p>
                 </article>
             </div>
-            <p v-else class="text-sm text-slate-500">No company status changes recorded yet.</p>
+            <p v-else class="text-sm text-slate-500">{{ $t('No company status changes recorded yet.') }}</p>
         </section>
     </PlatformLayout>
 </template>
