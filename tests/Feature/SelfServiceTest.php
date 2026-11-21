@@ -162,3 +162,99 @@ test('route audit: a permissionless account is refused on every company route ex
 
     expect($checked)->toBeGreaterThan(60)->and($leaks)->toBe([]);
 });
+
+test('route audit: a manager is refused on every route whose permission they do not hold', function () {
+    $mgr = $this->reg['tenant']->run(function () {
+        $u = new User(['name' => 'm', 'email' => 'mgr-audit@tenant-test.example', 'password' => 'StrongPassword123!']);
+        $u->forceFill(['tenant_id' => $this->tid, 'account_type' => User::ACCOUNT_TYPE_TENANT])->save();
+        $u->assignRole(TenantRoleCatalog::MANAGER);
+
+        return $u;
+    });
+    $held = TenantRoleCatalog::roles()[TenantRoleCatalog::MANAGER];
+
+    $checked = 0;
+    $leaks = [];
+    foreach (app('router')->getRoutes() as $route) {
+        if (! str_contains((string) $route->getDomain(), '{tenant}') || str_contains($route->uri(), 'v1/')) {
+            continue;
+        }
+        $needsMissing = false;
+        foreach ($route->gatherMiddleware() as $mw) {
+            if (is_string($mw) && str_starts_with($mw, 'tenant.can:')) {
+                $perms = explode(',', substr($mw, strlen('tenant.can:')));
+                if (array_intersect($perms, $held) === []) {
+                    $needsMissing = true;
+                }
+            }
+        }
+        $isEmployeeWrite = str_starts_with($route->uri(), 'employees') && array_diff($route->methods(), ['GET', 'HEAD']) !== [];
+        if (! $needsMissing && ! $isEmployeeWrite) {
+            continue;
+        }
+        $url = $this->base . preg_replace('/\{[^}]+\}/', '1', '/' . ltrim($route->uri(), '/'));
+        foreach (array_diff($route->methods(), ['HEAD']) as $method) {
+            $status = ($this->as)($mgr)->call($method, $url)->getStatusCode();
+            $checked++;
+            if ($status !== 403) {
+                $leaks[] = "$method {$route->uri()} => $status";
+            }
+        }
+    }
+
+    expect($checked)->toBeGreaterThan(60)->and($leaks)->toBe([]);
+});
+
+test('fixture-backed: a manager cannot change or delete real records and nothing is altered', function () {
+    $mgr = $this->reg['tenant']->run(function () {
+        $u = new User(['name' => 'm', 'email' => 'mgr-fix@tenant-test.example', 'password' => 'StrongPassword123!']);
+        $u->forceFill(['tenant_id' => $this->tid, 'account_type' => User::ACCOUNT_TYPE_TENANT])->save();
+        $u->assignRole(TenantRoleCatalog::MANAGER);
+
+        return $u;
+    });
+    $emp = app(CreateEmployeeAction::class)->execute(data: ['first_name' => 'Fix', 'last_name' => 'Ture', 'employment_status' => 'active', 'hire_date' => '2026-01-05'], tenantId: $this->tid, actorId: null);
+    $req = LeaveRequest::create(['tenant_id' => $this->tid, 'employee_id' => $emp->id, 'leave_type_id' => $this->annual->id, 'start_date' => '2026-12-06', 'end_date' => '2026-12-06', 'days' => 1, 'status' => 'pending']);
+    $job = \App\Modules\Recruitment\Models\JobOpening::create(['tenant_id' => $this->tid, 'title' => 'Fixture job', 'employment_type' => 'full_time', 'positions' => 1, 'status' => 'open']);
+    $cand = \App\Modules\Recruitment\Models\Candidate::create(['tenant_id' => $this->tid, 'job_opening_id' => $job->id, 'name' => 'Cand', 'stage' => 'applied']);
+    $cycle = \App\Modules\Performance\Models\ReviewCycle::create(['tenant_id' => $this->tid, 'name' => 'Cycle', 'starts_on' => '2026-01-01', 'ends_on' => '2026-12-31', 'status' => 'draft']);
+    \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+    $run = PayrollRun::create(['tenant_id' => $this->tid, 'year' => 2026, 'month' => 11, 'rule_set_id' => 0, 'status' => 'draft']);
+    \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+
+    $b = $this->base;
+    $attempts = [
+        ['DELETE', "/employees/{$emp->id}"],
+        ['PUT', "/employees/{$emp->id}", ['first_name' => 'Hacked', 'last_name' => 'X', 'employment_status' => 'active']],
+        ['POST', "/employees/{$emp->id}/identity-records", ['identity_type' => 'national_id', 'identity_number' => '12345678901234']],
+        ['PUT', "/leave/types/{$this->annual->id}", ['name' => 'Hacked', 'annual_days' => 99]],
+        ['DELETE', "/leave/types/{$this->annual->id}"],
+        ['PUT', "/leave/requests/{$req->id}", ['leave_type_id' => $this->annual->id, 'start_date' => '2026-12-07', 'end_date' => '2026-12-07']],
+        ['POST', "/leave/requests/{$req->id}/cancel"],
+        ['DELETE', "/recruitment/jobs/{$job->id}"],
+        ['DELETE', "/recruitment/candidates/{$cand->id}"],
+        ['POST', "/recruitment/candidates/{$cand->id}/hire"],
+        ['DELETE', "/performance/cycles/{$cycle->id}"],
+        ['POST', "/payroll/runs/{$run->id}/approve"],
+        ['DELETE', "/payroll/runs/{$run->id}"],
+        ['PUT', '/settings', ['display_name' => 'Hacked']],
+        ['PUT', "/team/{$this->reg['user']->id}/role", ['role' => 'Employee']],
+        ['PUT', "/team/{$this->reg['user']->id}/active", ['active' => false]],
+        ['PUT', "/team/{$this->reg['user']->id}/reset-access", ['password' => 'BrandNewStart123!']],
+    ];
+    foreach ($attempts as $a) {
+        [$method, $path] = $a;
+        $body = $a[2] ?? [];
+        $res = ($this->as)($mgr)->call($method, $b . $path, $body);
+        expect($res->getStatusCode())->toBe(403, "$method $path");
+    }
+
+    expect(Employee::find($emp->id)->first_name)->toBe('Fix')
+        ->and(LeaveType::find($this->annual->id)->name)->toBe('Annual')
+        ->and($req->fresh()->status)->toBe('pending')->and((string) $req->fresh()->start_date->toDateString())->toBe('2026-12-06')
+        ->and(\App\Modules\Recruitment\Models\JobOpening::find($job->id))->not->toBeNull()
+        ->and(\App\Modules\Recruitment\Models\Candidate::find($cand->id)->employee_id)->toBeNull()
+        ->and(\App\Modules\Performance\Models\ReviewCycle::find($cycle->id))->not->toBeNull()
+        ->and($run->fresh()->status)->toBe('draft')
+        ->and($this->reg['user']->fresh()->disabled_at)->toBeNull();
+});
