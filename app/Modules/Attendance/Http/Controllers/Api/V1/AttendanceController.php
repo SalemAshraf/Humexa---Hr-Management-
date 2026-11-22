@@ -59,7 +59,7 @@ class AttendanceController extends Controller
     public function status(Request $request)
     {
         $employee = $this->employee($request);
-        $date = now()->toDateString();
+        $date = \App\Modules\Settings\Support\CompanyClock::today((string) tenant('id'));
 
         $openSession = AttendanceSession::query()
             ->where('tenant_id', tenant('id'))

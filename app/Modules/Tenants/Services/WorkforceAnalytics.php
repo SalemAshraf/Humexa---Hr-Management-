@@ -99,7 +99,7 @@ class WorkforceAnalytics
      */
     public function attendanceToday(string $tenantId, ?Carbon $now = null): array
     {
-        $today = ($now ?? now())->toDateString();
+        $today = \App\Modules\Settings\Support\CompanyClock::today($tenantId, $now);
 
         $expected = Employee::query()
             ->where('tenant_id', $tenantId)
@@ -139,7 +139,7 @@ class WorkforceAnalytics
      */
     public function leave(string $tenantId, ?Carbon $now = null): array
     {
-        $today = ($now ?? now())->toDateString();
+        $today = \App\Modules\Settings\Support\CompanyClock::today($tenantId, $now);
 
         return [
             'pending' => LeaveRequest::query()->where('tenant_id', $tenantId)->where('status', LeaveRequest::PENDING)->count(),

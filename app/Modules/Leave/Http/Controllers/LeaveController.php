@@ -66,7 +66,7 @@ class LeaveController extends Controller
             ->when($scopeIds !== null, fn ($q) => $q->whereIn('employee_id', $scopeIds));
 
         $onLeaveToday = LeaveRequest::query()->where('tenant_id', $tenantId)->where('status', LeaveRequest::APPROVED)
-            ->whereDate('start_date', '<=', now()->toDateString())->whereDate('end_date', '>=', now()->toDateString())
+            ->whereDate('start_date', '<=', \App\Modules\Settings\Support\CompanyClock::today($tenantId))->whereDate('end_date', '>=', \App\Modules\Settings\Support\CompanyClock::today($tenantId))
             ->when($scopeIds !== null, fn ($q) => $q->whereIn('employee_id', $scopeIds))->count();
 
         return Inertia::render('Company/Leave/Index', [

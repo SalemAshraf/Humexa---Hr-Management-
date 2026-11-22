@@ -163,3 +163,23 @@ test('shift can be edited, and lateness is measured in company wall-clock time a
     ($this->as)($owner)->put("{$this->base}/attendance/shifts/{$shift->id}", ['name' => 'Office', 'start_time' => '08:00', 'end_time' => '08:00'])->assertSessionHasErrors('end_time');
     ($this->as)($u)->put("{$this->base}/attendance/shifts/{$shift->id}", ['name' => 'Hack', 'start_time' => '00:00', 'end_time' => '01:00'])->assertForbidden();
 });
+
+test('new attendance records use the company calendar day, not UTC, and old records are left alone', function () {
+    [$u, $emp] = ($this->account)('wt@tenant-test.example', 'Tz');
+    \App\Modules\Settings\Models\CompanySetting::query()->create(['tenant_id' => $this->tid, 'timezone' => 'Africa/Cairo']);
+    $old = AttendanceRecord::create(['tenant_id' => $this->tid, 'employee_id' => $emp->id, 'attendance_date' => '2026-11-10', 'status' => 'recorded']);
+
+    // 23:30 UTC on Nov 10 is 01:30 on Nov 11 in Cairo (UTC+2 in November).
+    \Illuminate\Support\Carbon::setTestNow(\Illuminate\Support\Carbon::parse('2026-11-10 23:30:00', 'UTC'));
+    ($this->as)($u)->post("{$this->base}/me/attendance/check-in")->assertSessionHasNoErrors();
+    \Illuminate\Support\Carbon::setTestNow(\Illuminate\Support\Carbon::parse('2026-11-11 05:00:00', 'UTC'));
+    ($this->as)($u)->post("{$this->base}/me/attendance/check-out")->assertSessionHasNoErrors();
+    \Illuminate\Support\Carbon::setTestNow();
+
+    $dates = AttendanceRecord::where('employee_id', $emp->id)->orderBy('id')->pluck('attendance_date')->map->toDateString()->all();
+    expect($dates)->toBe(['2026-11-10', '2026-11-11'])->and($old->fresh()->attendance_date->toDateString())->toBe('2026-11-10');
+
+    expect(\App\Modules\Settings\Support\CompanyClock::today($this->tid, \Illuminate\Support\Carbon::parse('2026-11-10 23:30:00', 'UTC')))->toBe('2026-11-11');
+    \App\Modules\Settings\Models\CompanySetting::query()->where('tenant_id', $this->tid)->update(['timezone' => 'Not/AZone']);
+    expect(\App\Modules\Settings\Support\CompanyClock::timezone($this->tid))->toBe('Africa/Cairo');
+});

@@ -46,7 +46,7 @@ class TenantAttendanceRecordsController extends Controller
                 'employee.branch:id,name',
             ]);
 
-        $date = $filters['date'] ?? now()->toDateString();
+        $date = $filters['date'] ?? \App\Modules\Settings\Support\CompanyClock::today($tenantId);
         $query->whereDate('attendance_date', $date);
 
         if (! empty($filters['search'])) {

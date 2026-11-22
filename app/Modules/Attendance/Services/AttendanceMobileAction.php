@@ -71,7 +71,7 @@ class AttendanceMobileAction
                     ->firstOrFail();
 
                 $now = now();
-                $date = $now->toDateString();
+                $date = \App\Modules\Settings\Support\CompanyClock::today($tenantId, $now);
 
                 // Lock/search the employee's open session across dates so overnight work
                 // cannot accidentally create overlapping sessions or lose its check-out.

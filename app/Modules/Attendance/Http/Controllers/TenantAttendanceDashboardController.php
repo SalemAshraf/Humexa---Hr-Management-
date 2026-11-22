@@ -30,7 +30,7 @@ class TenantAttendanceDashboardController extends Controller
             403
         );
 
-        $today = now()->toDateString();
+        $today = \App\Modules\Settings\Support\CompanyClock::today($tenantId);
         $scope = $this->scopeIds($tenantId, $user);
 
         $policy = AttendancePolicy::query()
