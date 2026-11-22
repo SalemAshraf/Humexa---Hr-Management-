@@ -258,7 +258,7 @@ class _HomePageState extends State<HomePage> {
           ]),
         ),
       ),
-      Card(
+      if (leaveData.isNotEmpty) Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
