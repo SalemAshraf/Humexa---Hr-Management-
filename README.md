@@ -1,10 +1,10 @@
 <div align="center">
 
-# Humexa HRMS
+# Afrad (Humexa) HRMS
 
-**A modular, multi-tenant Human Resources Management System**
+**A modular, multi-tenant Human Resources Management System in Arabic and English**
 
-Manage people, organization structure, and employee records through a secure, tenant-isolated platform.
+People records, attendance, leave, hiring, performance, payroll and reports in one tenant-isolated workspace. *Afrad* is the product name shown in the interface. *Humexa* is the repository and code name.
 
 </div>
 
@@ -16,33 +16,45 @@ Manage people, organization structure, and employee records through a secure, te
 
 The application follows a **Modular Monolith** architecture with Laravel on the backend and Vue 3 + Inertia.js on the frontend. It uses a **single-database tenancy model**, with tenant context resolved by domain and tenant-owned records scoped at the application level.
 
-Humexa is under active development. Features are delivered incrementally, and the implementation status described below reflects the current codebase—not a claim that every planned HR workflow is production-ready.
+This README describes the `feature/humexa-completion` branch. It has not been merged into `main` and has not been deployed. The status below reflects the code on this branch, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
 
 ## Key Capabilities
 
-### Platform and tenant management
-- Separate platform and tenant authentication flows.
-- Tenant registration and domain-based tenant resolution.
-- Tenant lifecycle controls, including activation and suspension.
-- Tenant-aware access middleware and authorization boundaries.
+All of the following exist in the code and are covered by automated tests unless noted.
 
-### Organization management
-- Branches.
-- Departments.
-- Positions.
-- Relationships between employees and organizational records.
+### Platform and company management
+- Separate platform-admin and company sign-in, with company resolved by domain.
+- Company registration with a 7-day trial. Platform admins set the plan and a manual "paid until" date. Payment happens outside the app.
+- After a trial or paid-until date ends, the company is **view and export only** (no create, edit or delete) until a later date is entered. The company's own timezone decides the day.
+- Plans limit employees and sign-in accounts; limits stop new additions and never hide or delete data.
+- Platform notifications for new, suspended, expiring and ended companies.
 
-### Employee management
-- Employee profiles and employment information.
-- Employment status and reporting relationships.
-- Multiple addresses, with a single primary address per employee.
-- Multiple emergency contacts with priority ordering.
-- National ID and passport records with encrypted values, keyed blind indexes, and masked display values.
-- Tenant-managed employee document types.
-- Private employee document uploads, previews, and downloads.
-- Optional employee profile photos stored privately.
+### Roles and permissions
+- Owner, HR, Manager and Employee roles with server-side, least-privilege checks. A manager sees only direct reports; HR and owner see everyone.
+- Legacy companies without a confirmed owner stay locked until `php artisan app:assign-tenant-owner <tenant> <email> --confirm` is run for a named account.
 
-> **Implementation note:** Employee profile and related-record backend capabilities are being built and verified incrementally. Frontend workflows and broader HR processes continue to evolve. Check the current routes, module code, and automated tests before relying on a capability in a production workflow.
+### People and organization
+- Employee profiles, addresses, emergency contacts, encrypted national ID and passport values with blind indexes, private documents and photos, archive and restore, document-expiry tracking.
+- Branches, departments and positions.
+
+### Attendance, leave and shifts
+- Web check-in and check-out by company calendar day, manual HR entries, optional shifts with lateness calculation, and a token-based mobile API.
+- Leave types, balances, requests and approvals.
+
+### Hiring, performance and reports
+- Openings, candidates and stages. Review cycles, ratings and goals.
+- Workforce reports with CSV download.
+
+### Payroll (company-defined rules)
+- Monthly payroll runs and payslips calculated from rules the company enters in its own settings. **No statutory rates, thresholds or tax tables are built in.** A new company starts blank and cannot create a run until every value is entered.
+- Output is a calculation from company-entered values. It is not verified legal, tax or insurance advice. Have an accountant review it.
+
+### Import and export
+- CSV import (create-only, every row checked first, nothing saved unless all rows are valid, no updates or deletes): employees, departments, positions.
+- CSV export, streamed and formula-safe: employees, leave, attendance. This is not a full data export (payroll, documents, reviews and hiring data are not included).
+
+### Interface
+- Arabic (RTL) and English, responsive down to phone width, with a marketing landing page.
 
 ## Technology Stack
 
@@ -51,7 +63,7 @@ Humexa is under active development. Features are delivered incrementally, and th
 | Backend | PHP 8.3+, Laravel 13 |
 | Frontend | Vue 3, Inertia.js 2 |
 | Styling | Tailwind CSS |
-| Database | MySQL |
+| Database | MySQL 8 (the test suite also runs against it) |
 | Cache and queues | Redis or the configured Laravel drivers |
 | Multi-tenancy | `stancl/tenancy` 3.10 — single-database mode |
 | Authorization | Spatie Laravel Permission with Teams |
@@ -65,10 +77,11 @@ Humexa uses a **Modular Monolith**: one deployable Laravel application, organize
 ```text
 app/
 ├── Modules/
-│   ├── Employees/
-│   ├── Organization/
-│   ├── Tenants/
-│   └── Users/
+│   ├── Attendance/    ├── Leave/          ├── Plans/
+│   ├── Employees/     ├── Notifications/  ├── Recruitment/
+│   ├── Organization/  ├── Payroll/        ├── Reports/
+│   ├── Performance/   ├── Search/         ├── SelfService/
+│   └── Settings/      ├── Tenants/        └── Users/
 ├── Http/
 │   └── Middleware/
 └── Models/
@@ -269,11 +282,13 @@ Profile photos and employee documents must use private storage. Files should be 
 
 ## Testing
 
-Run the complete automated test suite:
+Run the complete automated test suite (Pest, uses a real MySQL database):
 
 ```bash
 php artisan test
 ```
+
+The suite passes on this branch. A passing suite does not mean the product is ready for production.
 
 Run a focused feature test:
 
@@ -327,24 +342,22 @@ Contributions and new features should follow these conventions:
 9. Keep user-facing interfaces responsive and accessible.
 10. Support English and Arabic, including RTL layout requirements, as localization is implemented.
 
-## Roadmap
+## Limits and open decisions
 
-Humexa is being developed in stages. Planned capabilities include:
-
-- Attendance management, flexible shifts, breaks, corrections, and overtime approval.
-- Leave management and approval workflows.
-- Payroll and compensation workflows.
-- Recruitment and performance management.
-- Reporting, notifications, and additional platform administration capabilities.
-- A permission-aware, read-only AI assistant for HR data, with any future write-capable AI actions treated as a separate phase.
-
-Roadmap items are plans, not statements of current availability.
+- Not deployed and not merged into `main`.
+- No real email delivery is configured (password reset and email confirmation are written to the log only). A sending domain and mail service are needed.
+- AI features are planned only and are not built.
+- Payroll has no built-in legal numbers and makes no compliance claim.
+- Imports cover employees, departments and positions only. Leave, attendance, salary and history imports need business rules that are not decided. Excel (.xlsx) is not supported, only CSV.
+- A separate export permission and export of sensitive fields are not built.
+- No external penetration test has been done.
+- Pre-filled payroll rows in older companies are left untouched pending an owner decision.
 
 ## Project Status
 
-**Active development — not yet a production-ready release.**
+**Active development on a feature branch. Not a production-ready release.**
 
-Before deploying Humexa for real employee data, complete a production-readiness review covering authentication, authorization, tenant isolation, backups, file storage, encryption-key management, monitoring, queue processing, rate limiting, and operational recovery.
+Before using Afrad with real employee data, complete a production-readiness review: authentication, authorization, tenant isolation, backups, file storage, encryption-key management, email delivery, monitoring and legal review of any payroll configuration.
 
 ## License
 
