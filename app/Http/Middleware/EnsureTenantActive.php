@@ -92,8 +92,13 @@ class EnsureTenantActive
     {
         $trialEnds = $tenant->getAttribute('trial_ends_at');
 
-        return $trialEnds
-            && ! $tenant->getAttribute('subscription_ends_at')
-            && \Illuminate\Support\Carbon::parse($trialEnds)->endOfDay()->isPast();
+        if (! $trialEnds || $tenant->getAttribute('subscription_ends_at')) {
+            return false;
+        }
+
+        // The last trial day is the whole day on the company's calendar.
+        $today = \App\Modules\Settings\Support\CompanyClock::today((string) $tenant->getKey());
+
+        return $today > \Illuminate\Support\Carbon::parse($trialEnds)->toDateString();
     }
 }

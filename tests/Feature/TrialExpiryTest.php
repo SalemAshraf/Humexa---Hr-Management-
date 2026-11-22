@@ -44,3 +44,15 @@ test('companies without a trial date are never locked', function () {
     $this->tenant->forceFill(['trial_ends_at' => null])->save();
     ($this->as)()->post("{$this->base}/employees", $this->emp)->assertSessionHasNoErrors();
 });
+
+test('the trial runs through its last day on the company calendar, and the mobile API writes are blocked after it', function () {
+    $this->tenant->forceFill(['trial_ends_at' => \App\Modules\Settings\Support\CompanyClock::today((string) $this->tenant->id)])->save();
+    ($this->as)()->post("{$this->base}/employees", $this->emp)->assertSessionHasNoErrors();
+
+    tenancy()->end();
+    $this->flushSession();
+    $this->tenant->forceFill(['trial_ends_at' => now()->subDays(2)->toDateString()])->save();
+    $this->postJson("{$this->base}/api/v1/attendance/check-in", [])->assertStatus(401)->assertJsonMissing(['message' => 'x']);
+    \Laravel\Sanctum\Sanctum::actingAs($this->owner, ['attendance:mobile']);
+    $this->postJson("{$this->base}/api/v1/attendance/check-in", [])->assertForbidden()->assertJsonPath('message', fn ($m) => str_contains($m, 'free trial has ended'));
+});
