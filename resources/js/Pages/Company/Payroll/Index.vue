@@ -19,7 +19,9 @@ const now = new Date();
 const runForm = useForm({ year: now.getFullYear(), month: now.getMonth() + 1 });
 const createRun = () => runForm.post('/payroll/runs', { preserveScroll: true });
 
-const confirmRules = () => confirm('Mark these values as reviewed? This records that your company checked them with its accountant. It does not verify them.') && router.post('/payroll/rules/confirm', {}, { preserveScroll: true });
+const accepted = ref([]);
+const confirmRules = () => confirm('Mark these values as reviewed? This records that your company checked them with its accountant. It does not verify them.') && router.post('/payroll/rules/confirm', { acknowledged: accepted.value }, { preserveScroll: true });
+const loadTemplate = () => confirm('Load the Egypt 2026 starting rules as a new set? Nothing is used until you review it and accept every open item.') && router.post('/payroll/rules/egypt-template', {}, { preserveScroll: true });
 
 const showRules = ref(false);
 const ruleForm = useForm({
@@ -74,8 +76,17 @@ const flash = computed(() => window.history.state?.props?.flash);
                 </div>
                 <div v-if="abilities.manage" class="flex gap-3 text-xs font-semibold">
                     <button class="text-cyan-700" @click="showRules = !showRules">{{ showRules ? $t('Close') : $t('Edit rules') }}</button>
-                    <button v-if="!rules.confirmed && !rules.missing?.length" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white" @click="confirmRules">{{ $t('Mark rules as reviewed') }}</button>
+                    <button v-if="!rules.confirmed && !rules.missing?.length" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white disabled:opacity-40" :disabled="accepted.length < (rules.acknowledgements?.length ?? 0)" @click="confirmRules">{{ $t('Mark rules as reviewed') }}</button>
+                    <button v-if="!rules.template_key" class="text-cyan-700" data-testid="load-egypt-template" @click="loadTemplate">{{ $t('Load Egypt 2026 template') }}</button>
                 </div>
+            </div>
+            <p v-if="rules.effective_to" class="mt-2 text-xs font-semibold text-amber-800" data-testid="rules-period">{{ $t('These rules are valid from {from} to {to} only. Runs outside this period are refused until you enter and review new rules.', { from: formatDate(rules.effective_from), to: formatDate(rules.effective_to) }) }}</p>
+            <div v-if="abilities.manage && !rules.confirmed && rules.acknowledgements?.length" class="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900" data-testid="rules-acks">
+                <p class="mb-2 font-semibold">{{ $t('Accept each open item before marking the rules as reviewed.') }}</p>
+                <label v-for="a in rules.acknowledgements" :key="a.key" class="mb-2 flex items-start gap-2">
+                    <input v-model="accepted" type="checkbox" :value="a.key" class="mt-0.5" />
+                    <span>{{ $t(a.text) }}</span>
+                </label>
             </div>
             <dl class="mt-4 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
                 <div><dt class="text-xs text-slate-500">{{ $t('Employee insurance') }}</dt><dd class="font-semibold">{{ pct(rules.insurance_employee_rate) }}</dd></div>

@@ -35,6 +35,7 @@ class PayrollRunService
         $tenantId = (string) $run->tenant_id;
         $rules = PayrollRuleSet::query()->where('tenant_id', $tenantId)->findOrFail($run->rule_set_id);
         abort_if($rules->missingSettings() !== [], 422, 'The payroll rules are incomplete.');
+        abort_unless($rules->coversMonth((int) $run->year, (int) $run->month), 422, 'These payroll rules end before this month. Enter and review rules for this period first.');
         $start = Carbon::create($run->year, $run->month, 1)->startOfDay();
         $end = $start->copy()->endOfMonth()->startOfDay();
         $weekend = $this->leave->weekendDays($tenantId);
@@ -61,6 +62,32 @@ class PayrollRunService
                     continue;
                 }
 
+                if ($rules->strict_inputs) {
+                    if ($employee->hire_date !== null && $employee->hire_date->gt($start)) {
+                        $skipped[] = $employee->full_name.': joined during this month, pay and insurance for a partial first month are not calculated, handle by hand';
+
+                        continue;
+                    }
+
+                    if ($comp->insured && $comp->insurable_wage === null) {
+                        $skipped[] = $employee->full_name.': insured but no insurable wage entered, enter it on the salary record';
+
+                        continue;
+                    }
+
+                    if ($comp->insured && $employee->date_of_birth === null) {
+                        $skipped[] = $employee->full_name.': insured but no date of birth, needed to check the age 60 insurance rules';
+
+                        continue;
+                    }
+
+                    if ($comp->insured && $employee->date_of_birth->copy()->addYears(60)->lte($end)) {
+                        $skipped[] = $employee->full_name.': aged 60 or over, different insurance rules apply, handle by hand';
+
+                        continue;
+                    }
+                }
+
                 $adjustments = PayrollAdjustment::query()->where('payroll_run_id', $run->id)->where('employee_id', $employee->id)->get();
                 $earnTaxable = (float) $adjustments->where('kind', 'earning')->where('taxable', true)->sum('amount');
                 $earnExempt = (float) $adjustments->where('kind', 'earning')->where('taxable', false)->sum('amount');
@@ -84,7 +111,7 @@ class PayrollRunService
                     'annual_net_income' => $result['annual_net_income'], 'income_tax' => $result['income_tax'],
                     'after_tax_levy' => $result['after_tax_levy'], 'net_pay' => $result['net_pay'],
                     'details' => ['compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured, 'estimate_only' => true,
-                        'rules_snapshot' => $rules->only(['id', 'name', 'effective_from', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'private_insurance_cap_pct', 'private_insurance_cap_amount', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables']), 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
+                        'rules_snapshot' => $rules->only(['id', 'name', 'effective_from', 'effective_to', 'template_key', 'strict_inputs', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'private_insurance_cap_pct', 'private_insurance_cap_amount', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables']), 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
                 ]);
             }
         });

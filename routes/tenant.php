@@ -101,6 +101,7 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::middleware('tenant.can:payroll.manage')->group(function () {
                     Route::put('/rules', 'updateRules')->name('rules.update');
                     Route::post('/rules/confirm', 'confirmRules')->name('rules.confirm');
+                    Route::post('/rules/egypt-template', 'loadEgyptTemplate')->name('rules.template');
                     Route::post('/employees/{employee}/compensation', 'storeCompensation')->whereNumber('employee')->name('compensation.store');
                     Route::post('/runs', 'storeRun')->name('runs.store');
                     Route::post('/runs/{run}/recalculate', 'recalculate')->whereNumber('run')->name('runs.recalculate');

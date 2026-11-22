@@ -13,6 +13,7 @@ use App\Modules\Payroll\Models\PayrollRuleSet;
 use App\Modules\Payroll\Models\PayrollRun;
 use App\Modules\Payroll\Models\Payslip;
 use App\Modules\Payroll\Services\EgyptRuleDefaults;
+use App\Modules\Payroll\Services\EgyptTemplate;
 use App\Modules\Payroll\Services\PayrollRunService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -81,7 +82,7 @@ class PayrollController extends Controller
         $this->validateTables($tables);
         unset($data['tax_tables_json']);
 
-        $rules->fill($data + ['tax_tables' => $tables, 'confirmed_by_user_id' => null, 'confirmed_at' => null])->save();
+        $rules->fill($data + ['tax_tables' => $tables, 'confirmed_by_user_id' => null, 'confirmed_at' => null, 'accepted_acknowledgements' => []])->save();
 
         return back()->with('status', 'Rules saved. Confirm them again before creating a run.');
     }
@@ -95,9 +96,30 @@ class PayrollController extends Controller
             return back()->withErrors(['rules' => 'Enter every rate, limit and tax table in the rules before marking them as reviewed.']);
         }
 
+        $accepted = array_values(array_intersect((array) $request->input('acknowledged', []), $rules->required_acknowledgements ?? []));
+        $rules->accepted_acknowledgements = $accepted;
+
+        if ($rules->pendingAcknowledgements() !== []) {
+            return back()->withErrors(['rules' => 'Accept every open item before marking the rules as reviewed.']);
+        }
+
         $rules->forceFill(['confirmed_by_user_id' => $request->user('tenant')->id, 'confirmed_at' => now()])->save();
 
         return back()->with('status', 'Rules marked as reviewed.');
+    }
+
+    /** Loads the Egypt 2026 starting rules as a new, unreviewed set. Never overwrites existing rules. */
+    public function loadEgyptTemplate(Request $request): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+
+        if (PayrollRuleSet::query()->where('tenant_id', $tenantId)->where('template_key', EgyptTemplate::KEY)->exists()) {
+            return back()->withErrors(['rules' => 'The Egypt 2026 template is already loaded.']);
+        }
+
+        PayrollRuleSet::query()->create(['tenant_id' => $tenantId] + EgyptTemplate::attributes());
+
+        return back()->with('status', 'Egypt 2026 template loaded. Review it and accept the open items before creating a run.');
     }
 
     public function storeCompensation(Request $request): RedirectResponse
@@ -134,6 +156,10 @@ class PayrollController extends Controller
             return back()->withErrors(['run' => 'No rule set is effective for that month.']);
         }
 
+        if (! $rules->coversMonth((int) $data['year'], (int) $data['month'])) {
+            return back()->withErrors(['run' => 'The payroll rules end before that month. Enter and review rules for this period first.']);
+        }
+
         if ($rules->missingSettings() !== [] || ! $rules->isConfirmed()) {
             return back()->withErrors(['run' => 'Mark the payroll rules as reviewed before creating a run.']);
         }
@@ -143,9 +169,9 @@ class PayrollController extends Controller
         }
 
         $run = PayrollRun::query()->create($data + ['tenant_id' => $tenantId, 'rule_set_id' => $rules->id, 'created_by_user_id' => $request->user('tenant')->id])->refresh();
-        app(PayrollRunService::class)->build($run);
+        $skipped = app(PayrollRunService::class)->build($run);
 
-        return redirect('/payroll/runs/'.$run->id);
+        return redirect('/payroll/runs/'.$run->id)->with('status', $skipped === [] ? 'Run created.' : 'Run created. Left out: '.implode('; ', $skipped));
     }
 
     public function showRun(Request $request): Response
@@ -266,8 +292,8 @@ class PayrollController extends Controller
 
     private function rulesPayload(PayrollRuleSet $r): array
     {
-        return $r->only(['id', 'name', 'country', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables', 'sources', 'open_questions'])
-            + ['missing' => $r->missingSettings(), 'legacy_defaults' => $r->exists && ! $r->isConfirmed() && str_contains((string) $r->name, 'ESTIMATOR (unverified starting values)')] + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
+        return $r->only(['id', 'name', 'country', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables', 'sources', 'open_questions', 'strict_inputs', 'template_key'])
+            + ['effective_to' => $r->effective_to?->toDateString(), 'acknowledgements' => collect($r->required_acknowledgements ?? [])->map(fn ($k) => ['key' => $k, 'text' => EgyptTemplate::ACKNOWLEDGEMENTS[$k] ?? $k])->values(), 'missing' => $r->missingSettings(), 'legacy_defaults' => $r->exists && ! $r->isConfirmed() && str_contains((string) $r->name, 'ESTIMATOR (unverified starting values)')] + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
     }
 
     private function validateTables(mixed $tables): void
