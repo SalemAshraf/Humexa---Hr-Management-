@@ -48,6 +48,11 @@ const save = () => form.put('/settings', { preserveScroll: true });
             <p v-for="(m, k) in form.errors" :key="k" class="text-xs text-red-600 md:col-span-2">{{ m }}</p>
         </form>
 
+        <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h2 class="text-base font-bold text-slate-900">{{ $t('AI connections') }}</h2>
+            <p class="mt-1 text-sm text-slate-600">{{ $t('Connect Claude to read company totals. Read-only, and you can disconnect at any time.') }} <Link href="/ai-connections" class="font-semibold text-cyan-700">{{ $t('Open AI connections') }}</Link></p>
+        </section>
+
         <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 class="text-base font-bold text-slate-900">{{ $t('Weekend and leave rules') }}</h2>
             <p class="mt-1 text-sm text-slate-600">{{ $t('Weekend') }}: {{ weekend_days.map((d) => $t(days[d])).join($t(' and ')) }}. {{ $t('Change it in') }} <Link href="/leave" class="font-semibold text-cyan-700">{{ $t('Leaves') }}</Link>. {{ $t('Payroll rules are in') }} <Link href="/payroll" class="font-semibold text-cyan-700">{{ $t('Payroll') }}</Link>.</p>

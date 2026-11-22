@@ -135,7 +135,9 @@ test('a manager sees attendance only for direct reports, HR sees everyone, and a
 
 test('route audit: a permissionless account is refused on every company route except its own space', function () {
     [$u] = ($this->account)('audit@tenant-test.example', 'Audit');
-    $allowed = ['/', 'login', 'logout', 'password/change', 'dashboard', 'me', 'me/leave', 'me/leave/{leaveRequest}/cancel', 'notifications', 'search', 'account', 'locale'];
+    $allowed = ['/', 'login', 'logout', 'password/change', 'dashboard', 'me', 'me/leave', 'me/leave/{leaveRequest}/cancel', 'notifications', 'search', 'account', 'locale',
+        // AI connector: open protocol endpoints that answer without data, and the person's own connection list.
+        '.well-known/oauth-protected-resource/{any?}', '.well-known/oauth-authorization-server/{any?}', 'oauth/register', 'oauth/revoke', 'oauth/authorize', 'ai-connections', 'ai-connections/{family}'];
 
     $checked = 0;
     $leaks = [];

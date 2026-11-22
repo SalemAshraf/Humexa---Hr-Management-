@@ -36,6 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return '/login';
         });
+        // The AI connector speaks JSON from another app, with bearer tokens instead of the session.
+        $middleware->validateCsrfTokens(except: ['mcp', 'oauth/token', 'oauth/register', 'oauth/revoke']);
+
         $middleware->alias([
             'tenant.active' => \App\Http\Middleware\EnsureTenantActive::class,
             'tenant.user' => \App\Http\Middleware\EnsureTenantUser::class,

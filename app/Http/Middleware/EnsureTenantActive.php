@@ -75,7 +75,7 @@ class EnsureTenantActive
         // Owner decisions: after the 7-day trial without a manual activation, or after the
         // paid-until date, the company keeps read/export access but nothing can be added or changed.
         if ($this->trialExpired($tenant) && ! $request->isMethodSafe()
-            && ! $request->is('login', 'logout', 'locale', 'password/change', 'account', 'api/v1/auth/*', 'v1/auth/*')) {
+            && ! $request->is('login', 'logout', 'locale', 'password/change', 'account', 'mcp', 'oauth/*', 'ai-connections/*', 'api/v1/auth/*', 'v1/auth/*')) {
             $message = 'Your plan period has ended. Your data is kept and you can still view and export it. Ask the platform administrator to renew your plan to add or change records.';
 
             if ($request->is('api/*', 'v1/*') || $request->expectsJson() && ! $request->header('X-Inertia')) {

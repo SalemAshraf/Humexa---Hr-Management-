@@ -46,7 +46,21 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
         Route::get('/login', [TenantAuthController::class, 'create'])->name('tenant.login');
         Route::post('/login', [TenantAuthController::class, 'store'])->name('tenant.login.store');
 
+        // AI connector endpoints for this company host. Read-only. Tokens only work on the host they were approved on.
+        Route::get('/.well-known/oauth-protected-resource/{any?}', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'resourceMetadata'])->where('any', '.*');
+        Route::get('/.well-known/oauth-authorization-server/{any?}', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'serverMetadata'])->where('any', '.*');
+        Route::post('/oauth/register', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'register'])->middleware('throttle:20,1');
+        Route::post('/oauth/token', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'token'])->middleware('throttle:60,1');
+        Route::post('/oauth/revoke', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'revoke'])->middleware('throttle:60,1');
+        Route::post('/mcp', [\App\Modules\AiConnector\Http\Controllers\McpController::class, 'handle'])->middleware('throttle:60,1')->name('mcp');
+
         Route::middleware(['auth:tenant', 'tenant.user', 'tenant.password'])->group(function () {
+            // Read-only AI connector: the signed-in person approves an app, and can disconnect it again.
+            Route::get('/oauth/authorize', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'authorizeForm'])->name('oauth.authorize');
+            Route::post('/oauth/authorize', [\App\Modules\AiConnector\Http\Controllers\OauthController::class, 'decide'])->name('oauth.decide');
+            Route::get('/ai-connections', [\App\Modules\AiConnector\Http\Controllers\ConnectionsController::class, 'index'])->name('ai.connections');
+            Route::delete('/ai-connections/{family}', [\App\Modules\AiConnector\Http\Controllers\ConnectionsController::class, 'destroy'])->name('ai.disconnect');
+
             Route::get('/password/change', [TenantPasswordController::class, 'create'])->name('tenant.password.edit');
             Route::post('/password/change', [TenantPasswordController::class, 'update'])->name('tenant.password.update');
 

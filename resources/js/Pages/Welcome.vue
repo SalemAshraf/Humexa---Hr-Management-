@@ -51,9 +51,22 @@ const faqs = [
     { q: 'Is my company data separated from other companies?', a: 'Yes. Afrad is built as a multi-tenant platform where each organization has its own workspace, and its data is kept isolated from every other organization.' },
     { q: 'Does Afrad pay salaries or file taxes?', a: 'No. Afrad calculates pay from the rules your company enters and keeps the result. It does not move money or file anything, and your accountant should review the numbers before anyone is paid.' },
     { q: 'Can I use it in Arabic?', a: 'Yes. The interface works in Arabic and English with a language switch and right-to-left layout. Names and other data you enter stay exactly as you typed them.' },
-    { q: 'Does it have an AI assistant?', a: 'Not yet. It is planned, and no AI connection exists today.' },
+    { q: 'Does it have an AI assistant?', a: 'There is no assistant inside Afrad. You can connect your own Claude account to Afrad, read-only, to ask about company totals. It never receives names, contact details, salaries, ID numbers or documents, and it cannot change anything.' },
     { q: 'What happens at a plan limit?', a: 'Adding a new employee or user account is blocked once you reach the limit. Existing records are never hidden or deleted.' },
     { q: 'How do I get started?', a: 'Create your workspace, add your departments and employees, and invite your team. You can start with one area and add the others as you need them.' },
+];
+
+const aiAsks = [
+    'How many people work here, by department?',
+    'How many people are late today?',
+    'How many leave requests are waiting for approval?',
+    'Which positions are open, and how many candidates are at each stage?',
+];
+const aiTrust = [
+    ['Read-only', 'The connection can read. It cannot add, edit, approve or delete anything.'],
+    ['Totals, not people', 'Answers are counts. No names, contact details, salaries, ID numbers or documents are sent.'],
+    ['Follows your role', 'Each person can only ask about what their Afrad role already lets them see.'],
+    ['You stay in control', 'You approve each connection, and you can disconnect it at any time in Settings.'],
 ];
 
 const plans = [
@@ -103,6 +116,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                     <a href="#days" class="hover:text-[#0E2A47]">{{ $t('Why Afrad') }}</a>
                     <a href="#roles" class="hover:text-[#0E2A47]">{{ $t('Roles') }}</a>
                     <a href="#inside" class="hover:text-[#0E2A47]">{{ $t('Inside') }}</a>
+                    <a href="#ai" class="hover:text-[#0E2A47]">{{ $t('AI') }}</a>
                     <a href="#plans" class="hover:text-[#0E2A47]">{{ $t('Plans') }}</a>
                     <a href="#faq" class="hover:text-[#0E2A47]">{{ $t('FAQ') }}</a>
                 </div>
@@ -285,6 +299,36 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                     <div v-reveal="100">
                         <h3 class="text-2xl font-bold leading-[1.4] sm:text-3xl">{{ $t('Numbers ready when management asks') }}</h3>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Pick a period, read the people numbers for the whole company or for your own team, and export them as CSV.') }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5b. AI connection -->
+            <section id="ai" class="scroll-mt-20 border-y border-slate-200 bg-white py-16 lg:py-24">
+                <div class="mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-2 lg:px-8">
+                    <div v-reveal>
+                        <p class="text-sm font-bold text-[#0B7A60]">{{ $t('AI') }}</p>
+                        <h2 class="mt-3 text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('Ask Claude about your people numbers.') }}</h2>
+                        <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Connect your own Claude account to Afrad, read-only. Ask in plain language and get company totals back, without opening each page.') }}</p>
+                        <ul class="mt-6 space-y-3">
+                            <li v-for="a in aiAsks" :key="a" class="flex gap-3 text-[15px] leading-7 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#2BD9A9]" aria-hidden="true"></span>{{ $t(a) }}</li>
+                        </ul>
+                        <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950/80">{{ $t('This is a private connector you add by hand in Claude, not an assistant inside Afrad. It is new, and we are still trying it with real accounts. Answers are shown to Claude and handled under its own terms.') }}</p>
+                    </div>
+                    <div v-reveal="80">
+                        <div class="rounded-2xl border border-slate-200 bg-[#F3F6F8] p-5">
+                            <p class="text-xs font-semibold text-slate-400">{{ $t('Illustration, sample data') }}</p>
+                            <div class="mt-3 space-y-3 text-sm">
+                                <p class="ms-auto max-w-[85%] rounded-2xl rounded-ee-sm bg-[#0E2A47] px-4 py-3 text-white">{{ $t('How many people are late today?') }}</p>
+                                <p class="max-w-[90%] rounded-2xl rounded-es-sm border border-slate-200 bg-white px-4 py-3 text-slate-700">{{ $t('4 of 38 expected people checked in late today, and 2 have no attendance record yet.') }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                            <div v-for="(t, i) in aiTrust" :key="t[0]" v-reveal="i * 60" class="border-t-2 border-[#2BD9A9] pt-4">
+                                <p class="font-bold">{{ $t(t[0]) }}</p>
+                                <p class="mt-1 text-sm leading-7 text-slate-600">{{ $t(t[1]) }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
