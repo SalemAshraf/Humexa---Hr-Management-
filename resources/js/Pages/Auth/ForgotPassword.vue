@@ -23,13 +23,14 @@ const submit = () => {
 
 <template>
     <GuestLayout>
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5 sm:p-7">
         <Head :title="$t('Forgot Password')" />
 
-        <div class="mb-4 text-sm text-gray-600">{{ $t('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}</div>
+        <div class="mb-4 text-sm text-slate-600">{{ $t('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}</div>
 
         <div
             v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
+            class="mb-4 text-sm font-medium text-emerald-700"
         >
             {{ status }}
         </div>
@@ -41,7 +42,7 @@ const submit = () => {
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full focus:!border-[#0B7A60] focus:!ring-[#2BD9A9]/30"
                     v-model="form.email"
                     required
                     autofocus
@@ -53,10 +54,12 @@ const submit = () => {
 
             <div class="mt-4 flex items-center justify-end">
                 <PrimaryButton
+                    class="!w-full !justify-center !rounded-xl !bg-[#2BD9A9] !px-5 !py-3 !text-sm !font-bold !normal-case !tracking-normal !text-[#0A2038] hover:!bg-[#4BE5BB] focus:!bg-[#4BE5BB] focus:!ring-[#0B7A60]"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >{{ $t('Email Password Reset Link') }}</PrimaryButton>
             </div>
         </form>
+        </div>
     </GuestLayout>
 </template>
