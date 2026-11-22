@@ -16,7 +16,7 @@ People records, attendance, leave, hiring, performance, payroll and reports in o
 
 The application follows a **Modular Monolith** architecture with Laravel on the backend and Vue 3 + Inertia.js on the frontend. It uses a **single-database tenancy model**, with tenant context resolved by domain and tenant-owned records scoped at the application level.
 
-This README describes the `feature/humexa-completion` branch. It has not been merged into `main` and has not been deployed. The status below reflects the code on this branch, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
+This README describes the code on `main`. Newer work is on the branch `feature/humexa-completion` and is **not merged into `main`**: the payroll estimator, the optional read-only Claude connector, the sample-company command, the landing page and footer updates, and the hosting fixes. See [Branches and releases](#branches-and-releases). The status below reflects the code on `main`, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
 
 ## Key Capabilities
 
@@ -344,21 +344,31 @@ Contributions and new features should follow these conventions:
 
 ## Limits and open decisions
 
-- Not deployed and not merged into `main`.
+- A running copy of the newer branch has been set up on a test host, with sample data only. It is not proven for real employee data.
 - No real email delivery is configured (password reset and email confirmation are written to the log only). A sending domain and mail service are needed.
-- AI features are planned only and are not built.
+- AI features are not built on `main`. The branch adds an optional, read-only Claude connector that returns company totals only (no names, salaries or documents). It has been tested locally and has not been tried with a live Claude account.
 - Payroll has no built-in legal numbers and makes no compliance claim.
 - Imports cover employees, departments and positions only. Leave, attendance, salary and history imports need business rules that are not decided. Excel (.xlsx) is not supported, only CSV.
 - A separate export permission and export of sensitive fields are not built.
 - No external penetration test has been done.
 - Pre-filled payroll rows in older companies are left untouched pending an owner decision.
 
+## Branches and releases
+
+| Branch | What it holds |
+| --- | --- |
+| `main` | The code this README describes. |
+| `feature/humexa-completion` | The newest work, kept separate until it is reviewed: payroll estimator (reviewed-assumptions only, no compliance claim), read-only Claude connector, sample-company command, MariaDB foreign-key fix, host settings, landing page and footer. Latest revision at the time of writing: `6ddfda8`. |
+| `feature/attendance-api-first-foundation` | An earlier attendance work branch. |
+
+To try the newest work, check out `feature/humexa-completion` and follow its README. Its sample company command only adds fictional data and never needs real employee records.
+
 ## Project Status
 
-**Active development on a feature branch. Not a production-ready release.**
+**Active development. Not a production-ready release.**
 
 Before using Afrad with real employee data, complete a production-readiness review: authentication, authorization, tenant isolation, backups, file storage, encryption-key management, email delivery, monitoring and legal review of any payroll configuration.
 
 ## License
 
-No open-source license has been declared for this repository. Unless and until a license is added, all rights are reserved.
+No license has been selected yet. The owner has not chosen terms for reuse, so none are granted or implied by this repository being public.
