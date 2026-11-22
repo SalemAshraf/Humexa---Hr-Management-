@@ -40,7 +40,12 @@ class PayrollCalculator
 
         $annualTax = $this->annualTax($rules->tax_tables, $annualNet);
         $monthlyTax = $this->round2($annualTax / 12);
-        $levy = $this->round2($gross * $rules->after_tax_levy_rate);
+        $levyBase = match ($rules->levy_base) {
+            'basic' => (float) $in['basic'],
+            'taxable_gross' => $taxableGross,
+            default => $gross,
+        };
+        $levy = $this->round2($levyBase * $rules->after_tax_levy_rate);
 
         $net = $this->round2($gross - $insEmployee - $monthlyTax - $levy - $in['deductions']);
 

@@ -7,6 +7,7 @@ import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 const props = defineProps({
     run: { type: Object, required: true },
     rule_name: { type: String, default: '' },
+    provisional: { type: Object, default: null },
     payslips: { type: Array, required: true },
     totals: { type: Object, required: true },
     adjustments: { type: Array, required: true },
@@ -52,6 +53,13 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
 
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(m) }}</p>
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $t($page.props.flash.status) }}</p>
+
+        <section v-if="provisional" class="mb-5 rounded-xl border border-amber-400 bg-amber-50 px-4 py-3 text-xs text-amber-900" data-testid="run-provisional">
+            <p class="text-sm font-bold">{{ $t('Provisional estimate. Not a statutory result and not safe to pay from without your accountant.') }}</p>
+            <p class="mt-1">{{ $t('Rules valid from {from} to {to}.', { from: provisional.valid_from, to: provisional.valid_to ?? '-' }) }} {{ $t('Extra levy base chosen by your company') }}: {{ provisional.levy_base ?? '-' }}.</p>
+            <p class="mt-2 font-semibold">{{ $t('Not calculated') }}:</p>
+            <ul class="list-disc ps-5"><li v-for="n in provisional.not_calculated" :key="n">{{ $t(n) }}</li></ul>
+        </section>
 
         <section class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
             <article v-for="(label, key) in { gross: 'Gross (EGP)', insurance_employee: 'Employee insurance (EGP)', tax: 'Income tax (EGP)', insurance_employer: 'Employer insurance (EGP)', net: 'Net pay (EGP)' }" :key="key" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">

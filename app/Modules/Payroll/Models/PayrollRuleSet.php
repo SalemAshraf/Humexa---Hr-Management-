@@ -30,7 +30,13 @@ class PayrollRuleSet extends Model
     /** @return list<string> required settings the company has not entered yet */
     public function missingSettings(): array
     {
-        return array_values(array_filter(self::REQUIRED, fn (string $f) => $this->getAttribute($f) === null || $this->getAttribute($f) === []));
+        $missing = array_values(array_filter(self::REQUIRED, fn (string $f) => $this->getAttribute($f) === null || $this->getAttribute($f) === []));
+
+        if ($this->strict_inputs && (float) $this->after_tax_levy_rate > 0 && $this->levy_base === null) {
+            $missing[] = 'levy_base';
+        }
+
+        return $missing;
     }
 
     /** @return list<string> open items the company has not accepted yet */

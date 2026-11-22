@@ -74,6 +74,7 @@ class PayrollController extends Controller
             'rounding_step' => ['required', 'integer', 'min:1', 'max:1000'],
             'after_tax_levy_rate' => ['required', 'numeric', 'between:0,0.5'],
             'after_tax_levy_label' => ['nullable', 'string', 'max:80'],
+            'levy_base' => [\Illuminate\Validation\Rule::requiredIf(fn () => $rules->strict_inputs && (float) $request->input('after_tax_levy_rate') > 0), 'nullable', 'in:'.implode(',', EgyptTemplate::LEVY_BASES)],
             'month_days_basis' => ['required', 'integer', 'between:20,31'],
             'tax_tables_json' => ['required', 'json'],
         ]);
@@ -184,6 +185,10 @@ class PayrollController extends Controller
         return Inertia::render('Company/Payroll/Run', [
             'run' => ['id' => $run->id, 'year' => $run->year, 'month' => $run->month, 'status' => $run->status, 'approved_at' => $run->approved_at?->toDateTimeString()],
             'rule_name' => PayrollRuleSet::where('tenant_id', $tenantId)->whereKey($run->rule_set_id)->value('name'),
+            'provisional' => ($rs = PayrollRuleSet::where('tenant_id', $tenantId)->find($run->rule_set_id))?->strict_inputs ? [
+                'valid_from' => $rs->effective_from->toDateString(), 'valid_to' => $rs->effective_to?->toDateString(), 'levy_base' => $rs->levy_base,
+                'not_calculated' => EgyptTemplate::NOT_CALCULATED,
+            ] : null,
             'payslips' => $slips->map(fn (Payslip $p) => ['id' => $p->id, 'employee' => $p->employee?->full_name, 'employee_number' => $p->employee?->employee_number] + $p->only(self::PAYSLIP_FIELDS))->values(),
             'totals' => ['gross' => round((float) $slips->sum('gross'), 2), 'tax' => round((float) $slips->sum('income_tax'), 2), 'insurance_employee' => round((float) $slips->sum('insurance_employee'), 2), 'insurance_employer' => round((float) $slips->sum('insurance_employer'), 2), 'net' => round((float) $slips->sum('net_pay'), 2)],
             'adjustments' => PayrollAdjustment::query()->where('payroll_run_id', $run->id)->orderBy('id')->get(['id', 'employee_id', 'kind', 'label', 'amount', 'taxable']),
@@ -262,13 +267,21 @@ class PayrollController extends Controller
             $out = fopen('php://output', 'w');
             fputcsv($out, array_merge(['employee_number', 'employee'], self::PAYSLIP_FIELDS, ['note']));
             foreach ($rows as $p) {
-                fputcsv($out, array_map([$this, 'csvSafe'], array_merge([$p->employee?->employee_number, $p->employee?->full_name], array_values($p->only(self::PAYSLIP_FIELDS)), ['Calculated from company-entered rules, not verified by Afrad, amounts in EGP'])));
+                fputcsv($out, array_map([$this, 'csvSafe'], array_merge([$p->employee?->employee_number, $p->employee?->full_name], array_values($p->only(self::PAYSLIP_FIELDS)), [$this->exportNote($p)])));
             }
             fclose($out);
         }, $name, ['Content-Type' => 'text/csv']);
     }
 
     /** Stop spreadsheet formula injection from names. */
+    private function exportNote(Payslip $p): string
+    {
+        $note = 'Calculated from company-entered rules, not verified by Afrad, amounts in EGP';
+        $pv = $p->details['provisional'] ?? null;
+
+        return $pv === null ? $note : $note.'. Provisional estimate, valid '.$pv['valid_from'].' to '.($pv['valid_to'] ?? 'open').'; levy base chosen by company: '.($pv['levy_base'] ?? 'n/a').'; not calculated: '.implode('; ', $pv['not_calculated']);
+    }
+
     public function csvSafe(mixed $v): mixed
     {
         return is_string($v) && $v !== '' && in_array($v[0], ['=', '+', '-', '@', "\t", "\r"], true) ? "'".$v : $v;
@@ -292,7 +305,7 @@ class PayrollController extends Controller
 
     private function rulesPayload(PayrollRuleSet $r): array
     {
-        return $r->only(['id', 'name', 'country', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables', 'sources', 'open_questions', 'strict_inputs', 'template_key'])
+        return $r->only(['id', 'name', 'country', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'after_tax_levy_label', 'levy_base', 'month_days_basis', 'tax_tables', 'sources', 'open_questions', 'strict_inputs', 'template_key'])
             + ['effective_to' => $r->effective_to?->toDateString(), 'acknowledgements' => collect($r->required_acknowledgements ?? [])->map(fn ($k) => ['key' => $k, 'text' => EgyptTemplate::ACKNOWLEDGEMENTS[$k] ?? $k])->values(), 'missing' => $r->missingSettings(), 'legacy_defaults' => $r->exists && ! $r->isConfirmed() && str_contains((string) $r->name, 'ESTIMATOR (unverified starting values)')] + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
     }
 

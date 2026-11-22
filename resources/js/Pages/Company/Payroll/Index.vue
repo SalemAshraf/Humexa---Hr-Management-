@@ -1,6 +1,6 @@
 <script setup>
 import { dateLocale } from '@/lib/i18n';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 import { formatDate } from '@/lib/date';
@@ -23,15 +23,26 @@ const accepted = ref([]);
 const confirmRules = () => confirm('Mark these values as reviewed? This records that your company checked them with its accountant. It does not verify them.') && router.post('/payroll/rules/confirm', { acknowledged: accepted.value }, { preserveScroll: true });
 const loadTemplate = () => confirm('Load the Egypt 2026 starting rules as a new set? Nothing is used until you review it and accept every open item.') && router.post('/payroll/rules/egypt-template', {}, { preserveScroll: true });
 
+const missingLabels = { insurance_employer_rate: 'Employer insurance rate', levy_base: 'Levy is charged on (your choice)', insurance_employee_rate: 'Employee insurance rate (0.11 = 11%)', insurable_min: 'Insurable wage minimum', insurable_max: 'Insurable wage maximum', personal_exemption_annual: 'Personal exemption (a year)', tax_tables: 'Tax tables' };
 const showRules = ref(false);
 const ruleForm = useForm({
     name: props.rules?.name ?? '', effective_from: props.rules?.effective_from ?? '',
     insurance_employee_rate: props.rules?.insurance_employee_rate ?? '', insurance_employer_rate: props.rules?.insurance_employer_rate ?? '',
     insurable_min: props.rules?.insurable_min ?? '', insurable_max: props.rules?.insurable_max ?? '',
     personal_exemption_annual: props.rules?.personal_exemption_annual ?? '', rounding_step: props.rules?.rounding_step ?? 10,
-    after_tax_levy_rate: props.rules?.after_tax_levy_rate ?? 0, after_tax_levy_label: props.rules?.after_tax_levy_label ?? '',
+    after_tax_levy_rate: props.rules?.after_tax_levy_rate ?? 0, after_tax_levy_label: props.rules?.after_tax_levy_label ?? '', levy_base: props.rules?.levy_base ?? '',
     month_days_basis: props.rules?.month_days_basis ?? 30,
     tax_tables_json: JSON.stringify(props.rules?.tax_tables ?? [], null, 1),
+});
+// A newly loaded template replaces the rules shown, so the edit form follows them.
+watch(() => props.rules?.id, () => {
+    const r = props.rules ?? {};
+    ruleForm.defaults({
+        name: r.name ?? '', effective_from: r.effective_from ?? '', insurance_employee_rate: r.insurance_employee_rate ?? '', insurance_employer_rate: r.insurance_employer_rate ?? '',
+        insurable_min: r.insurable_min ?? '', insurable_max: r.insurable_max ?? '', personal_exemption_annual: r.personal_exemption_annual ?? '', rounding_step: r.rounding_step ?? 10,
+        after_tax_levy_rate: r.after_tax_levy_rate ?? 0, after_tax_levy_label: r.after_tax_levy_label ?? '', levy_base: r.levy_base ?? '', month_days_basis: r.month_days_basis ?? 30,
+        tax_tables_json: JSON.stringify(r.tax_tables ?? [], null, 1),
+    }).reset();
 });
 const saveRules = () => ruleForm.put('/payroll/rules', { preserveScroll: true, onSuccess: () => { showRules.value = false; } });
 
@@ -65,6 +76,7 @@ const flash = computed(() => window.history.state?.props?.flash);
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $t($page.props.flash.status) }}</p>
 
         <p v-if="rules?.legacy_defaults" class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" data-testid="rules-legacy">{{ $t('These values were pre-filled by an earlier version of Afrad. They are not verified. Check every rate, limit and tax table with your accountant before marking the rules as reviewed.') }}</p>
+        <p v-if="rules?.missing?.length && rules.template_key" class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" data-testid="rules-template-missing">{{ $t('Still to enter before these rules can be reviewed') }}: {{ rules.missing.map((k) => $t(missingLabels[k] ?? k)).join(', ') }}.</p>
         <p v-if="rules?.missing?.length" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-testid="rules-missing">{{ $t('Your payroll rules are not complete yet. Enter the insurance rates, insurable wage limits, personal exemption and tax tables from your accountant, then mark the rules as reviewed.') }}</p>
         <section v-if="rules" class="mb-6 rounded-2xl border bg-white p-5 shadow-sm" :class="'border-amber-300'">
             <div class="flex flex-wrap items-start justify-between gap-3">
@@ -80,9 +92,10 @@ const flash = computed(() => window.history.state?.props?.flash);
                     <button v-if="!rules.template_key" class="text-cyan-700" data-testid="load-egypt-template" @click="loadTemplate">{{ $t('Load Egypt 2026 template') }}</button>
                 </div>
             </div>
+            <p v-if="rules.template_key" class="mt-2 text-xs text-slate-700" data-testid="rules-estimator">{{ $t('This is a reviewed-assumptions estimator, not a statutory or compliance result. Enter the employer insurance rate and the base for the extra levy yourself, from your accountant.') }}</p>
             <p v-if="rules.effective_to" class="mt-2 text-xs font-semibold text-amber-800" data-testid="rules-period">{{ $t('These rules are valid from {from} to {to} only. Runs outside this period are refused until you enter and review new rules.', { from: formatDate(rules.effective_from), to: formatDate(rules.effective_to) }) }}</p>
             <div v-if="abilities.manage && !rules.confirmed && rules.acknowledgements?.length" class="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900" data-testid="rules-acks">
-                <p class="mb-2 font-semibold">{{ $t('Accept each open item before marking the rules as reviewed.') }}</p>
+                <p class="mb-2 font-semibold">{{ $t('Known limits. Accepting them records that you know what is left out. It does not verify any figure.') }}</p>
                 <label v-for="a in rules.acknowledgements" :key="a.key" class="mb-2 flex items-start gap-2">
                     <input v-model="accepted" type="checkbox" :value="a.key" class="mt-0.5" />
                     <span>{{ $t(a.text) }}</span>
@@ -93,6 +106,7 @@ const flash = computed(() => window.history.state?.props?.flash);
                 <div><dt class="text-xs text-slate-500">{{ $t('Employer insurance') }}</dt><dd class="font-semibold">{{ pct(rules.insurance_employer_rate) }}</dd></div>
                 <div><dt class="text-xs text-slate-500">{{ $t('Insurable wage range') }}</dt><dd class="font-semibold">{{ money(rules.insurable_min) }} {{ $t('to') }} {{ money(rules.insurable_max) }}</dd></div>
                 <div><dt class="text-xs text-slate-500">{{ $t('Personal exemption (a year)') }}</dt><dd class="font-semibold">{{ money(rules.personal_exemption_annual) }}</dd></div>
+                <div v-if="rules.template_key"><dt class="text-xs text-slate-500">{{ $t('Extra levy') }}</dt><dd class="font-semibold">{{ pct(rules.after_tax_levy_rate) }} · {{ rules.levy_base ? $t(rules.levy_base === 'gross' ? 'Gross pay' : rules.levy_base === 'basic' ? 'Basic salary' : 'Taxable gross pay') : $t('Not chosen') }}</dd></div>
             </dl>
 
             <form v-if="showRules" class="mt-5 grid grid-cols-1 gap-3 border-t border-slate-100 pt-4 md:grid-cols-4" @submit.prevent="saveRules">
@@ -106,6 +120,8 @@ const flash = computed(() => window.history.state?.props?.flash);
                 <label class="text-xs font-medium text-slate-500">{{ $t('Personal exemption (a year)') }}<input v-model="ruleForm.personal_exemption_annual" type="number" step="0.01" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
                 <label class="text-xs font-medium text-slate-500">{{ $t('Round net income down to') }}<input v-model="ruleForm.rounding_step" type="number" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
                 <label class="text-xs font-medium text-slate-500">{{ $t('Extra levy on gross (0.0005 = 0.05%)') }}<input v-model="ruleForm.after_tax_levy_rate" type="number" step="0.000001" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
+                <label class="text-xs font-medium text-slate-500">{{ $t('Levy is charged on (your choice)') }}
+                    <select v-model="ruleForm.levy_base" class="mt-1 w-full rounded-lg border-slate-300 text-sm" data-testid="levy-base"><option value="">{{ $t('Not chosen') }}</option><option value="gross">{{ $t('Gross pay') }}</option><option value="taxable_gross">{{ $t('Taxable gross pay') }}</option><option value="basic">{{ $t('Basic salary') }}</option></select></label>
                 <label class="text-xs font-medium text-slate-500">{{ $t('Levy name') }}<input v-model="ruleForm.after_tax_levy_label" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
                 <label class="text-xs font-medium text-slate-500 md:col-span-4">{{ $t('Tax tables (JSON). Each table applies up to "up_to" of yearly net income. Bands are [upper limit, rate]. End each table with a null limit.') }}<textarea v-model="ruleForm.tax_tables_json" rows="8" class="mt-1 w-full rounded-lg border-slate-300 font-mono text-xs"></textarea>
                 </label>

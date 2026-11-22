@@ -36,7 +36,7 @@ beforeEach(function () {
 
 function egyptTemplateRules(): PayrollRuleSet
 {
-    return (new PayrollRuleSet)->forceFill(EgyptTemplate::attributes());
+    return (new PayrollRuleSet)->forceFill(['insurance_employer_rate' => 0.1875, 'levy_base' => 'gross'] + EgyptTemplate::attributes());
 }
 
 test('the template tax tables match the Law 7/2024 table at every step', function () {
@@ -68,25 +68,43 @@ test('loading the template is opt-in, never overwrites, and needs every open ite
     expect(PayrollRuleSet::where('tenant_id', $this->tid)->count())->toBe(1)->and($rules->isConfirmed())->toBeFalse()
         ->and($rules->effective_to->toDateString())->toBe('2026-12-31');
 
-    // Confirming with nothing or only some items accepted is refused.
-    ($this->as)()->post("{$this->base}/payroll/rules/confirm")->assertSessionHasErrors('rules');
-    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => ['martyrs_fund_base']])->assertSessionHasErrors('rules');
-    ($this->as)()->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertSessionHasErrors('run');
+    // Employer rate and levy base are company inputs: the template does not fill them, so the set is incomplete.
+    expect($rules->missingSettings())->toContain('insurance_employer_rate')->toContain('levy_base');
+    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => array_keys(EgyptTemplate::ACKNOWLEDGEMENTS)])->assertSessionHasErrors('rules');
+    expect($rules->fresh()->isConfirmed())->toBeFalse();
 
-    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => array_keys(EgyptTemplate::ACKNOWLEDGEMENTS)])->assertSessionHasNoErrors();
-    expect($rules->fresh()->isConfirmed())->toBeTrue();
-
-    // Editing a value clears the review and the accepted items.
     $a = EgyptTemplate::attributes();
-    ($this->as)()->put("{$this->base}/payroll/rules", ['name' => $a['name'], 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
-        'insurable_min' => 2700, 'insurable_max' => 16700, 'personal_exemption_annual' => 20000, 'rounding_step' => 10, 'after_tax_levy_rate' => 0.0005, 'month_days_basis' => 30,
-        'tax_tables_json' => json_encode($a['tax_tables'])])->assertSessionHasNoErrors();
+    $put = fn (array $o = []) => ($this->as)()->put("{$this->base}/payroll/rules", $o + ['name' => $a['name'], 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
+        'insurable_min' => 2700, 'insurable_max' => 16700, 'personal_exemption_annual' => 20000, 'rounding_step' => 10, 'after_tax_levy_rate' => 0.0005, 'levy_base' => 'gross', 'month_days_basis' => 30,
+        'tax_tables_json' => json_encode($a['tax_tables'])]);
+    $put(['levy_base' => ''])->assertSessionHasErrors('levy_base');
+    $put(['levy_base' => 'nonsense'])->assertSessionHasErrors('levy_base');
+    $put()->assertSessionHasNoErrors();
+
+    // Known limits must all be accepted, and accepting them is recorded but does not stand in for inputs.
+    ($this->as)()->post("{$this->base}/payroll/rules/confirm")->assertSessionHasErrors('rules');
+    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => ['manual_cases']])->assertSessionHasErrors('rules');
+    ($this->as)()->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertSessionHasErrors('run');
+    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => array_keys(EgyptTemplate::ACKNOWLEDGEMENTS)])->assertSessionHasNoErrors();
+    expect($rules->fresh()->isConfirmed())->toBeTrue()->and($rules->fresh()->levy_base)->toBe('gross');
+
+    // Editing a value clears the review and the accepted items, and keeps the end date.
+    $put(['insurable_max' => 17000])->assertSessionHasNoErrors();
     expect($rules->fresh()->isConfirmed())->toBeFalse()->and($rules->fresh()->effective_to->toDateString())->toBe('2026-12-31');
+});
+
+test('the levy follows the base the company chose', function () {
+    $in = ['basic' => 20000.0, 'allowances' => 10000.0, 'insured' => false, 'insurable_wage' => null, 'unpaid_days' => 0.0, 'earnings_taxable' => 0.0, 'earnings_exempt' => 5000.0, 'deductions' => 0.0];
+    foreach (['gross' => 35000 * 0.0005, 'taxable_gross' => 30000 * 0.0005, 'basic' => 20000 * 0.0005] as $base => $levy) {
+        $r = egyptTemplateRules()->forceFill(['levy_base' => $base]);
+        expect((new PayrollCalculator)->calculate($r, $in)['after_tax_levy'])->toBe(round($levy, 2), $base);
+    }
 });
 
 test('2027 is refused, and unresolved inputs leave the person out instead of guessing', function () {
     ($this->as)()->post("{$this->base}/payroll/rules/egypt-template");
-    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => array_keys(EgyptTemplate::ACKNOWLEDGEMENTS)]);
+    PayrollRuleSet::where('tenant_id', $this->tid)->update(['insurance_employer_rate' => 0.1875, 'levy_base' => 'gross']);
+    ($this->as)()->post("{$this->base}/payroll/rules/confirm", ['acknowledged' => array_keys(EgyptTemplate::ACKNOWLEDGEMENTS)])->assertSessionHasNoErrors();
 
     $ok = ($this->emp)('OK');
     $noWage = ($this->emp)('NOWAGE');
@@ -94,8 +112,9 @@ test('2027 is refused, and unresolved inputs leave the person out instead of gue
     $senior = ($this->emp)('SENIOR', ['date_of_birth' => '1960-01-01']);
     $joiner = ($this->emp)('JOINER', ['hire_date' => '2026-11-10']);
     $uninsured = ($this->emp)('UNINS', ['date_of_birth' => null]);
-    foreach ([[$ok, 16700, true], [$noWage, null, true], [$noDob, 16700, true], [$senior, 16700, true], [$joiner, 16700, true], [$uninsured, null, false]] as [$e, $wage, $insured]) {
-        ($this->as)()->post("{$this->base}/payroll/employees/{$e->id}/compensation", ['effective_from' => '2026-01-01', 'basic_salary' => 30000, 'allowances' => 0, 'insured' => $insured, 'insurable_wage' => $wage])->assertSessionHasNoErrors();
+    $unreasoned = ($this->emp)('NOREASON');
+    foreach ([[$ok, 16700, true], [$noWage, null, true], [$noDob, 16700, true], [$senior, 16700, true], [$joiner, 16700, true], [$uninsured, null, false], [$unreasoned, null, false]] as [$e, $wage, $insured]) {
+        ($this->as)()->post("{$this->base}/payroll/employees/{$e->id}/compensation", ['effective_from' => '2026-01-01', 'basic_salary' => 30000, 'allowances' => 0, 'insured' => $insured, 'insurable_wage' => $wage, 'note' => $e->id === $uninsured->id ? 'Foreign national on payroll abroad' : null])->assertSessionHasNoErrors();
     }
 
     // No silent extension into 2027, and none into years before the sources.
@@ -106,10 +125,14 @@ test('2027 is refused, and unresolved inputs leave the person out instead of gue
     ($this->as)()->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertRedirect();
     $paid = Payslip::where('tenant_id', $this->tid)->pluck('employee_id')->all();
     expect($paid)->toContain($ok->id)->toContain($uninsured->id)
-        ->not->toContain($noWage->id)->not->toContain($noDob->id)->not->toContain($senior->id)->not->toContain($joiner->id);
+        ->not->toContain($noWage->id)->not->toContain($noDob->id)->not->toContain($senior->id)->not->toContain($joiner->id)->not->toContain($unreasoned->id);
 
     $slip = Payslip::where('employee_id', $ok->id)->firstOrFail();
-    expect((float) $slip->net_pay)->toBe(23457.27)->and($slip->details['rules_snapshot']['effective_to'])->not->toBeNull();
+    expect((float) $slip->net_pay)->toBe(23457.27)->and($slip->details['rules_snapshot']['effective_to'])->not->toBeNull()
+        ->and($slip->details['provisional']['levy_base_chosen_by_company'])->toBe('gross')->and($slip->details['provisional']['not_calculated'])->not->toBeEmpty();
+    $run = \App\Modules\Payroll\Models\PayrollRun::where('tenant_id', $this->tid)->firstOrFail();
+    ($this->as)()->get("{$this->base}/payroll/runs/{$run->id}")->assertInertia(fn ($p) => $p->where('provisional.valid_to', '2026-12-31')->has('provisional.not_calculated'));
+    expect(($this->as)()->get("{$this->base}/payroll/runs/{$run->id}/export")->streamedContent())->toContain('Provisional estimate');
 
     // December 2026 is still covered; recalculating a draft after the end date is also refused.
     ($this->as)()->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 12])->assertRedirect();

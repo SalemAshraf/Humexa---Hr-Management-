@@ -69,6 +69,12 @@ class PayrollRunService
                         continue;
                     }
 
+                    if (! $comp->insured && trim((string) $comp->note) === '') {
+                        $skipped[] = $employee->full_name.': marked uninsured with no reason in the salary note, record why or mark as insured';
+
+                        continue;
+                    }
+
                     if ($comp->insured && $comp->insurable_wage === null) {
                         $skipped[] = $employee->full_name.': insured but no insurable wage entered, enter it on the salary record';
 
@@ -111,7 +117,12 @@ class PayrollRunService
                     'annual_net_income' => $result['annual_net_income'], 'income_tax' => $result['income_tax'],
                     'after_tax_levy' => $result['after_tax_levy'], 'net_pay' => $result['net_pay'],
                     'details' => ['compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured, 'estimate_only' => true,
-                        'rules_snapshot' => $rules->only(['id', 'name', 'effective_from', 'effective_to', 'template_key', 'strict_inputs', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'private_insurance_cap_pct', 'private_insurance_cap_amount', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables']), 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
+                        'rules_snapshot' => $rules->only(['id', 'levy_base', 'name', 'effective_from', 'effective_to', 'template_key', 'strict_inputs', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'private_insurance_cap_pct', 'private_insurance_cap_amount', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables']), 'provisional' => $rules->strict_inputs ? [
+                        'kind' => 'reviewed-assumptions estimate, not a statutory result',
+                        'valid_from' => $rules->effective_from->toDateString(), 'valid_to' => $rules->effective_to?->toDateString(),
+                        'levy_base_chosen_by_company' => $rules->levy_base, 'insurance_declared_by_company' => $comp->insured ? 'insured' : 'uninsured: '.$comp->note,
+                        'not_calculated' => EgyptTemplate::NOT_CALCULATED,
+                    ] : null, 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
                 ]);
             }
         });
