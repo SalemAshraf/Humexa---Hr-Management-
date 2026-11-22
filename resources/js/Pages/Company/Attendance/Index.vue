@@ -90,6 +90,14 @@ const formattedDate = computed(() => new Intl.DateTimeFormat(dateLocale(), {
             </div>
         </section>
 
+        <section v-if="canReviewRequests" class="mb-4 flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
+            <div>
+                <h2 class="font-bold text-slate-900">{{ $t('Work shifts') }}</h2>
+                <p class="mt-1 text-sm text-slate-500">{{ $t('Optional. Give employees a shift to see late arrivals. Employees without a shift are not affected.') }}</p>
+            </div>
+            <a href="/attendance/shifts" class="inline-flex items-center justify-center rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-700">{{ $t('Manage shifts') }}</a>
+        </section>
+
         <section v-if="canReviewRequests" class="mb-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" data-testid="attendance-manual">
             <h2 class="font-bold text-slate-900">{{ $t('Add an attendance entry') }}</h2>
             <p class="mt-1 text-sm text-slate-500">{{ $t('Record a finished work session for an employee, for example when they forgot to check in.') }}</p>

@@ -89,3 +89,54 @@ test('HR can add a manual entry only when the policy allows it, without overlaps
     ($this->as)($u)->post("{$this->base}/attendance/manual", $entry)->assertForbidden();
     ($this->as)($u)->put("{$this->base}/attendance/policy", ['mobile_checkin_enabled' => false, 'manual_attendance_enabled' => false])->assertForbidden();
 });
+
+
+test('shifts are optional, explicit, and only affect late minutes of the first check-in', function () {
+    [$u, $emp] = ($this->account)('ws@tenant-test.example', 'Shifty');
+    $owner = $this->reg['user'];
+    \App\Modules\Settings\Models\CompanySetting::query()->create(['tenant_id' => $this->tid, 'timezone' => 'Africa/Cairo']);
+    $lateness = app(\App\Modules\Attendance\Services\ShiftLateness::class);
+    $at = fn (string $local) => \Illuminate\Support\Carbon::parse($local, 'Africa/Cairo')->utc();
+
+    // No shift: always 0 and nothing assigned by creating a shift.
+    expect($lateness->minutesLate($emp->fresh(), $at('2026-11-10 11:00')))->toBe(0);
+    ($this->as)($u)->post("{$this->base}/attendance/shifts", ['name' => 'X', 'start_time' => '09:00', 'end_time' => '17:00'])->assertForbidden();
+    ($this->as)($owner)->post("{$this->base}/attendance/shifts", ['name' => 'Day', 'start_time' => '09:00', 'end_time' => '17:00', 'grace_minutes' => 10])->assertSessionHasNoErrors();
+    ($this->as)($owner)->post("{$this->base}/attendance/shifts", ['name' => 'Day', 'start_time' => '09:00', 'end_time' => '17:00'])->assertSessionHasErrors('name');
+    ($this->as)($owner)->post("{$this->base}/attendance/shifts", ['name' => 'Same', 'start_time' => '09:00', 'end_time' => '09:00'])->assertSessionHasErrors('end_time');
+    $day = \App\Modules\Attendance\Models\AttendanceShift::where('tenant_id', $this->tid)->where('name', 'Day')->firstOrFail();
+    expect($emp->fresh()->shift_id)->toBeNull();
+
+    ($this->as)($owner)->put("{$this->base}/attendance/shifts/assign", ['employee_id' => $emp->id, 'shift_id' => $day->id])->assertSessionHasNoErrors();
+    $emp = $emp->fresh();
+    expect($lateness->minutesLate($emp, $at('2026-11-10 08:30')))->toBe(0)
+        ->and($lateness->minutesLate($emp, $at('2026-11-10 09:10')))->toBe(0)
+        ->and($lateness->minutesLate($emp, $at('2026-11-10 09:25')))->toBe(15);
+
+    // Overnight 22:00 to 06:00 with company grace 5 (policy), check-in 01:00 is measured from 22:00 the evening before.
+    AttendancePolicy::where('tenant_id', $this->tid)->update(['late_grace_minutes' => 5]);
+    ($this->as)($owner)->post("{$this->base}/attendance/shifts", ['name' => 'Night', 'start_time' => '22:00', 'end_time' => '06:00'])->assertSessionHasNoErrors();
+    $night = \App\Modules\Attendance\Models\AttendanceShift::where('tenant_id', $this->tid)->where('name', 'Night')->firstOrFail();
+    ($this->as)($owner)->put("{$this->base}/attendance/shifts/assign", ['employee_id' => $emp->id, 'shift_id' => $night->id]);
+    $emp = $emp->fresh();
+    expect($lateness->minutesLate($emp, $at('2026-11-11 01:00')))->toBe(175)
+        ->and($lateness->minutesLate($emp, $at('2026-11-10 21:30')))->toBe(0)
+        ->and($lateness->minutesLate($emp, $at('2026-11-10 22:20')))->toBe(15);
+
+    // Real check-in stores it, only on the first session of the day.
+    ($this->as)($owner)->put("{$this->base}/attendance/shifts/assign", ['employee_id' => $emp->id, 'shift_id' => $day->id]);
+    \Illuminate\Support\Carbon::setTestNow($at('2026-11-10 09:40'));
+    ($this->as)($u)->post("{$this->base}/me/attendance/check-in")->assertSessionHasNoErrors();
+    \Illuminate\Support\Carbon::setTestNow($at('2026-11-10 12:00'));
+    ($this->as)($u)->post("{$this->base}/me/attendance/check-out")->assertSessionHasNoErrors();
+    ($this->as)($u)->post("{$this->base}/me/attendance/check-in")->assertSessionHasNoErrors();
+    \Illuminate\Support\Carbon::setTestNow();
+    $sessions = \App\Modules\Attendance\Models\AttendanceSession::where('employee_id', $emp->id)->orderBy('session_number')->pluck('late_minutes')->all();
+    expect($sessions)->toBe([30, 0]);
+
+    // Deleting a shift in use is refused; an unused one can go.
+    ($this->as)($owner)->delete("{$this->base}/attendance/shifts/{$day->id}")->assertSessionHasErrors('shift');
+    ($this->as)($owner)->delete("{$this->base}/attendance/shifts/{$night->id}")->assertSessionHasNoErrors();
+    ($this->as)($u)->get("{$this->base}/attendance/shifts")->assertForbidden();
+    ($this->as)($owner)->get("{$this->base}/attendance/shifts")->assertOk();
+});

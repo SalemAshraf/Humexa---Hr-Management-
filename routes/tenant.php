@@ -57,6 +57,11 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
 
             Route::post('/attendance/manual', [\App\Modules\Attendance\Http\Controllers\TenantManualAttendanceController::class, 'store'])->middleware(['tenant.can:attendance.manage', 'throttle:60,1'])->name('tenant.attendance.manual');
+            Route::get('/attendance/shifts', [\App\Modules\Attendance\Http\Controllers\TenantShiftController::class, 'index'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.shifts');
+            Route::post('/attendance/shifts', [\App\Modules\Attendance\Http\Controllers\TenantShiftController::class, 'store'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.shifts.store');
+            Route::put('/attendance/shifts/assign', [\App\Modules\Attendance\Http\Controllers\TenantShiftController::class, 'assign'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.shifts.assign');
+            Route::put('/attendance/shifts/{shift}', [\App\Modules\Attendance\Http\Controllers\TenantShiftController::class, 'update'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.shifts.update');
+            Route::delete('/attendance/shifts/{shift}', [\App\Modules\Attendance\Http\Controllers\TenantShiftController::class, 'destroy'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.shifts.destroy');
             Route::put('/attendance/policy', [\App\Modules\Attendance\Http\Controllers\TenantManualAttendanceController::class, 'updatePolicy'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.policy');
 
             Route::prefix('/attendance/requests')->middleware('tenant.can:attendance.manage')->name('tenant.attendance.requests.')->controller(TenantAttendanceRequestsController::class)->group(function () {

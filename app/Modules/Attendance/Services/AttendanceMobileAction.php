@@ -117,6 +117,7 @@ class AttendanceMobileAction
                         'session_number' => $nextSessionNumber,
                         'check_in_at' => $now,
                         'check_in_source' => $source,
+                        'late_minutes' => $nextSessionNumber === 1 ? app(ShiftLateness::class)->minutesLate($employee, $now) : 0,
                         'status' => 'open',
                     ]);
                 } else {
