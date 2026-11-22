@@ -1444,5 +1444,9 @@
  "Payslips": "قسائم الراتب",
  "No locked payslip for you yet.": "لا توجد قسيمة معتمدة لك بعد.",
  "Monthly pay with social insurance and salary tax, calculated from the rules your company enters. Your company must mark the rules as reviewed before a run can be created.": "حساب المرتب الشهري بالتأمينات وضريبة المرتبات من القواعد اللي شركتك بتدخلها. لازم الشركة تعلّم القواعد كمراجَعة قبل إنشاء أي كشف.",
- "Your sign-in is not linked to an employee record yet. Ask HR to link it, then your leave, attendance and payslips will show here.": "حساب دخولك غير مرتبط بسجل موظف بعد. اطلب من الموارد البشرية ربطه، وبعدها ستظهر هنا إجازاتك وحضورك وتقديرات راتبك."
+ "Your sign-in is not linked to an employee record yet. Ask HR to link it, then your leave, attendance and payslips will show here.": "حساب دخولك غير مرتبط بسجل موظف بعد. اطلب من الموارد البشرية ربطه، وبعدها ستظهر هنا إجازاتك وحضورك وتقديرات راتبك.",
+ "free trial": "التجربة المجانية",
+ "plan": "الاشتراك",
+ "Your {what} ended on {date}. You can still view and export your data, but adding or changing records is paused until the plan is renewed.": "انتهى {what} بتاريخ {date}. لسه تقدر تعرض بياناتك وتصدّرها، لكن إضافة أو تعديل السجلات متوقف لحد ما الاشتراك يتجدد.",
+ "Your {what} ends on {date} ({n} days left). After that, adding or changing records is paused until the plan is renewed.": "{what} هينتهي بتاريخ {date} (فاضل {n} يوم). بعدها إضافة أو تعديل السجلات هتتوقف لحد ما الاشتراك يتجدد."
 }

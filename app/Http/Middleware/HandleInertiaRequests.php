@@ -69,6 +69,26 @@ class HandleInertiaRequests extends Middleware
                 return app(\App\Modules\Plans\Services\PlanLimits::class)->usage((string) tenant()->getTenantKey());
             },
 
+            // Access period of the company: trial days left, or the paid-until date, and whether it has ended.
+            'planPeriod' => function () use ($request) {
+                if (! $request->user('tenant') || ! tenancy()->initialized) {
+                    return null;
+                }
+
+                $t = tenant();
+                $paid = $t->getAttribute('subscription_ends_at');
+                $limit = $paid ?: $t->getAttribute('trial_ends_at');
+
+                if (! $limit) {
+                    return null;
+                }
+
+                $today = \Illuminate\Support\Carbon::parse(\App\Modules\Settings\Support\CompanyClock::today((string) $t->getKey()));
+                $end = \Illuminate\Support\Carbon::parse($limit)->startOfDay();
+
+                return ['kind' => $paid ? 'paid' : 'trial', 'ends_on' => $end->toDateString(), 'days_left' => (int) $today->diffInDays($end, false)];
+            },
+
             'flash' => [
                 'status' => fn () => $this->translated($request->session()->get('status')),
                 'success' => fn () => $this->translated($request->session()->get('success')),

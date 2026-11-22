@@ -67,3 +67,17 @@ test('a lapsed paid-until date is read-only too, and renewing lifts it', functio
     $this->tenant->forceFill(['subscription_ends_at' => \App\Modules\Settings\Support\CompanyClock::today((string) $this->tenant->id)])->save();
     ($this->as)()->post("{$this->base}/employees", $this->emp)->assertSessionHasNoErrors();
 });
+
+test('the company layout gets the plan period: trial days left, ended, and nothing for companies without dates', function () {
+    $props = fn () => ($this->as)()->get("{$this->base}/dashboard")->original->getData()['page']['props']['planPeriod'];
+
+    expect($props())->toMatchArray(['kind' => 'trial', 'days_left' => 7]);
+
+    tenancy()->end();
+    $this->tenant->forceFill(['trial_ends_at' => now()->subDays(2)->toDateString()])->save();
+    expect($props()['days_left'])->toBeLessThan(0);
+
+    tenancy()->end();
+    $this->tenant->forceFill(['trial_ends_at' => null, 'subscription_ends_at' => null])->save();
+    expect($props())->toBeNull();
+});

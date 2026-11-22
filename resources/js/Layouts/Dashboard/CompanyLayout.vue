@@ -21,6 +21,14 @@ const {
 } = useSidebar();
 
 const page = usePage();
+const periodNotice = computed(() => {
+    const p = page.props.planPeriod;
+    if (!p) return null;
+    const what = p.kind === 'trial' ? t('free trial') : t('plan');
+    if (p.days_left < 0) return { ended: true, text: t('Your {what} ended on {date}. You can still view and export your data, but adding or changing records is paused until the plan is renewed.', { what, date: p.ends_on }) };
+    if (p.days_left <= 7) return { ended: false, text: t('Your {what} ends on {date} ({n} days left). After that, adding or changing records is paused until the plan is renewed.', { what, date: p.ends_on, n: p.days_left }) };
+    return null;
+});
 const allowed = (permission) => !permission || !!page.props.can?.[permission];
 
 const allNavigationItems = [
@@ -83,7 +91,9 @@ function handleSidebarToggle() {
             />
 
             <main class="min-h-[calc(100vh-72px)] p-4 sm:p-6 lg:p-8">
+                <div v-if="periodNotice" class="mb-4 rounded-xl border px-4 py-3 text-sm" :class="periodNotice.ended ? 'border-red-300 bg-red-50 text-red-800' : 'border-amber-300 bg-amber-50 text-amber-900'" data-testid="plan-period-notice">{{ periodNotice.text }}</div>
                 <p v-if="$page.props.errors?.plan_limit" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900" role="alert">{{ $page.props.errors.plan_limit }}</p>
+                <p v-if="$page.props.errors?.trial" class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">{{ $t($page.props.errors.trial) }}</p>
                 <slot />
             </main>
         </div>
