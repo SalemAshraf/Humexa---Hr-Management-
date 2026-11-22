@@ -153,6 +153,7 @@ class EmployeeController extends Controller
 
     public function create(): Response
     {
+        abort_unless(request()->user('tenant')?->can('employees.manage'), 403);
         $this->authorize('create', Employee::class);
 
         return Inertia::render('Employees/Create', $this->formOptions());
@@ -196,6 +197,7 @@ class EmployeeController extends Controller
 
     public function edit(): Response
     {
+        abort_unless(request()->user('tenant')?->can('employees.manage'), 403);
         $employee = (string) request()->route('employee');
         $record = $this->employeeQuery()->with(['user:id,name,email'])->findOrFail($employee);
         $this->authorize('update', $record);

@@ -154,7 +154,7 @@ const money = (v) => `EGP ${Number(v).toLocaleString('en-US', { minimumFractionD
 
             <section class="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm" data-testid="me-payslips">
                 <h2 class="p-4 text-base font-bold text-slate-900">{{ $t('Payslip estimates') }}</h2>
-                <p class="mx-4 mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{{ $t('These are estimates in EGP from an experimental calculator. They are not official payslips and may differ from what you are paid.') }}</p>
+                <p class="mx-4 mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{{ $t('These amounts are in EGP and come from your company payroll rules. Ask HR if something looks wrong.') }}</p>
                 <p v-if="!payslips.length" class="px-4 pb-4 text-sm text-slate-500">{{ $t('No locked estimate for you yet.') }}</p>
                 <ul class="divide-y divide-slate-100">
                     <li v-for="p in payslips" :key="p.id" class="grid grid-cols-2 gap-2 p-4 text-sm sm:grid-cols-5">

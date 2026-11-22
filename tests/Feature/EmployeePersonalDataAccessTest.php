@@ -130,6 +130,9 @@ test('a manager sees their direct team only; HR and owner see everyone; other co
     ($this->as)($manager)->get("{$this->base}/employees/{$other->id}")->assertForbidden();
     ($this->as)($manager)->get("{$this->base}/employees/{$other->id}/profile-photo")->assertForbidden();
     ($this->as)($manager)->get("{$this->base}/employees/archived")->assertForbidden();
+    ($this->as)($manager)->get("{$this->base}/employees/create")->assertForbidden();
+    ($this->as)($manager)->get("{$this->base}/employees/{$other->id}/edit")->assertForbidden();
+    ($this->as)($manager)->get("{$this->base}/employees/{$report->id}/edit")->assertForbidden();
     ($this->as)($manager)->get("{$this->base}/employees?search=OTHER")->assertInertia(fn ($p) => $p->where('employees.total', 0));
     ($this->as)($manager)->get("{$this->base}/dashboard")->assertInertia(fn ($p) => $p->where('analytics.headcount', null));
 

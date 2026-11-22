@@ -83,7 +83,7 @@ const allModules = [
     { name: t('Leave Management'), description: t('Leave policies, balances and approval workflows'), shortcut: 'LV', href: '/leave', permission: 'leave.view' },
     { name: t('Recruitment'), description: t('Openings, candidates and hiring stages'), shortcut: 'RE', href: '/recruitment', permission: 'recruitment.view' },
     { name: t('Performance'), description: t('Review cycles, ratings and goals'), shortcut: 'PE', href: '/performance', permission: 'performance.view' },
-    { name: t('Payroll estimator'), description: t('Experimental salary estimates. Not verified for real payroll.'), shortcut: 'PA', href: '/payroll', permission: 'payroll.view', note: t('Experimental') },
+    { name: t('Payroll'), description: t('Monthly pay runs from your company rules.'), shortcut: 'PA', href: '/payroll', permission: 'payroll.view' },
     { name: t('Reports'), description: t('Workforce numbers for a period, with CSV download'), shortcut: 'RP', href: '/reports', permission: 'reports.view' },
     { name: t('Document expiry'), description: t('Employee documents that expired or expire soon'), shortcut: 'DX', href: '/documents/expiry', permission: 'employees.manage' },
 ];

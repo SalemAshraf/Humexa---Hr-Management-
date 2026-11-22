@@ -23,7 +23,7 @@ const adj = useForm({ employee_id: '', kind: 'deduction', label: '', amount: '',
 const addAdj = () => adj.post(`/payroll/runs/${props.run.id}/adjustments`, { preserveScroll: true, onSuccess: () => adj.reset('label', 'amount') });
 const removeAdj = (a) => router.delete(`/payroll/runs/${props.run.id}/adjustments/${a.id}`, { preserveScroll: true });
 const recalc = () => router.post(`/payroll/runs/${props.run.id}/recalculate`, {}, { preserveScroll: true });
-const approve = () => confirm(`Lock the ${title} estimate? Nothing in it can change afterwards. It is still an estimate, not verified payroll.`) && router.post(`/payroll/runs/${props.run.id}/approve`);
+const approve = () => confirm(`Lock the ${title} run? Nothing in it can change afterwards.`) && router.post(`/payroll/runs/${props.run.id}/approve`);
 const remove = () => confirm(`Delete the draft run for ${title}?`) && router.delete(`/payroll/runs/${props.run.id}`);
 </script>
 
@@ -49,7 +49,7 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
         </section>
 
                 <p v-if="run.year >= 2027" class="mb-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" data-testid="insurance-2027-note"><b>{{ $t('Rates may be out of date for {year}.', { year: run.year }) }}</b> {{ $t('Press reports citing an unpublished insurance authority memo say the pension share rises by 0.5 point for the employee and 0.5 point for the employer from January 2027, and the insurable wage limits change. This rule set still uses the 2026 values. Check the official notice and update the rules before relying on this estimate.') }}</p>
-                <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"><b>{{ $t('Experimental estimator.') }}</b> {{ $t('These figures are not verified payroll and must not be used to pay staff. The Egypt values are unverified starting points, the tax method is simplified, and some levies are not included. Amounts are in EGP.') }}</p>
+                <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ $t('Payroll rules and rates are entered and reviewed by your company. Afrad does not verify them. Have your accountant check the results before anyone is paid. Amounts are in EGP.') }}</p>
 
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(m) }}</p>
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $t($page.props.flash.status) }}</p>

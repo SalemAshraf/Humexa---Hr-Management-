@@ -44,11 +44,11 @@ test('hr sees the whole company, a manager only direct reports, an employee noth
 
     $r = ($this->as)($hr)->get("{$this->base}/reports")->assertOk();
     expect(collect($page($r)['sections']['Headcount'])->sum('value'))->toBe(3)->and($page($r)['scope'])->toBe('company')
-        ->and($page($r)['sections'])->toHaveKeys(['Recruitment pipeline', 'Payroll estimates, net total (EGP, experimental)']);
+        ->and($page($r)['sections'])->toHaveKeys(['Recruitment pipeline', 'Payroll runs, net total (EGP)']);
 
     $r = ($this->as)($mgr)->get("{$this->base}/reports")->assertOk();
     expect(collect($page($r)['sections']['Headcount'])->sum('value'))->toBe(1)->and($page($r)['scope'])->toBe('direct_reports')
-        ->and($page($r)['sections'])->not->toHaveKeys(['Recruitment pipeline', 'Payroll estimates, net total (EGP, experimental)']);
+        ->and($page($r)['sections'])->not->toHaveKeys(['Recruitment pipeline', 'Payroll runs, net total (EGP)']);
 
     // department rows add up to everyone who is not resigned, terminated or draft
     $r = ($this->as)($hr)->get("{$this->base}/reports")->assertOk();

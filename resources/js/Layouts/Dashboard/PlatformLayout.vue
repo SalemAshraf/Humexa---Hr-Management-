@@ -28,7 +28,6 @@ const navigationItems = computed(() => [
         ? [{ label: 'Activity Logs', href: route('platform.activity-logs.index'), shortcut: 'AC' }]
         : []),
     { label: 'Plans', href: route('platform.plans.index'), shortcut: 'PL' },
-    { label: 'Billing', shortcut: 'BI', disabled: true, badge: 'Soon' },
     { label: 'Platform Users', href: route('platform.users.index'), shortcut: 'US' },
     { label: 'Notifications', href: route('platform.notifications.index'), shortcut: 'NO' },
     { label: 'Settings', href: route('platform.settings.index'), shortcut: 'SE' },

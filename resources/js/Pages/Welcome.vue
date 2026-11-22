@@ -15,7 +15,7 @@ defineProps({
     canRegister: { type: Boolean, default: true },
 });
 
-const chips = ['Employee records', 'Attendance', 'Leave', 'Hiring', 'Performance reviews', 'Document expiry', 'Reports', 'Payroll (experimental)'];
+const chips = ['Employee records', 'Attendance', 'Leave', 'Hiring', 'Performance reviews', 'Document expiry', 'Reports', 'Payroll'];
 
 const moments = [
     { n: '01', pain: 'A passport or contract expires and nobody notices until it is a problem.', fix: 'Expiring and expired documents sit in one list, so renewals happen on time.' },
@@ -49,7 +49,7 @@ const bars = [38, 52, 44, 61, 57, 70];
 
 const faqs = [
     { q: 'Is my company data separated from other companies?', a: 'Yes. Afrad is built as a multi-tenant platform where each organization has its own workspace, and its data is kept isolated from every other organization.' },
-    { q: 'Is payroll ready for production use?', a: 'Not yet. Payroll is an experimental estimator. It is not an official payslip and its results must be reviewed by an accountant before anyone relies on them.' },
+    { q: 'Does Afrad pay salaries or file taxes?', a: 'No. Afrad calculates pay from the rules your company enters and keeps the result. It does not move money or file anything, and your accountant should review the numbers before anyone is paid.' },
     { q: 'Can I use it in Arabic?', a: 'Yes. The interface works in Arabic and English with a language switch and right-to-left layout. Names and other data you enter stay exactly as you typed them.' },
     { q: 'Does it have an AI assistant?', a: 'Not yet. It is planned, and no AI connection exists today.' },
     { q: 'What happens at a plan limit?', a: 'Adding a new employee or user account is blocked once you reach the limit. Existing records are never hidden or deleted.' },
@@ -324,10 +324,10 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             <!-- 8. Payroll honesty -->
             <section class="mx-auto max-w-5xl px-5 pb-24 lg:px-8">
                 <div class="rounded-2xl border border-amber-200 bg-amber-50 p-7 md:flex md:items-start md:gap-6 md:p-9" v-reveal>
-                    <span class="mb-4 inline-flex shrink-0 rounded-full bg-amber-200 px-3 py-1 text-xs font-bold text-amber-900 md:mb-0">{{ $t('Experimental') }}</span>
+                    <span class="mb-4 inline-flex shrink-0 rounded-full bg-amber-200 px-3 py-1 text-xs font-bold text-amber-900 md:mb-0">{{ $t('Payroll') }}</span>
                     <div>
-                        <h2 class="text-xl font-bold leading-[1.4]">{{ $t('Payroll is an estimator, not a payroll system yet.') }}</h2>
-                        <p class="mt-2 text-[15px] leading-7 text-amber-950/80">{{ $t('Afrad can estimate a monthly pay run to help you plan. The results are not official payslips, rates and rules may change, and an accountant must review them before anyone relies on a number.') }}</p>
+                        <h2 class="text-xl font-bold leading-[1.4]">{{ $t('Payroll runs on your company rules.') }}</h2>
+                        <p class="mt-2 text-[15px] leading-7 text-amber-950/80">{{ $t('You enter your rates and rules in company settings, and Afrad calculates the monthly run from them. Afrad does not pay salaries or file anything, and your accountant should review a run before anyone relies on it.') }}</p>
                     </div>
                 </div>
             </section>

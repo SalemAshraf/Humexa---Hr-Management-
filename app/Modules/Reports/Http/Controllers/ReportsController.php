@@ -102,7 +102,7 @@ class ReportsController extends Controller
 
         if ($user->can('payroll.view')) {
             $runs = PayrollRun::query()->where('tenant_id', $tenantId)->orderByDesc('year')->orderByDesc('month')->limit(6)->get();
-            $sections['Payroll estimates, net total (EGP, experimental)'] = $runs->map(fn ($r) => [
+            $sections['Payroll runs, net total (EGP)'] = $runs->map(fn ($r) => [
                 'label' => sprintf('%04d-%02d (%s)', $r->year, $r->month, $r->status === 'approved' ? 'locked' : 'draft'),
                 'value' => round((float) Payslip::where('payroll_run_id', $r->id)->sum('net_pay'), 2),
             ])->all();

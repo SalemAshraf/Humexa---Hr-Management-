@@ -72,6 +72,28 @@ class EnsureTenantActive
             }
         }
 
+        // Owner decision: after the 7-day trial without a manual activation the
+        // company keeps read/export access, but nothing can be added or changed.
+        if ($this->trialExpired($tenant) && ! $request->isMethodSafe()
+            && ! $request->is('login', 'logout', 'locale', 'password/change', 'account', 'api/v1/auth/*', 'v1/auth/*')) {
+            $message = 'Your free trial has ended. Your data is kept and you can still view and export it. Ask the platform administrator to activate your plan to add or change records.';
+
+            if ($request->is('api/*', 'v1/*') || $request->expectsJson() && ! $request->header('X-Inertia')) {
+                return response()->json(['message' => $message], 403);
+            }
+
+            return back()->withErrors(['trial' => $message]);
+        }
+
         return $next($request);
+    }
+
+    private function trialExpired($tenant): bool
+    {
+        $trialEnds = $tenant->getAttribute('trial_ends_at');
+
+        return $trialEnds
+            && ! $tenant->getAttribute('subscription_ends_at')
+            && \Illuminate\Support\Carbon::parse($trialEnds)->endOfDay()->isPast();
     }
 }

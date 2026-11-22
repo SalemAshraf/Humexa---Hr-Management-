@@ -57,7 +57,7 @@ const flash = computed(() => window.history.state?.props?.flash);
             <p class="mt-2 text-sm text-slate-500">{{ $t('Estimated monthly pay with social insurance and salary tax for Egypt. Rates are editable. Your company must mark them as reviewed before an estimate can be created.') }}</p>
         </section>
 
-                <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900"><b>{{ $t('Experimental estimator.') }}</b> {{ $t('These figures are not verified payroll and must not be used to pay staff. The Egypt values are unverified starting points, the tax method is simplified, and some levies are not included. Amounts are in EGP.') }}</p>
+                <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ $t('Payroll rules and rates are entered and reviewed by your company. Afrad does not verify them. Have your accountant check the results before anyone is paid. Amounts are in EGP.') }}</p>
 
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(m) }}</p>
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $t($page.props.flash.status) }}</p>
