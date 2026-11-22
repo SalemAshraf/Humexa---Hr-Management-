@@ -13,6 +13,7 @@ use App\Modules\Payroll\Models\EmployeeAdvance;
 use App\Modules\Payroll\Models\EmployeeCompensation;
 use App\Modules\Payroll\Models\PayrollAdjustment;
 use App\Modules\Payroll\Models\PayrollRuleSet;
+use App\Modules\Payroll\Models\PayrollSetting;
 use App\Modules\Payroll\Models\PayrollRun;
 use App\Modules\Payroll\Models\Payslip;
 use App\Modules\Payroll\Services\EgyptRuleDefaults;
@@ -55,14 +56,15 @@ class PayrollController extends Controller
                 'id' => $e->id, 'name' => $e->full_name, 'employee_number' => $e->employee_number,
                 'compensation' => ($c = $latest->get($e->id)) ? [
                     'effective_from' => $c->effective_from->toDateString(), 'basic_salary' => $c->basic_salary, 'allowances' => $c->allowances,
-                    'insured' => $c->insured, 'insurable_wage' => $c->insurable_wage, 'note' => $c->note, 'bank_name' => $c->bank_name, 'bank_account' => $c->bank_account,
+                    'insured' => $c->insured, 'insurable_wage' => $c->insurable_wage, 'note' => $c->note, 'bank_name' => $c->bank_name, 'bank_account_masked' => $c->maskedBankAccount(),
                 ] : null,
             ])->values(),
             'advances' => EmployeeAdvance::query()->where('tenant_id', $tenantId)->orderByDesc('id')->get()->map(fn (EmployeeAdvance $a) => [
                 'id' => $a->id, 'employee_id' => $a->employee_id, 'employee' => $employees->firstWhere('id', $a->employee_id)?->full_name,
                 'principal' => $a->principal, 'installment' => $a->installment, 'start' => sprintf('%04d-%02d', $a->start_year, $a->start_month),
-                'reason' => $a->reason, 'status' => $a->status, 'balance' => $a->balance(),
+                'reason' => $a->reason, 'status' => $a->status, 'balance' => $a->balance(), 'created_by' => User::query()->whereKey($a->created_by_user_id)->value('name'), 'created_at' => $a->created_at?->toDateString(), 'cancelled_at' => $a->cancelled_at?->toDateString(),
             ])->values(),
+            'dualControl' => PayrollSetting::dualControl($tenantId),
             'abilities' => ['manage' => (bool) $request->user('tenant')?->can('payroll.manage')],
         ]);
     }
@@ -148,6 +150,13 @@ class PayrollController extends Controller
             'note' => ['nullable', 'string', 'max:190'],
         ]);
 
+        // A blank account keeps the one already on file, so editing a salary never wipes or re-exposes it.
+        if (($data['bank_account'] ?? '') === '') {
+            $previous = EmployeeCompensation::query()->where('tenant_id', $tenantId)->where('employee_id', $employee->id)->orderByDesc('effective_from')->first();
+            $data['bank_account'] = $previous?->bank_account;
+            $data['bank_name'] = ($data['bank_name'] ?? '') === '' ? $previous?->bank_name : $data['bank_name'];
+        }
+
         EmployeeCompensation::query()->updateOrCreate(
             ['tenant_id' => $tenantId, 'employee_id' => $employee->id, 'effective_from' => $data['effective_from']],
             $data + ['allowances' => $data['allowances'] ?? 0, 'created_by_user_id' => $request->user('tenant')->id],
@@ -222,9 +231,12 @@ class PayrollController extends Controller
         abort_unless($run->status === PayrollRun::DRAFT, 422, 'Already approved.');
         $approver = $request->user('tenant');
 
-        // Two-person control: whoever created the run cannot also approve it while another payroll manager exists.
-        if ((int) $run->created_by_user_id === (int) $approver->id && $this->otherPayrollManagerExists((string) $run->tenant_id, (int) $approver->id)) {
-            return back()->withErrors(['run' => 'Another payroll manager must approve this run. The person who created it cannot approve it.']);
+        // Dual control is a company policy the company opts into. When it is on, the creator of a run can never approve it,
+        // and if nobody else can approve, the run waits instead of silently falling back to self-approval.
+        if (PayrollSetting::dualControl((string) $run->tenant_id) && (int) $run->created_by_user_id === (int) $approver->id) {
+            return back()->withErrors(['run' => $this->otherPayrollManagerExists((string) $run->tenant_id, (int) $approver->id)
+                ? 'Dual control is on: another payroll manager must approve this run. The person who created it cannot approve it.'
+                : 'Dual control is on and no other payroll manager exists. Add a second payroll manager, or the company can turn dual control off in Payroll settings.']);
         }
 
         DB::transaction(function () use ($run, $approver) {
@@ -252,6 +264,14 @@ class PayrollController extends Controller
             ->where('id', '!=', $exceptUserId)->get()->contains(fn (User $u) => $u->can('payroll.manage'));
     }
 
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['dual_control' => ['required', 'boolean']]);
+        PayrollSetting::query()->updateOrCreate(['tenant_id' => $this->tenantId()], ['dual_control' => $data['dual_control'], 'updated_by_user_id' => $request->user('tenant')->id]);
+
+        return back()->with('status', $data['dual_control'] ? 'Dual control is on. The person who creates a run cannot approve it.' : 'Dual control is off.');
+    }
+
     public function storeAdvance(Request $request): RedirectResponse
     {
         $tenantId = $this->tenantId();
@@ -272,7 +292,7 @@ class PayrollController extends Controller
     public function cancelAdvance(Request $request): RedirectResponse
     {
         $advance = EmployeeAdvance::query()->where('tenant_id', $this->tenantId())->findOrFail($request->route('advance'));
-        $advance->forceFill(['status' => 'cancelled'])->save();
+        $advance->forceFill(['status' => 'cancelled', 'cancelled_by_user_id' => $request->user('tenant')->id, 'cancelled_at' => now()])->save();
 
         return back()->with('status', 'Advance cancelled. Installments already taken in approved runs stay on record.');
     }

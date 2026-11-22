@@ -26,8 +26,11 @@
             <meta property="og:locale" content="{{ $seoAr ? 'ar_EG' : 'en_US' }}">
             <meta name="twitter:card" content="summary">
             <script type="application/ld+json">{!! json_encode($seoLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
-        @elseif (request()->is('platform*', 'employee*'))
-            <meta name="robots" content="noindex, nofollow">
+        @else
+            {{-- Everything except the public landing page and registration is private or transactional: keep it out of search. --}}
+            @if (tenancy()->initialized || ! (request()->path() === 'register'))
+                <meta name="robots" content="noindex, nofollow">
+            @endif
         @endif
         <title inertia>{{ __('Afrad') }}</title>
 

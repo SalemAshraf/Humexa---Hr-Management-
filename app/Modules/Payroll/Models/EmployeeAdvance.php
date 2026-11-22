@@ -16,7 +16,7 @@ class EmployeeAdvance extends Model
 
     protected function casts(): array
     {
-        return ['principal' => 'float', 'installment' => 'float'];
+        return ['principal' => 'float', 'installment' => 'float', 'cancelled_at' => 'datetime'];
     }
 
     /** Taken by approved runs only. A draft run never reduces the balance. */

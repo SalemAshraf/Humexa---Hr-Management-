@@ -12,9 +12,17 @@ test('the landing page carries a description, canonical link and structured data
         ->and($html)->not->toContain('"offers"');
 });
 
+test('login and other private pages are kept out of search, registration and the landing page are not', function () {
+    $this->withoutVite();
+    expect($this->get('/login')->getContent())->toContain('noindex')
+        ->and($this->get('/platform/login')->getContent())->toContain('noindex')
+        ->and($this->get('/register')->getContent())->not->toContain('noindex')
+        ->and($this->get('/')->getContent())->not->toContain('noindex');
+});
+
 test('the sitemap lists only public pages and the robots file hides private areas', function () {
     $xml = $this->get('/sitemap.xml')->assertOk()->getContent();
-    expect($xml)->toContain('/login')->and($xml)->not->toContain('platform')->and($xml)->not->toContain('employee');
+    expect($xml)->toContain('/register')->and($xml)->not->toContain('/login')->and($xml)->not->toContain('platform')->and($xml)->not->toContain('employee');
 
     $robots = file_get_contents(public_path('robots.txt'));
     expect($robots)->toContain('Disallow: /platform')->and($robots)->toContain('Disallow: /employee');

@@ -1602,5 +1602,16 @@
     "Download transfer list": "تنزيل قائمة التحويل",
     "Another payroll manager must approve this run. The person who created it cannot approve it.": "لازم مسؤول رواتب تاني يعتمد الكشف ده. اللي أنشأه مينفعش يعتمده.",
     "Advance saved. It is deducted from net pay in each run from the start month until repaid.": "اتحفظت السلفة. بتتخصم من صافي الراتب في كل كشف من شهر البداية لحد ما تتسدد.",
-    "Advance cancelled. Installments already taken in approved runs stay on record.": "اتلغت السلفة. الأقساط اللي اتخصمت في كشوف معتمدة هتفضل مسجلة."
+    "Advance cancelled. Installments already taken in approved runs stay on record.": "اتلغت السلفة. الأقساط اللي اتخصمت في كشوف معتمدة هتفضل مسجلة.",
+    "Approval policy": "سياسة الاعتماد",
+    "Dual control is on: the person who creates a run cannot approve it.": "الاعتماد المزدوج شغّال: اللي بينشئ الكشف مينفعش يعتمده.",
+    "Dual control is off: the person who creates a run can also approve it.": "الاعتماد المزدوج مقفول: اللي بينشئ الكشف يقدر يعتمده كمان.",
+    "Turn dual control on": "تشغيل الاعتماد المزدوج",
+    "Turn dual control off": "إيقاف الاعتماد المزدوج",
+    "added": "اتضافت",
+    "An installment is deducted from net pay in each approved run from the start month until the balance is repaid. A draft run shows it but does not reduce the balance. Afrad has not verified that a deduction like this is permitted for your company. Check with your accountant or legal adviser before using it.": "القسط بيتخصم من صافي الراتب في كل كشف معتمد من شهر البداية لحد ما الرصيد يتسدد. الكشف المسودة بيعرضه لكن مش بينقص الرصيد. أفراد ما اتأكدتش إن خصم زي ده مسموح لشركتك. راجع المحاسب أو المستشار القانوني قبل ما تستخدمه.",
+    "Dual control is on: another payroll manager must approve this run. The person who created it cannot approve it.": "الاعتماد المزدوج شغّال: لازم مسؤول رواتب تاني يعتمد الكشف. اللي أنشأه مينفعش يعتمده.",
+    "Dual control is on and no other payroll manager exists. Add a second payroll manager, or the company can turn dual control off in Payroll settings.": "الاعتماد المزدوج شغّال ومفيش مسؤول رواتب تاني. ضيف مسؤول رواتب تاني، أو الشركة تقدر تقفل الاعتماد المزدوج من إعدادات الرواتب.",
+    "Dual control is on. The person who creates a run cannot approve it.": "الاعتماد المزدوج اتشغّل. اللي بينشئ الكشف مينفعش يعتمده.",
+    "Dual control is off.": "الاعتماد المزدوج اتقفل."
 }

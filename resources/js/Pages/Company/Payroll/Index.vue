@@ -10,6 +10,7 @@ const props = defineProps({
     runs: { type: Array, required: true },
     employees: { type: Array, required: true },
     advances: { type: Array, default: () => [] },
+    dualControl: { type: Boolean, default: false },
     abilities: { type: Object, required: true },
 });
 
@@ -52,13 +53,15 @@ const comp = useForm({ effective_from: '', basic_salary: '', allowances: 0, insu
 const editComp = (e) => {
     editing.value = editing.value === e.id ? null : e.id;
     const c = e.compensation;
-    comp.defaults({ effective_from: new Date().toISOString().slice(0, 7) + '-01', basic_salary: c?.basic_salary ?? '', allowances: c?.allowances ?? 0, insured: c?.insured ?? true, insurable_wage: c?.insurable_wage ?? '', note: '', bank_name: c?.bank_name ?? '', bank_account: c?.bank_account ?? '' }).reset();
+    comp.defaults({ effective_from: new Date().toISOString().slice(0, 7) + '-01', basic_salary: c?.basic_salary ?? '', allowances: c?.allowances ?? 0, insured: c?.insured ?? true, insurable_wage: c?.insurable_wage ?? '', note: '', bank_name: c?.bank_name ?? '', bank_account: '' }).reset();
 };
 const saveComp = (e) => comp.transform((d) => ({ ...d, insurable_wage: d.insurable_wage === '' ? null : d.insurable_wage })).post(`/payroll/employees/${e.id}/compensation`, { preserveScroll: true, onSuccess: () => { editing.value = null; } });
 
 const advForm = useForm({ employee_id: '', principal: '', installment: '', start_year: new Date().getFullYear(), start_month: new Date().getMonth() + 1, reason: '' });
 const saveAdvance = () => advForm.post('/payroll/advances', { preserveScroll: true, onSuccess: () => advForm.reset('principal', 'installment', 'reason') });
 const cancelAdvance = (a) => { if (confirm('Cancel this advance? Installments already taken stay on record.')) router.post(`/payroll/advances/${a.id}/cancel`, {}, { preserveScroll: true }); };
+
+const setDual = (on) => router.put('/payroll/settings', { dual_control: on }, { preserveScroll: true });
 
 const pct = (v) => v == null ? '-' : `${(v * 100).toFixed(2).replace(/\.?0+$/, '')}%`;
 const withoutSalary = computed(() => props.employees.filter((e) => !e.compensation).length);
@@ -169,8 +172,14 @@ const flash = computed(() => window.history.state?.props?.flash);
 
 
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+                <h2 class="text-base font-bold text-slate-900">{{ $t('Approval policy') }}</h2>
+                <p class="mt-1 text-sm text-slate-600">{{ dualControl ? $t('Dual control is on: the person who creates a run cannot approve it.') : $t('Dual control is off: the person who creates a run can also approve it.') }}</p>
+                <button v-if="abilities.manage" class="mt-3 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-200" @click="setDual(!dualControl)">{{ dualControl ? $t('Turn dual control off') : $t('Turn dual control on') }}</button>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
                 <h2 class="text-base font-bold text-slate-900">{{ $t('Advances and loans') }}</h2>
-                <p class="text-xs text-slate-500">{{ $t('An installment is deducted from net pay in each approved run from the start month until the balance is repaid. A draft run shows it but does not reduce the balance.') }}</p>
+                <p class="text-xs text-slate-500">{{ $t('An installment is deducted from net pay in each approved run from the start month until the balance is repaid. A draft run shows it but does not reduce the balance. Afrad has not verified that a deduction like this is permitted for your company. Check with your accountant or legal adviser before using it.') }}</p>
                 <form v-if="abilities.manage" class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-6" @submit.prevent="saveAdvance">
                     <label class="col-span-2 text-xs font-medium text-slate-500 md:col-span-2">{{ $t('Employee') }}
                         <select v-model="advForm.employee_id" class="mt-1 w-full rounded-lg border-slate-300 text-sm" required><option value="" disabled></option><option v-for="e in employees" :key="e.id" :value="e.id">{{ e.name }}</option></select></label>
@@ -186,7 +195,7 @@ const flash = computed(() => window.history.state?.props?.flash);
                     <li v-for="a in advances" :key="a.id" class="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
                         <div>
                             <p class="font-semibold text-slate-800">{{ a.employee }}</p>
-                            <p class="text-xs text-slate-500">EGP {{ money(a.principal) }} · {{ $t('installment') }} {{ money(a.installment) }} · {{ $t('from') }} {{ a.start }} · {{ $t('balance') }} EGP {{ money(a.balance) }}<span v-if="a.reason"> · {{ a.reason }}</span></p>
+                            <p class="text-xs text-slate-500">EGP {{ money(a.principal) }} · {{ $t('installment') }} {{ money(a.installment) }} · {{ $t('from') }} {{ a.start }} · {{ $t('balance') }} EGP {{ money(a.balance) }}<span v-if="a.reason"> · {{ a.reason }}</span> · {{ $t('added') }} {{ a.created_at }}<span v-if="a.created_by"> {{ a.created_by }}</span><span v-if="a.cancelled_at"> · {{ $t('cancelled') }} {{ a.cancelled_at }}</span></p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="a.status === 'cancelled' ? 'bg-slate-100 text-slate-500' : a.balance <= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'">{{ a.status === 'cancelled' ? $t('cancelled') : a.balance <= 0 ? $t('repaid') : $t('active') }}</span>
@@ -219,7 +228,7 @@ const flash = computed(() => window.history.state?.props?.flash);
                             <label class="text-xs font-medium text-slate-500">{{ $t('Insurable wage') }}<input v-model="comp.insurable_wage" type="number" step="0.01" :placeholder="$t('= basic')" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
                             <label class="flex items-end gap-2 pb-2 text-xs font-medium text-slate-600"><input v-model="comp.insured" type="checkbox" class="rounded border-slate-300" />{{ $t('Insured') }}</label>
                             <label class="col-span-2 text-xs font-medium text-slate-500 md:col-span-2">{{ $t('Bank name') }}<input v-model="comp.bank_name" type="text" maxlength="120" class="mt-1 w-full rounded-lg border-slate-300 text-sm" /></label>
-                            <label class="col-span-2 text-xs font-medium text-slate-500 md:col-span-3">{{ $t('Bank account or IBAN') }}<input v-model="comp.bank_account" type="text" maxlength="64" class="mt-1 w-full rounded-lg border-slate-300 text-sm" dir="ltr" /></label>
+                            <label class="col-span-2 text-xs font-medium text-slate-500 md:col-span-3">{{ $t('Bank account or IBAN') }}<input v-model="comp.bank_account" type="text" maxlength="64" autocomplete="off" :placeholder="e.compensation?.bank_account_masked || ''" class="mt-1 w-full rounded-lg border-slate-300 text-sm" dir="ltr" /></label>
                             <div class="col-span-2 flex gap-2 md:col-span-5"><button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="comp.processing">{{ $t('Save salary') }}</button></div>
                             <p v-for="(m, k) in comp.errors" :key="k" class="col-span-2 text-xs text-red-600 md:col-span-5">{{ $t(m) }}</p>
                         </form>

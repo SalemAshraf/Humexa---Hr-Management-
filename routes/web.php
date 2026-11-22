@@ -11,7 +11,7 @@ use App\Modules\Tenants\Http\Controllers\PlatformTenantController;
 Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->middleware('throttle:30,1')->name('locale');
 
 Route::get('/sitemap.xml', function () {
-    $urls = [url('/'), url('/login'), url('/register')];
+    $urls = [url('/'), url('/register')];
     $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
     foreach ($urls as $u) {
         $xml .= '<url><loc>'.e($u).'</loc></url>';

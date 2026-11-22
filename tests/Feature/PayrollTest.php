@@ -69,7 +69,9 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
     expect((float) Payslip::where('payroll_run_id', $run->id)->first()->net_pay)->toBe(22472.27);
 
     ($this->as)($hr)->get("{$this->base}/payroll/runs/{$run->id}/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8')->assertDownload('payroll-run-2026-11.csv');
-    // The creator cannot approve their own run while another payroll manager exists.
+    // Default is the old behaviour (no dual control). Once the company turns it on, the creator cannot approve.
+    expect(\App\Modules\Payroll\Models\PayrollSetting::dualControl($this->tid))->toBeFalse();
+    ($this->as)($hr)->put("{$this->base}/payroll/settings", ['dual_control' => true])->assertSessionHasNoErrors();
     ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertSessionHasErrors('run');
     expect($run->fresh()->status)->toBe('draft');
     ($this->as)($this->reg['user'])->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertSessionHasNoErrors();
@@ -148,6 +150,15 @@ test('a run uses the rule set in force for its month and keeps a snapshot', func
 });
 
 
+test('with dual control on and no second payroll manager the run waits and nothing falls back to self-approval', function () {
+    \App\Modules\Payroll\Models\PayrollSetting::query()->create(['tenant_id' => $this->tid, 'dual_control' => true]);
+    $rules = PayrollRuleSet::query()->create(['tenant_id' => $this->tid, 'name' => 'x', 'effective_from' => '2026-01-01', 'tax_tables' => []]);
+    $run = PayrollRun::query()->create(['tenant_id' => $this->tid, 'year' => 2026, 'month' => 3, 'rule_set_id' => $rules->id, 'created_by_user_id' => $this->hr->id]);
+    $this->reg['user']->forceFill(['disabled_at' => now()])->save();
+    ($this->as)($this->hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertSessionHasErrors('run');
+    expect($run->fresh()->status)->toBe('draft');
+});
+
 test('an advance is deducted in installments only from approved runs, never beyond the balance, and cancelling stops it', function () {
     $hr = $this->hr;
     ($this->as)($hr)->put("{$this->base}/payroll/rules", ['name' => 'Test', 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
@@ -183,4 +194,14 @@ test('an advance is deducted in installments only from approved runs, never beyo
 
     $csv = ($this->as)($hr)->get("{$this->base}/payroll/runs/{$nov->id}/transfer-list")->assertOk()->streamedContent();
     expect($csv)->toContain('Test Bank')->and($csv)->toContain('EG00TEST')->and($csv)->toContain('net_pay_egp');
+
+    // The number is encrypted at rest, masked in the page data, kept when a salary is edited with the field blank,
+    // and the transfer list needs payroll.manage.
+    $raw = \Illuminate\Support\Facades\DB::table('employee_compensations')->where('employee_id', $this->worker->id)->value('bank_account');
+    expect($raw)->not->toContain('EG00TEST');
+    ($this->as)($hr)->post("{$this->base}/payroll/employees/{$this->worker->id}/compensation", ['effective_from' => '2026-06-01', 'basic_salary' => 31000, 'allowances' => 0, 'insured' => true, 'bank_account' => ''])->assertSessionHasNoErrors();
+    expect(\App\Modules\Payroll\Models\EmployeeCompensation::where('employee_id', $this->worker->id)->orderByDesc('effective_from')->first()->bank_account)->toBe('EG00TEST');
+    $page = ($this->as)($hr)->get("{$this->base}/payroll")->assertOk()->getContent();
+    expect($page)->not->toContain('EG00TEST')->and($page)->toContain('bank_account_masked');
+    ($this->as)(($this->mk)(\App\Modules\Users\Support\TenantRoleCatalog::HR_ADMIN, 'hr2@tenant-test.example'))->get("{$this->base}/payroll/runs/{$nov->id}/transfer-list")->assertOk();
 });
