@@ -24,6 +24,14 @@ class PayrollRuleSet extends Model
         ];
     }
 
+    public const REQUIRED = ['insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'tax_tables'];
+
+    /** @return list<string> required settings the company has not entered yet */
+    public function missingSettings(): array
+    {
+        return array_values(array_filter(self::REQUIRED, fn (string $f) => $this->getAttribute($f) === null || $this->getAttribute($f) === []));
+    }
+
     public function isConfirmed(): bool
     {
         return $this->confirmed_at !== null;

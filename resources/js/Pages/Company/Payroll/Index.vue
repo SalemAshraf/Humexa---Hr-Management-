@@ -12,7 +12,7 @@ const props = defineProps({
     abilities: { type: Object, required: true },
 });
 
-const money = (v) => Number(v ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (v) => v == null ? '-' : Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const monthName = (m) => new Date(2000, m - 1, 1).toLocaleString(dateLocale(), { month: 'long' });
 
 const now = new Date();
@@ -24,9 +24,9 @@ const confirmRules = () => confirm('Mark these values as reviewed? This records 
 const showRules = ref(false);
 const ruleForm = useForm({
     name: props.rules?.name ?? '', effective_from: props.rules?.effective_from ?? '',
-    insurance_employee_rate: props.rules?.insurance_employee_rate ?? 0, insurance_employer_rate: props.rules?.insurance_employer_rate ?? 0,
-    insurable_min: props.rules?.insurable_min ?? 0, insurable_max: props.rules?.insurable_max ?? 0,
-    personal_exemption_annual: props.rules?.personal_exemption_annual ?? 0, rounding_step: props.rules?.rounding_step ?? 10,
+    insurance_employee_rate: props.rules?.insurance_employee_rate ?? '', insurance_employer_rate: props.rules?.insurance_employer_rate ?? '',
+    insurable_min: props.rules?.insurable_min ?? '', insurable_max: props.rules?.insurable_max ?? '',
+    personal_exemption_annual: props.rules?.personal_exemption_annual ?? '', rounding_step: props.rules?.rounding_step ?? 10,
     after_tax_levy_rate: props.rules?.after_tax_levy_rate ?? 0, after_tax_levy_label: props.rules?.after_tax_levy_label ?? '',
     month_days_basis: props.rules?.month_days_basis ?? 30,
     tax_tables_json: JSON.stringify(props.rules?.tax_tables ?? [], null, 1),
@@ -42,7 +42,7 @@ const editComp = (e) => {
 };
 const saveComp = (e) => comp.transform((d) => ({ ...d, insurable_wage: d.insurable_wage === '' ? null : d.insurable_wage })).post(`/payroll/employees/${e.id}/compensation`, { preserveScroll: true, onSuccess: () => { editing.value = null; } });
 
-const pct = (v) => `${(v * 100).toFixed(2).replace(/\.?0+$/, '')}%`;
+const pct = (v) => v == null ? '-' : `${(v * 100).toFixed(2).replace(/\.?0+$/, '')}%`;
 const withoutSalary = computed(() => props.employees.filter((e) => !e.compensation).length);
 const flash = computed(() => window.history.state?.props?.flash);
 </script>
@@ -62,17 +62,18 @@ const flash = computed(() => window.history.state?.props?.flash);
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(m) }}</p>
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $t($page.props.flash.status) }}</p>
 
+        <p v-if="rules?.missing?.length" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-testid="rules-missing">{{ $t('Your payroll rules are not complete yet. Enter the insurance rates, insurable wage limits, personal exemption and tax tables from your accountant, then mark the rules as reviewed.') }}</p>
         <section v-if="rules" class="mb-6 rounded-2xl border bg-white p-5 shadow-sm" :class="'border-amber-300'">
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h2 class="text-base font-bold text-slate-900">{{ $t(rules.name) }}</h2>
                     <p class="mt-1 text-sm" :class="'text-amber-700'">
-                        {{ rules.confirmed ? $t('Marked as reviewed by your company on {date}. This is not a verification of the values.', { date: formatDate(rules.confirmed_at) }) : $t('Not reviewed. These are unverified starting values. Check them before creating an estimate.') }}
+                        {{ rules.confirmed ? $t('Marked as reviewed by your company on {date}. This is not a verification of the values.', { date: formatDate(rules.confirmed_at) }) : $t('Not reviewed yet. Check the values, then mark them as reviewed before creating a run.') }}
                     </p>
                 </div>
                 <div v-if="abilities.manage" class="flex gap-3 text-xs font-semibold">
                     <button class="text-cyan-700" @click="showRules = !showRules">{{ showRules ? $t('Close') : $t('Edit rules') }}</button>
-                    <button v-if="!rules.confirmed" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white" @click="confirmRules">{{ $t('Mark rules as reviewed') }}</button>
+                    <button v-if="!rules.confirmed && !rules.missing?.length" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-white" @click="confirmRules">{{ $t('Mark rules as reviewed') }}</button>
                 </div>
             </div>
             <dl class="mt-4 grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">

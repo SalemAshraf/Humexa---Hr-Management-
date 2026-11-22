@@ -48,7 +48,6 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
             </div>
         </section>
 
-                <p v-if="run.year >= 2027" class="mb-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" data-testid="insurance-2027-note"><b>{{ $t('Rates may be out of date for {year}.', { year: run.year }) }}</b> {{ $t('Press reports citing an unpublished insurance authority memo say the pension share rises by 0.5 point for the employee and 0.5 point for the employer from January 2027, and the insurable wage limits change. This rule set still uses the 2026 values. Check the official notice and update the rules before relying on this estimate.') }}</p>
                 <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ $t('Payroll rules and rates are entered and reviewed by your company. Afrad does not verify them. Have your accountant check the results before anyone is paid. Amounts are in EGP.') }}</p>
 
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(m) }}</p>

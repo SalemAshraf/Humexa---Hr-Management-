@@ -452,8 +452,6 @@
  "Recalculate": "إعادة الحساب",
  "Lock estimate": "اعتماد التقدير",
  "Delete draft": "حذف المسودة",
- "Rates may be out of date for {year}.": "قد تكون النسب قديمة لعام {year}.",
- "Press reports citing an unpublished insurance authority memo say the pension share rises by 0.5 point for the employee and 0.5 point for the employer from January 2027, and the insurable wage limits change. This rule set still uses the 2026 values. Check the official notice and update the rules before relying on this estimate.": "تقارير صحفية تستند إلى مذكرة غير منشورة من هيئة التأمينات تقول إن حصة المعاش سترتفع بمقدار 0.5 نقطة للموظف و0.5 نقطة لصاحب العمل من يناير 2027، وإن حدود الأجر التأميني ستتغير. مجموعة القواعد هذه ما زالت تستخدم قيم 2026. راجع الإخطار الرسمي وحدّث القواعد قبل الاعتماد على هذا التقدير.",
  "Experimental estimator.": "مقدّر تجريبي.",
  "These figures are not verified payroll and must not be used to pay staff. The Egypt values are unverified starting points, the tax method is simplified, and some levies are not included. Amounts are in EGP.": "هذه الأرقام ليست رواتب موثّقة ويجب ألا تُستخدم لصرف رواتب الموظفين. القيم المصرية نقاط بداية غير موثّقة، وطريقة الضريبة مبسطة، وبعض الرسوم غير مشمولة. المبالغ بالجنيه المصري.",
  "Basic + allow.": "الأساسي + البدلات",
@@ -478,7 +476,6 @@
  "MONEY": "المال",
  "Estimated monthly pay with social insurance and salary tax for Egypt. Rates are editable. Your company must mark them as reviewed before an estimate can be created.": "تقدير للراتب الشهري مع التأمينات الاجتماعية وضريبة المرتبات في مصر. النسب قابلة للتعديل. يجب أن تضع شركتك علامة المراجعة عليها قبل إنشاء أي تقدير.",
  "Marked as reviewed by your company on {date}. This is not a verification of the values.": "وضعت شركتك علامة المراجعة في {date}. هذا لا يعني التحقق من القيم.",
- "Not reviewed. These are unverified starting values. Check them before creating an estimate.": "لم تتم المراجعة. هذه قيم بدء غير موثّقة. راجعها قبل إنشاء تقدير.",
  "Edit rules": "تعديل القواعد",
  "Mark rules as reviewed": "وضع علامة المراجعة على القواعد",
  "Employee insurance": "تأمينات الموظف",
@@ -1437,5 +1434,8 @@
  "These amounts are in EGP and come from your company payroll rules. Ask HR if something looks wrong.": "المبالغ دي بالجنيه المصري ومن قواعد مرتبات شركتك. اسأل الـHR لو في حاجة شكلها غلط.",
  "Payroll runs, net total (EGP)": "كشوف المرتبات، صافي الإجمالي (ج.م)",
  "Does Afrad pay salaries or file taxes?": "هل أفراد بيدفع مرتبات أو بيقدم ضرائب؟",
- "No. Afrad calculates pay from the rules your company enters and keeps the result. It does not move money or file anything, and your accountant should review the numbers before anyone is paid.": "لا. أفراد بيحسب المرتب من القواعد اللي شركتك بتدخلها وبيحتفظ بالنتيجة. مبيحركش فلوس ومبيقدمش أي إقرارات، والمحاسب لازم يراجع الأرقام قبل ما أي حد ياخد مرتبه."
+ "No. Afrad calculates pay from the rules your company enters and keeps the result. It does not move money or file anything, and your accountant should review the numbers before anyone is paid.": "لا. أفراد بيحسب المرتب من القواعد اللي شركتك بتدخلها وبيحتفظ بالنتيجة. مبيحركش فلوس ومبيقدمش أي إقرارات، والمحاسب لازم يراجع الأرقام قبل ما أي حد ياخد مرتبه.",
+ "Not reviewed yet. Check the values, then mark them as reviewed before creating a run.": "لسه مراجعتش. راجع القيم وبعدين علّمها كمراجَعة قبل ما تنشئ كشف.",
+ "Your payroll rules are not complete yet. Enter the insurance rates, insurable wage limits, personal exemption and tax tables from your accountant, then mark the rules as reviewed.": "قواعد المرتبات لسه مش كاملة. أدخل نسب التأمينات وحدود الأجر التأميني والإعفاء الشخصي وجداول الضريبة من محاسبك، وبعدين علّم القواعد كمراجَعة.",
+ "Enter every rate, limit and tax table in the rules before marking them as reviewed.": "أدخل كل النسب والحدود وجداول الضريبة في القواعد قبل ما تعلّمها كمراجَعة."
 }

@@ -90,6 +90,10 @@ class PayrollController extends Controller
         $rules = $this->activeRules($this->tenantId(), create: false);
         abort_if($rules === null, 404);
 
+        if ($rules->missingSettings() !== []) {
+            return back()->withErrors(['rules' => 'Enter every rate, limit and tax table in the rules before marking them as reviewed.']);
+        }
+
         $rules->forceFill(['confirmed_by_user_id' => $request->user('tenant')->id, 'confirmed_at' => now()])->save();
 
         return back()->with('status', 'Rules marked as reviewed.');
@@ -129,7 +133,7 @@ class PayrollController extends Controller
             return back()->withErrors(['run' => 'No rule set is effective for that month.']);
         }
 
-        if (! $rules->isConfirmed()) {
+        if ($rules->missingSettings() !== [] || ! $rules->isConfirmed()) {
             return back()->withErrors(['run' => 'Mark the payroll rules as reviewed before creating an estimate.']);
         }
 
@@ -262,7 +266,7 @@ class PayrollController extends Controller
     private function rulesPayload(PayrollRuleSet $r): array
     {
         return $r->only(['id', 'name', 'country', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables', 'sources', 'open_questions'])
-            + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
+            + ['missing' => $r->missingSettings()] + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
     }
 
     private function validateTables(mixed $tables): void

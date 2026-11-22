@@ -3,17 +3,16 @@
 declare(strict_types=1);
 
 use App\Modules\Payroll\Models\PayrollRuleSet;
-use App\Modules\Payroll\Services\EgyptRuleDefaults;
 use App\Modules\Payroll\Services\PayrollCalculator;
 
 function egyptRules(array $override = []): PayrollRuleSet
 {
-    return (new PayrollRuleSet)->forceFill(array_merge(EgyptRuleDefaults::attributes(), $override));
+    return (new PayrollRuleSet)->forceFill(array_merge(payrollTestRules(), $override));
 }
 
 test('annual tax follows the six tables including the 600,000 step', function () {
     $c = new PayrollCalculator;
-    $t = EgyptRuleDefaults::taxTables();
+    $t = payrollTestTaxTables();
 
     expect($c->annualTax($t, 30000))->toBe(0.0)
         ->and($c->annualTax($t, 317950))->toBe(56288.75)

@@ -34,6 +34,7 @@ class PayrollRunService
 
         $tenantId = (string) $run->tenant_id;
         $rules = PayrollRuleSet::query()->where('tenant_id', $tenantId)->findOrFail($run->rule_set_id);
+        abort_if($rules->missingSettings() !== [], 422, 'The payroll rules are incomplete.');
         $start = Carbon::create($run->year, $run->month, 1)->startOfDay();
         $end = $start->copy()->endOfMonth()->startOfDay();
         $weekend = $this->leave->weekendDays($tenantId);
@@ -83,7 +84,7 @@ class PayrollRunService
                     'annual_net_income' => $result['annual_net_income'], 'income_tax' => $result['income_tax'],
                     'after_tax_levy' => $result['after_tax_levy'], 'net_pay' => $result['net_pay'],
                     'details' => ['compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured, 'estimate_only' => true,
-                        'rules_snapshot' => $rules->only(['id', 'name', 'effective_from', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'month_days_basis', 'tax_tables']), 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
+                        'rules_snapshot' => $rules->only(['id', 'name', 'effective_from', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'private_insurance_cap_pct', 'private_insurance_cap_amount', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables']), 'rules_confirmed_at' => $rules->confirmed_at?->toDateTimeString()],
                 ]);
             }
         });

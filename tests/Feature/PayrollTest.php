@@ -39,9 +39,16 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
     $hr = $this->hr;
     ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
     $rules = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
-    expect($rules->isConfirmed())->toBeFalse();
+    expect($rules->isConfirmed())->toBeFalse()->and($rules->missingSettings())->toHaveCount(6);
 
+    // A fresh company has no statutory number pre-filled, and blank rules cannot be confirmed.
+    ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm")->assertSessionHasErrors('rules');
+    expect($rules->fresh()->isConfirmed())->toBeFalse();
     ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertSessionHasErrors('run');
+
+    ($this->as)($hr)->put("{$this->base}/payroll/rules", ['name' => 'Test', 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
+        'insurable_min' => 2700, 'insurable_max' => 16700, 'personal_exemption_annual' => 20000, 'rounding_step' => 10, 'after_tax_levy_rate' => 0, 'month_days_basis' => 30,
+        'tax_tables_json' => json_encode(payrollTestTaxTables())])->assertSessionHasNoErrors();
 
     ($this->as)($hr)->post("{$this->base}/payroll/employees/{$this->worker->id}/compensation", ['effective_from' => '2026-01-01', 'basic_salary' => 30000, 'allowances' => 0, 'insured' => true])->assertRedirect();
     ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm")->assertRedirect();
@@ -58,6 +65,13 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
 
     ($this->as)($hr)->get("{$this->base}/payroll/runs/{$run->id}/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8')->assertDownload('payroll-ESTIMATE-2026-11.csv');
     ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertRedirect();
+
+    // The approved run keeps the parameters it was calculated with, even if the rules change later.
+    $before = Payslip::where('payroll_run_id', $run->id)->first();
+    PayrollRuleSet::where('tenant_id', $this->tid)->update(['insurance_employee_rate' => 0.5, 'insurable_max' => 99999]);
+    $after = Payslip::where('payroll_run_id', $run->id)->first();
+    expect($after->details['rules_snapshot']['insurance_employee_rate'])->toEqual(0.11)->and($after->details['rules_snapshot']['insurable_max'])->toEqual(16700)
+        ->and((float) $after->net_pay)->toBe((float) $before->net_pay);
     ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/recalculate")->assertStatus(422);
     ($this->as)($hr)->delete("{$this->base}/payroll/runs/{$run->id}")->assertStatus(422);
     ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/adjustments", ['employee_id' => $this->worker->id, 'kind' => 'earning', 'label' => 'x', 'amount' => 5, 'taxable' => true])->assertStatus(422);
@@ -66,9 +80,10 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
 test('editing confirmed rules clears the confirmation and bad tables are refused', function () {
     $hr = $this->hr;
     ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
-    ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm");
     $r = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
-    expect($r->isConfirmed())->toBeTrue();
+    $r->forceFill(payrollTestRules())->save();
+    ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm");
+    expect($r->fresh()->isConfirmed())->toBeTrue();
 
     $payload = fn (array $o = []) => array_merge([
         'name' => 'Mine', 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
@@ -95,7 +110,7 @@ test('roles without payroll access are refused, and other tenants cannot be reac
 
     $other = app(RegisterCompanyAction::class)->execute(companyName: 'Other Co', adminName: 'O', email: 'other-pay@tenant-test.example', password: 'StrongPassword123!');
     $foreign = PayrollRun::query()->forceCreate(['tenant_id' => (string) $other['tenant']->id, 'year' => 2026, 'month' => 1,
-        'rule_set_id' => PayrollRuleSet::query()->forceCreate(['tenant_id' => (string) $other['tenant']->id] + \App\Modules\Payroll\Services\EgyptRuleDefaults::attributes())->id]);
+        'rule_set_id' => PayrollRuleSet::query()->forceCreate(['tenant_id' => (string) $other['tenant']->id] + payrollTestRules())->id]);
 
     ($this->as)($this->hr)->get("{$this->base}/payroll/runs/{$foreign->id}")->assertNotFound();
     ($this->as)($this->hr)->post("{$this->base}/payroll/runs/{$foreign->id}/approve")->assertNotFound();
@@ -106,8 +121,8 @@ test('a run uses the rule set in force for its month and keeps a snapshot', func
     $hr = $this->hr;
     ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
     $old = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
-    $old->forceFill(['effective_from' => '2025-01-01', 'confirmed_at' => now(), 'insurable_max' => 12000])->save();
-    $new = PayrollRuleSet::query()->forceCreate(['tenant_id' => $this->tid] + \App\Modules\Payroll\Services\EgyptRuleDefaults::attributes() + []);
+    $old->forceFill(payrollTestRules())->forceFill(['effective_from' => '2025-01-01', 'confirmed_at' => now(), 'insurable_max' => 12000])->save();
+    $new = PayrollRuleSet::query()->forceCreate(['tenant_id' => $this->tid] + payrollTestRules() + []);
     $new->forceFill(['effective_from' => '2026-06-01', 'confirmed_at' => now()])->save();
 
     ($this->as)($hr)->post("{$this->base}/payroll/employees/{$this->worker->id}/compensation", ['effective_from' => '2025-01-01', 'basic_salary' => 30000, 'allowances' => 0, 'insured' => true]);
