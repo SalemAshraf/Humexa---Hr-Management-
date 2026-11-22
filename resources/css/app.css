@@ -6,4 +6,4 @@
 @tailwind components;
 @tailwind utilities;
 /* Arabic text uses an Arabic-capable face first. */
-html[dir='rtl'] body { font-family: 'Noto Sans Arabic', 'Segoe UI', Tahoma, Figtree, sans-serif; }
+html[dir='rtl'] body { font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif; }

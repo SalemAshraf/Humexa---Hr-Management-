@@ -8,9 +8,6 @@
         <link rel="apple-touch-icon" href="/brand/png/afrad-icon-180.png">
         <title inertia>{{ __('Afrad') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|noto-sans-arabic:400,500,600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @routes

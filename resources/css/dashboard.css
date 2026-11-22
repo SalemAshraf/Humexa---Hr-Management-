@@ -1,5 +1,5 @@
 :root {
-    --hx-font-sans: 'Figtree', sans-serif;
+    --hx-font-sans: 'IBM Plex Sans Arabic', 'IBM Plex Sans', 'Segoe UI', Tahoma, sans-serif;
 
     --hx-radius-sm: 0.5rem;
     --hx-radius-md: 0.75rem;
