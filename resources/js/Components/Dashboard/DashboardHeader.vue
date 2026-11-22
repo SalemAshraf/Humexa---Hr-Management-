@@ -82,7 +82,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                 </svg>
             </button>
 
-            <div class="min-w-0">
+            <div class="hidden min-w-0 min-[480px]:block">
                 <h2 class="truncate text-base font-semibold sm:text-lg">
                     {{ title }}
                 </h2>
@@ -105,7 +105,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
             <component
                 :is="isPlatform ? 'button' : Link"
                 v-bind="isPlatform ? { type: 'button' } : { href: '/search' }"
-                class="hidden h-10 items-center gap-2 rounded-xl border px-3 text-sm transition-colors md:flex"
+                class="hidden h-10 items-center gap-2 rounded-xl border px-3 text-sm transition-colors lg:flex"
                 :class="isPlatform
                     ? 'border-slate-700 text-slate-400 hover:bg-slate-800'
                     : 'border-slate-200 text-slate-500 hover:bg-slate-50'"
@@ -177,7 +177,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                     {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
                 </div>
 
-                <div class="hidden min-w-0 sm:block">
+                <div class="hidden min-w-0 xl:block">
                     <p class="max-w-32 truncate text-sm font-semibold">
                         {{ user?.name || 'User' }}
                     </p>
@@ -213,7 +213,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey));
                     <path d="M10 17l5-5-5-5M15 12H3" />
                     <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
                 </svg>
-                <span class="hidden sm:inline">{{ $t('Logout') }}</span>
+                <span class="hidden lg:inline">{{ $t('Logout') }}</span>
             </Link>
         </div>
     </header>
