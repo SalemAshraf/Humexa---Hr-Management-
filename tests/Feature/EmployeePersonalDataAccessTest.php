@@ -84,6 +84,8 @@ test('managers can read the employee directory but cannot change it and employee
 
 test('screens receive the signed-in permissions so denied actions are hidden', function () {
     $manager = ($this->mk)(TenantRoleCatalog::MANAGER, 'm3@tenant-test.example');
+    $mine = \App\Modules\Employees\Models\Employee::query()->forceCreate(['tenant_id' => $this->tid, 'employee_number' => 'M-3', 'first_name' => 'Boss', 'last_name' => 'Three', 'employment_status' => 'active', 'user_id' => $manager->id]);
+    \App\Modules\Employees\Models\Employee::query()->whereKey($this->emp->id)->update(['manager_id' => $mine->id]);
     $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr4@tenant-test.example');
     $url = "{$this->base}/employees/{$this->emp->id}";
 
@@ -107,4 +109,32 @@ test('screens receive the signed-in permissions so denied actions are hidden', f
     expect($h['canUpdate'])->toBeTrue()->and($h['can']['employees.manage'])->toBeTrue()->and($h['can']['roles.manage'])->toBeFalse();
 
     expect($can($this->reg['user'])['can']['roles.manage'])->toBeTrue();
+});
+
+test('a manager sees their direct team only; HR and owner see everyone; other companies stay invisible', function () {
+    $manager = ($this->mk)(TenantRoleCatalog::MANAGER, 'mv@tenant-test.example');
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hrv@tenant-test.example');
+    $make = fn (string $n, array $extra = []) => \App\Modules\Employees\Models\Employee::query()->forceCreate(['tenant_id' => $this->tid, 'employee_number' => $n, 'first_name' => $n, 'last_name' => 'Visible', 'employment_status' => 'active', ...$extra]);
+
+    // A manager account with no linked employee record sees nobody.
+    ($this->as)($manager)->get("{$this->base}/employees")->assertOk()->assertInertia(fn ($p) => $p->where('employees.total', 0)->where('summary.total', 0));
+
+    $boss = $make('BOSS', ['user_id' => $manager->id]);
+    $report = $make('REPORT', ['manager_id' => $boss->id]);
+    $other = $make('OTHER');
+
+    ($this->as)($manager)->get("{$this->base}/employees")->assertOk()
+        ->assertInertia(fn ($p) => $p->where('employees.total', 2)->where('summary.total', 2));
+    ($this->as)($manager)->get("{$this->base}/employees/{$report->id}")->assertOk();
+    ($this->as)($manager)->get("{$this->base}/employees/{$boss->id}")->assertOk();
+    ($this->as)($manager)->get("{$this->base}/employees/{$other->id}")->assertForbidden();
+    ($this->as)($manager)->get("{$this->base}/employees/{$other->id}/profile-photo")->assertForbidden();
+    ($this->as)($manager)->get("{$this->base}/employees/archived")->assertForbidden();
+    ($this->as)($manager)->get("{$this->base}/employees?search=OTHER")->assertInertia(fn ($p) => $p->where('employees.total', 0));
+    ($this->as)($manager)->get("{$this->base}/dashboard")->assertInertia(fn ($p) => $p->where('analytics.headcount', null));
+
+    foreach ([$hr, $this->reg['user']] as $all) {
+        ($this->as)($all)->get("{$this->base}/employees/{$other->id}")->assertOk();
+        ($this->as)($all)->get("{$this->base}/employees")->assertInertia(fn ($p) => $p->where('summary.total', 4));
+    }
 });

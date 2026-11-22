@@ -16,7 +16,8 @@ class EmployeePolicy
 
     public function view(User $user, Employee $employee): bool
     {
-        return $this->ownsEmployee($user, $employee);
+        return $this->ownsEmployee($user, $employee)
+            && \App\Modules\Employees\Support\EmployeeVisibility::canSee((string) tenant()->getTenantKey(), $user, $employee);
     }
 
     public function create(User $user): bool

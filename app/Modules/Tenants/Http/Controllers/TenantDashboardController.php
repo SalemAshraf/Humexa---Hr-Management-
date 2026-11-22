@@ -61,7 +61,7 @@ class TenantDashboardController extends Controller
             ],
             // Each block is sent only to users who hold the matching permission.
             'analytics' => [
-                'headcount' => $user->can('employees.view')
+                'headcount' => $user->can('employees.manage') // company-wide totals: HR only; managers see their team on Employees
                     ? $analytics->headcount((string) $tenant->getTenantKey())
                     : null,
                 'leave' => $user->can('leave.manage')

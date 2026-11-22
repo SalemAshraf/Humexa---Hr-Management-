@@ -31,7 +31,9 @@ class SearchController extends Controller
             $like = '%'.addcslashes(mb_substr($term, 0, 80), '\\%_').'%';
 
             if ($user->can('employees.view')) {
+                $visible = \App\Modules\Employees\Support\EmployeeVisibility::ids($tenantId, $user);
                 $groups[] = ['label' => 'Employees', 'results' => Employee::query()->where('tenant_id', $tenantId)
+                    ->when($visible !== null, fn ($q) => $q->whereIn('id', $visible))
                     ->where(fn ($q) => $q->where('first_name', 'like', $like)->orWhere('last_name', 'like', $like)->orWhere('employee_number', 'like', $like)
                         ->orWhere('work_email', 'like', $like)->orWhere('phone', 'like', $like)
                         ->orWhereRaw("concat(first_name, ' ', last_name) like ?", [$like]))

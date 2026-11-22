@@ -13,6 +13,9 @@ const form = reactive({ name: '', start_time: '09:00', end_time: '17:00', grace_
 const input = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm';
 const create = () =>
     router.post('/attendance/shifts', { ...form, grace_minutes: form.grace_minutes === '' ? null : form.grace_minutes }, { preserveScroll: true, onSuccess: () => { form.name = ''; } });
+const editing = reactive({});
+const startEdit = (s) => { editing[s.id] = { name: s.name, start_time: s.start_time, end_time: s.end_time, grace_minutes: s.grace_minutes ?? '' }; };
+const save = (s) => router.put(`/attendance/shifts/${s.id}`, { ...editing[s.id], grace_minutes: editing[s.id].grace_minutes === '' ? null : editing[s.id].grace_minutes }, { preserveScroll: true, onSuccess: () => { delete editing[s.id]; } });
 const remove = (s) => router.delete(`/attendance/shifts/${s.id}`, { preserveScroll: true });
 const assign = (e, value) => router.put('/attendance/shifts/assign', { employee_id: e.id, shift_id: value === '' ? null : Number(value) }, { preserveScroll: true });
 </script>
@@ -43,12 +46,27 @@ const assign = (e, value) => router.put('/attendance/shifts/assign', { employee_
         <section class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-testid="shift-list">
             <p v-if="!shifts.length" class="p-5 text-sm text-slate-500">{{ $t('No shifts yet.') }}</p>
             <ul class="divide-y divide-slate-100">
-                <li v-for="s in shifts" :key="s.id" class="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="font-semibold text-slate-800"><bdi>{{ s.name }}</bdi></p>
-                        <p class="text-xs text-slate-500"><bdi dir="ltr">{{ s.start_time }} - {{ s.end_time }}</bdi> · {{ s.grace_minutes === null ? $t('Company grace time') : $t('Grace {n} min', { n: s.grace_minutes }) }} · {{ $t('{n} employees', { n: s.employees }) }}</p>
+                <li v-for="s in shifts" :key="s.id" class="p-4">
+                    <div v-if="editing[s.id]" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" :data-testid="'shift-edit-' + s.id">
+                        <input v-model="editing[s.id].name" :class="input" maxlength="80" required :aria-label="$t('Shift name')" />
+                        <input v-model="editing[s.id].start_time" :class="input" type="time" required :aria-label="$t('Start')" />
+                        <input v-model="editing[s.id].end_time" :class="input" type="time" required :aria-label="$t('End')" />
+                        <input v-model="editing[s.id].grace_minutes" :class="input" type="number" min="0" max="240" :placeholder="$t('Grace minutes (optional)')" :aria-label="$t('Grace minutes (optional)')" />
+                        <div class="flex gap-4 text-sm font-semibold">
+                            <button class="text-cyan-700" @click="save(s)">{{ $t('Save') }}</button>
+                            <button class="text-slate-500" @click="delete editing[s.id]">{{ $t('Cancel') }}</button>
+                        </div>
                     </div>
-                    <button class="text-sm font-semibold text-red-600" @click="remove(s)">{{ $t('Delete') }}</button>
+                    <div v-else class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="font-semibold text-slate-800"><bdi>{{ s.name }}</bdi></p>
+                            <p class="text-xs text-slate-500"><bdi dir="ltr">{{ s.start_time }} - {{ s.end_time }}</bdi> · {{ s.grace_minutes === null ? $t('Company grace time') : $t('Grace {n} min', { n: s.grace_minutes }) }} · {{ $t('{n} employees', { n: s.employees }) }}</p>
+                        </div>
+                        <div class="flex gap-4 text-sm font-semibold">
+                            <button class="text-cyan-700" @click="startEdit(s)">{{ $t('Edit') }}</button>
+                            <button class="text-red-600" @click="remove(s)">{{ $t('Delete') }}</button>
+                        </div>
+                    </div>
                 </li>
             </ul>
         </section>

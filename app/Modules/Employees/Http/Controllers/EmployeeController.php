@@ -66,8 +66,10 @@ class EmployeeController extends Controller
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', Employee::class);
+        $visible = \App\Modules\Employees\Support\EmployeeVisibility::ids($this->tenantId(), $request->user('tenant'));
+        $scoped = fn () => $this->employeeQuery()->when($visible !== null, fn ($q) => $q->whereIn('id', $visible));
 
-        $query = $this->employeeQuery()->with([
+        $query = $scoped()->with([
             'branch:id,name',
             'department:id,name',
             'position:id,name',
@@ -110,10 +112,10 @@ class EmployeeController extends Controller
             'departments' => Department::query()->where('tenant_id', $this->tenantId())->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'filters' => $request->only('search', 'status', 'branch_id', 'department_id'),
             'summary' => [
-                'total' => $this->employeeQuery()->count(),
-                'active' => $this->employeeQuery()->where('employment_status', Employee::STATUS_ACTIVE)->count(),
-                'probation' => $this->employeeQuery()->where('employment_status', Employee::STATUS_PROBATION)->count(),
-                'on_leave' => $this->employeeQuery()->where('employment_status', Employee::STATUS_ON_LEAVE)->count(),
+                'total' => $scoped()->count(),
+                'active' => $scoped()->where('employment_status', Employee::STATUS_ACTIVE)->count(),
+                'probation' => $scoped()->where('employment_status', Employee::STATUS_PROBATION)->count(),
+                'on_leave' => $scoped()->where('employment_status', Employee::STATUS_ON_LEAVE)->count(),
             ],
         ]);
     }
@@ -121,6 +123,7 @@ class EmployeeController extends Controller
     public function archived(): Response
     {
         $this->authorize('viewAny', Employee::class);
+        abort_unless(\App\Modules\Employees\Support\EmployeeVisibility::ids($this->tenantId(), request()->user('tenant')) === null, 403);
 
         $employees = Employee::withTrashed()
             ->where('tenant_id', $this->tenantId())

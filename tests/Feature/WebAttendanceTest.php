@@ -140,3 +140,26 @@ test('shifts are optional, explicit, and only affect late minutes of the first c
     ($this->as)($u)->get("{$this->base}/attendance/shifts")->assertForbidden();
     ($this->as)($owner)->get("{$this->base}/attendance/shifts")->assertOk();
 });
+
+
+test('shift can be edited, and lateness is measured in company wall-clock time across the Cairo DST change', function () {
+    [$u, $emp] = ($this->account)('wd@tenant-test.example', 'Dst');
+    $owner = $this->reg['user'];
+    \App\Modules\Settings\Models\CompanySetting::query()->create(['tenant_id' => $this->tid, 'timezone' => 'Africa/Cairo']);
+    ($this->as)($owner)->post("{$this->base}/attendance/shifts", ['name' => 'Office', 'start_time' => '09:00', 'end_time' => '17:00', 'grace_minutes' => 0]);
+    $shift = \App\Modules\Attendance\Models\AttendanceShift::where('tenant_id', $this->tid)->firstOrFail();
+    ($this->as)($owner)->put("{$this->base}/attendance/shifts/assign", ['employee_id' => $emp->id, 'shift_id' => $shift->id]);
+    $lateness = app(\App\Modules\Attendance\Services\ShiftLateness::class);
+    $at = fn (string $local) => \Illuminate\Support\Carbon::parse($local, 'Africa/Cairo')->utc();
+
+    // Egypt moves clocks forward at midnight on the last Friday of April (2026-04-24). 09:30 local is still 30 late.
+    foreach (['2026-04-23 09:30', '2026-04-24 09:30', '2026-04-25 09:30', '2026-10-30 09:30', '2026-10-31 09:30'] as $when) {
+        expect($lateness->minutesLate($emp->fresh(), $at($when)))->toBe(30);
+    }
+
+    ($this->as)($owner)->put("{$this->base}/attendance/shifts/{$shift->id}", ['name' => 'Office', 'start_time' => '08:00', 'end_time' => '16:00', 'grace_minutes' => 15])->assertSessionHasNoErrors();
+    expect($shift->fresh()->start_time)->toStartWith('08:00')->and($shift->fresh()->grace_minutes)->toBe(15)
+        ->and($lateness->minutesLate($emp->fresh(), $at('2026-04-24 09:30')))->toBe(75);
+    ($this->as)($owner)->put("{$this->base}/attendance/shifts/{$shift->id}", ['name' => 'Office', 'start_time' => '08:00', 'end_time' => '08:00'])->assertSessionHasErrors('end_time');
+    ($this->as)($u)->put("{$this->base}/attendance/shifts/{$shift->id}", ['name' => 'Hack', 'start_time' => '00:00', 'end_time' => '01:00'])->assertForbidden();
+});

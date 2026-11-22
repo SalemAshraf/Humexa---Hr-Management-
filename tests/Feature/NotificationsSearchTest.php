@@ -62,7 +62,7 @@ test('search only returns what the role may open and escapes wildcards', functio
     $labels = fn ($user, $q) => collect(($this->as)($user)->get("{$this->base}/search?q=".urlencode($q))->assertOk()->viewData('page')['props']['groups'])->pluck('label')->all();
 
     expect($labels($hr, 'weld'))->toContain('Employees', 'Candidates', 'Job openings')
-        ->and($labels($mgr, 'weld'))->toBe(['Employees'])
+        ->and($labels($mgr, 'weld'))->toBe([])
         ->and($labels($emp, 'weld'))->toBe([])
         ->and($labels($hr, '%%'))->toBe([])
         ->and($labels($hr, 'w'))->toBe([]);
