@@ -16,7 +16,7 @@ People records, attendance, leave, hiring, performance, payroll and reports in o
 
 The application follows a **Modular Monolith** architecture with Laravel on the backend and Vue 3 + Inertia.js on the frontend. It uses a **single-database tenancy model**, with tenant context resolved by domain and tenant-owned records scoped at the application level.
 
-This README describes the `feature/humexa-completion` branch. Release `b65d605` of `main` is deployed at `afrad.mancydigitals.com` (MariaDB 10.6, PHP 8.3). This branch adds the MariaDB foreign-key fix and host settings on top of it. The status below reflects the code on this branch, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
+This README describes the `feature/humexa-completion` branch. It adds, on top of `main`, the MariaDB foreign-key fix, host settings, the payroll estimator, the read-only Claude connector and the sample-company command. The status below reflects the code on this branch, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
 
 ## Key Capabilities
 
@@ -341,6 +341,12 @@ Contributions and new features should follow these conventions:
 8. Avoid unnecessary packages and cross-module dependencies.
 9. Keep user-facing interfaces responsive and accessible.
 10. Support English and Arabic, including RTL layout requirements, as localization is implemented.
+
+## Sample company and Claude connector
+
+**Sample company.** `php artisan humexa:demo-company --email=owner@demo.example.test --password-file=/path/to/file --confirm` adds one fictional company with an owner login, sample employees, two weeks of attendance and an active period (`--active-days`, default 90). It only adds rows, refuses to run if the email or company name exists, reads the password from a file (never an argument, never printed), sends no messages and creates no platform admin. Follow it with `php artisan humexa:seed-demo-modules <company id> --confirm` for leave, hiring, review, document and salary samples. All names and numbers are made up. Never commit a password file.
+
+**Claude connector (read-only, new).** Each company's own address serves `/mcp` plus OAuth discovery, so a company user can add it by hand in Claude as a custom connector. Tokens are stored as hashes and bound to one company, one user and one address. Four tools return totals only (headcount, attendance today, leave overview, open positions), each gated by the user's own Afrad permission. Names, contact details, salaries, payroll, ID numbers and documents are never returned. A user can disconnect at any time on `/ai-connections`. It is covered by local tests and has not been tried with a live Claude account. Requires the migration `2026_11_22_080000_create_ai_connector_tables`.
 
 ## Limits and open decisions
 

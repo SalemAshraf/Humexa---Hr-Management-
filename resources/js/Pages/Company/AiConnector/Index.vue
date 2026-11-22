@@ -7,6 +7,12 @@ defineProps({
     tools: { type: Array, required: true },
     url: { type: String, required: true },
 });
+const labels = {
+    workforce_headcount: 'Headcount totals by status and department',
+    attendance_today: "Today's attendance totals",
+    leave_overview: 'Pending leave and people on leave today',
+    open_positions: 'Open positions with candidate counts per stage',
+};
 const disconnect = (family) => router.delete(`/ai-connections/${family}`, { preserveScroll: true });
 </script>
 
@@ -27,7 +33,7 @@ const disconnect = (family) => router.delete(`/ai-connections/${family}`, { pres
             <p class="mt-3 select-all rounded-lg bg-slate-50 px-3 py-2 font-mono text-xs" dir="ltr">{{ url }}</p>
             <p v-if="!tools.length" class="mt-3 text-sm text-amber-800">{{ $t('Your role has no company totals to share, so you cannot connect.') }}</p>
             <ul v-else class="mt-3 list-disc space-y-1 ps-5 text-sm text-slate-700">
-                <li v-for="tl in tools" :key="tl">{{ tl }}</li>
+                <li v-for="tl in tools" :key="tl">{{ $t(labels[tl] ?? tl) }}</li>
             </ul>
             <p class="mt-3 text-xs text-slate-500">{{ $t('Read-only. It never receives names, contact details, salaries, ID numbers or documents. Answers go to the AI app you connect, under its own terms.') }}</p>
         </section>
