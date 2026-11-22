@@ -122,7 +122,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
 <template>
     <Head>
         <title>{{ $t('Afrad | HR software for growing companies') }}</title>
-        <meta name="description" content="Employee records, attendance, leave, hiring and reviews in one workspace, in Arabic and English." />
         <meta name="theme-color" content="#F3F6F8" />
     </Head>
 
