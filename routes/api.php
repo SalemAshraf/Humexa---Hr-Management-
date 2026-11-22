@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureTenantActive;
 use App\Modules\Attendance\Http\Controllers\Api\V1\AttendanceController;
 use App\Modules\Attendance\Http\Controllers\Api\V1\AttendanceWorkflowController;
 use App\Modules\Attendance\Http\Controllers\Api\V1\MobileAuthController;
+use App\Modules\Leave\Http\Controllers\Api\V1\LeaveApiController;
 
 Route::domain('{tenant}.'.config('humexa.tenant_domain'))->middleware([
     InitializeTenancyByDomain::class,
@@ -18,6 +19,9 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))->middleware([
     Route::post('/auth/login',[MobileAuthController::class,'login'])->middleware('throttle:10,1');
     Route::middleware(['auth:sanctum', 'abilities:attendance:mobile'])->group(function(){
         Route::post('/auth/logout',[MobileAuthController::class,'logout']);
+        Route::get('/leave',[LeaveApiController::class,'index']);
+        Route::post('/leave',[LeaveApiController::class,'store'])->middleware('throttle:20,1');
+        Route::post('/leave/{leaveRequest}/cancel',[LeaveApiController::class,'cancel'])->whereNumber('leaveRequest');
         Route::prefix('attendance')->group(function(){
             Route::get('/policy',[AttendanceController::class,'policy']);
             Route::get('/status',[AttendanceController::class,'status']);
