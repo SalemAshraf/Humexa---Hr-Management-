@@ -12,7 +12,7 @@ class ApiException implements Exception {
 
 /// Thin client for the Afrad attendance token API (/api/v1). One instance per company address.
 class AfradApi {
-  AfradApi(this.host, {this.token, http.Client? client, this.scheme = 'https'}) : _client = client ?? http.Client();
+  AfradApi(this.host, {this.token, http.Client? client, String? scheme}) : scheme = scheme ?? (host.split(':').first.endsWith('localhost') ? 'http' : 'https'), _client = client ?? http.Client();
 
   final String host;
   final String scheme;

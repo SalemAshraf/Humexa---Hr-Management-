@@ -68,6 +68,11 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? status;
   List<Map<String, dynamic>> history = [];
   String? message;
+  @override
+  void didUpdateWidget(covariant HomePage old) {
+    super.didUpdateWidget(old);
+    if (old.lang != widget.lang) message = null;
+  }
   bool ok = false;
   bool busy = false;
   final host = TextEditingController();
