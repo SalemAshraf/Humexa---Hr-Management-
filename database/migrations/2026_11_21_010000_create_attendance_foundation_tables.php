@@ -43,7 +43,7 @@ return new class extends Migration {
             $table->unique(['id', 'tenant_id'], 'attendance_locations_id_tenant_unique');
             $table->index(['tenant_id', 'is_active']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->restrictOnUpdate()->restrictOnDelete();
         });
 
         // One daily summary per employee. Detailed clock events live in attendance_sessions.
@@ -66,7 +66,7 @@ return new class extends Migration {
             $table->unique(['tenant_id', 'employee_id', 'attendance_date'], 'attendance_daily_unique');
             $table->index(['tenant_id', 'attendance_date', 'status']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
 
         // Multiple work periods are allowed for the same employee and day.
@@ -94,10 +94,10 @@ return new class extends Migration {
             $table->index(['tenant_id', 'employee_id', 'check_in_at'], 'attendance_sessions_employee_checkin_index');
             $table->foreign(['attendance_record_id', 'tenant_id', 'employee_id'], 'attendance_sessions_daily_record_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
-                ->on('attendance_records')->cascadeOnUpdate()->restrictOnDelete();
+                ->on('attendance_records')->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['employee_id', 'tenant_id'], 'attendance_sessions_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_events', function (Blueprint $table) {
@@ -119,13 +119,13 @@ return new class extends Migration {
             $table->index(['tenant_id', 'employee_id', 'occurred_at']);
             $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'attendance_events_session_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
-                ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
+                ->on('attendance_sessions')->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['employee_id', 'tenant_id'], 'attendance_events_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['location_id', 'tenant_id'], 'attendance_events_location_fk')
                 ->references(['id', 'tenant_id'])->on('attendance_locations')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_breaks', function (Blueprint $table) {
@@ -138,7 +138,7 @@ return new class extends Migration {
             $table->index(['tenant_id', 'attendance_session_id']);
             $table->foreign(['attendance_session_id', 'tenant_id'], 'attendance_breaks_session_fk')
                 ->references(['id', 'tenant_id'])->on('attendance_sessions')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_corrections', function (Blueprint $table) {
@@ -158,16 +158,16 @@ return new class extends Migration {
             $table->index(['tenant_id', 'status']);
             $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'attendance_corrections_session_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
-                ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
+                ->on('attendance_sessions')->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['employee_id', 'tenant_id'], 'attendance_corrections_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['requested_by_user_id', 'tenant_id'], 'attendance_corrections_requester_fk')
                 ->references(['id', 'tenant_id'])->on('users')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['reviewed_by_user_id', 'tenant_id'], 'attendance_corrections_reviewer_fk')
                 ->references(['id', 'tenant_id'])->on('users')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('overtime_requests', function (Blueprint $table) {
@@ -185,13 +185,13 @@ return new class extends Migration {
             $table->index(['tenant_id', 'status']);
             $table->foreign(['attendance_session_id', 'tenant_id', 'employee_id'], 'overtime_requests_session_fk')
                 ->references(['id', 'tenant_id', 'employee_id'])
-                ->on('attendance_sessions')->cascadeOnUpdate()->restrictOnDelete();
+                ->on('attendance_sessions')->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['employee_id', 'tenant_id'], 'overtime_requests_employee_fk')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
             $table->foreign(['reviewed_by_user_id', 'tenant_id'], 'overtime_requests_reviewer_fk')
                 ->references(['id', 'tenant_id'])->on('users')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_devices', function (Blueprint $table) {
@@ -209,7 +209,7 @@ return new class extends Migration {
             $table->unique(['id', 'tenant_id'], 'attendance_devices_id_tenant_unique');
             $table->unique(['tenant_id', 'device_identifier']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('attendance_device_events', function (Blueprint $table) {
@@ -225,8 +225,8 @@ return new class extends Migration {
             $table->timestamps();
             $table->unique(['tenant_id', 'device_id', 'external_event_id'], 'device_event_dedupe');
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['device_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_devices')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['device_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('attendance_devices')->restrictOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

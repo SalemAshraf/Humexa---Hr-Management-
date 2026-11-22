@@ -37,7 +37,7 @@ return new class extends Migration
 
             $table->foreign(['employee_id', 'tenant_id'], 'employee_identity_employee_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

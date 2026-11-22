@@ -46,7 +46,7 @@ return new class extends Migration
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['branch_id', 'tenant_id'], 'departments_branch_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('branches')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('positions', function (Blueprint $table) {
@@ -66,7 +66,7 @@ return new class extends Migration
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreign(['department_id', 'tenant_id'], 'positions_department_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('departments')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

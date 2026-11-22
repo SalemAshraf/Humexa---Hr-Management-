@@ -63,23 +63,23 @@ return new class extends Migration
 
             $table->foreign(['user_id', 'tenant_id'], 'employees_user_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('users')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['branch_id', 'tenant_id'], 'employees_branch_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('branches')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['department_id', 'tenant_id'], 'employees_department_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('departments')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['position_id', 'tenant_id'], 'employees_position_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('positions')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['manager_id', 'tenant_id'], 'employees_manager_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('employee_employment_histories', function (Blueprint $table) {
@@ -101,11 +101,11 @@ return new class extends Migration
 
             $table->foreign(['employee_id', 'tenant_id'], 'employee_history_employee_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['changed_by_user_id', 'tenant_id'], 'employee_history_user_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('users')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

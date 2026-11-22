@@ -38,15 +38,15 @@ return new class extends Migration
 
             $table->foreign(['employee_id', 'tenant_id'], 'employee_documents_employee_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('employees')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['document_type_id', 'tenant_id'], 'employee_documents_type_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('employee_document_types')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
 
             $table->foreign(['uploaded_by_user_id', 'tenant_id'], 'employee_documents_uploader_tenant_foreign')
                 ->references(['id', 'tenant_id'])->on('users')
-                ->cascadeOnUpdate()->restrictOnDelete();
+                ->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

@@ -40,8 +40,8 @@ return new class extends Migration {
             $table->index(['tenant_id', 'status']);
             $table->index(['tenant_id', 'employee_id', 'start_date']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['leave_type_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('leave_types')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
+            $table->foreign(['leave_type_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('leave_types')->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

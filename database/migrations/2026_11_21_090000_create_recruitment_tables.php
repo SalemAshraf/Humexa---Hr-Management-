@@ -26,8 +26,8 @@ return new class extends Migration {
             $table->index(['tenant_id', 'status']);
             $table->unique(['id', 'tenant_id'], 'job_openings_id_tenant_unique');
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['department_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('departments')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['department_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('departments')->restrictOnUpdate()->restrictOnDelete();
+            $table->foreign(['branch_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('branches')->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('candidates', function (Blueprint $table) {
@@ -47,8 +47,8 @@ return new class extends Migration {
             $table->index(['tenant_id', 'job_opening_id', 'stage']);
             $table->unique(['id', 'tenant_id'], 'candidates_id_tenant_unique');
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['job_opening_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('job_openings')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['job_opening_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('job_openings')->restrictOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('candidate_stage_events', function (Blueprint $table) {
@@ -60,7 +60,7 @@ return new class extends Migration {
             $table->text('note')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
-            $table->foreign(['candidate_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('candidates')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreign(['candidate_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('candidates')->restrictOnUpdate()->cascadeOnDelete();
         });
 
         // New permissions for existing companies. Creates roles and permissions only; promotes nobody.

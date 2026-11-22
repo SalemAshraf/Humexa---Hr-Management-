@@ -38,8 +38,8 @@ return new class extends Migration {
             $table->unique(['review_cycle_id', 'employee_id']);
             $table->index(['tenant_id', 'status']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['review_cycle_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('review_cycles')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['review_cycle_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('review_cycles')->restrictOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
     }
 

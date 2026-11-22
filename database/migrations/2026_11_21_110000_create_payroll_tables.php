@@ -50,7 +50,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->unique(['employee_id', 'effective_from']);
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('payroll_runs', function (Blueprint $table) {
@@ -67,7 +67,7 @@ return new class extends Migration {
             $table->unique(['tenant_id', 'year', 'month']);
             $table->unique(['id', 'tenant_id'], 'payroll_runs_id_tenant_unique');
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['rule_set_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('payroll_rule_sets')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['rule_set_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('payroll_rule_sets')->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('payslips', function (Blueprint $table) {
@@ -94,8 +94,8 @@ return new class extends Migration {
             $table->unique(['payroll_run_id', 'employee_id']);
             $table->unique(['id', 'tenant_id'], 'payslips_id_tenant_unique');
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['payroll_run_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('payroll_runs')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['payroll_run_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('payroll_runs')->restrictOnUpdate()->cascadeOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
 
         Schema::create('payroll_adjustments', function (Blueprint $table) {
@@ -110,8 +110,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('created_by_user_id')->nullable();
             $table->timestamps();
             $table->foreign('tenant_id')->references('id')->on('tenants')->cascadeOnUpdate()->restrictOnDelete();
-            $table->foreign(['payroll_run_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('payroll_runs')->cascadeOnUpdate()->cascadeOnDelete();
-            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->cascadeOnUpdate()->restrictOnDelete();
+            $table->foreign(['payroll_run_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('payroll_runs')->restrictOnUpdate()->cascadeOnDelete();
+            $table->foreign(['employee_id', 'tenant_id'])->references(['id', 'tenant_id'])->on('employees')->restrictOnUpdate()->restrictOnDelete();
         });
     }
 
