@@ -432,17 +432,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 </div>
             </section>
 
-            <!-- 8. Payroll honesty -->
-            <section class="mx-auto max-w-5xl px-5 pb-24 lg:px-8">
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-7 md:flex md:items-start md:gap-6 md:p-9" v-reveal>
-                    <span class="mb-4 inline-flex shrink-0 rounded-full bg-amber-200 px-3 py-1 text-xs font-bold text-amber-900 md:mb-0">{{ $t('Payroll') }}</span>
-                    <div>
-                        <h2 class="text-xl font-bold leading-[1.4]">{{ $t('Payroll runs on your company rules.') }}</h2>
-                        <p class="mt-2 text-[15px] leading-7 text-amber-950/80">{{ $t('You enter your rates and rules in company settings, and Afrad calculates the monthly run from them. Afrad does not pay salaries or file anything, and your accountant should review a run before anyone relies on it.') }}</p>
-                    </div>
-                </div>
-            </section>
-
             <!-- 9. Security -->
             <section class="border-y border-slate-200 bg-white py-16 lg:py-20">
                 <div class="mx-auto max-w-5xl px-5 lg:px-8">
