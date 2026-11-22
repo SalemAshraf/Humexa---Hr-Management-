@@ -23,7 +23,7 @@ const save = () => form.put('/settings', { preserveScroll: true });
         </section>
 
         <section v-if="$page.props.planUsage" class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700" aria-label="Plan">
-            <p class="font-bold text-slate-900">{{ $t('Your plan') }}: <bdi>{{ $page.props.planUsage.plan ? $page.props.planUsage.plan.name : $t('No plan assigned (no limits)') }}</bdi></p>
+            <p class="font-bold text-slate-900">{{ $t('Your plan') }}: <bdi>{{ $page.props.planUsage.plan ? $page.props.planUsage.plan.name : $t('No plan assigned (no employee/account limits)') }}</bdi></p>
             <dl class="mt-2 grid gap-2 sm:grid-cols-2">
                 <div class="rounded-lg bg-slate-50 px-3 py-2"><dt class="text-xs text-slate-500">{{ $t('Employees') }}</dt><dd class="font-semibold"><bdi dir="ltr">{{ $page.props.planUsage.employees }}</bdi> {{ $t('used') }} · {{ $t('limit') }}: <bdi dir="ltr">{{ $page.props.planUsage.plan?.max_employees ?? $t('No limit') }}</bdi></dd></div>
                 <div class="rounded-lg bg-slate-50 px-3 py-2"><dt class="text-xs text-slate-500">{{ $t('Sign-in accounts') }}</dt><dd class="font-semibold"><bdi dir="ltr">{{ $page.props.planUsage.accounts }}</bdi> {{ $t('used') }} · {{ $t('limit') }}: <bdi dir="ltr">{{ $page.props.planUsage.plan?.max_accounts ?? $t('No limit') }}</bdi></dd></div>

@@ -1,7 +1,7 @@
 <script setup>
 import { t } from '@/lib/i18n';
 import { ref } from 'vue';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
@@ -63,6 +63,10 @@ const tabItems = [
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{{ $t('COMPANY STRUCTURE') }}</p>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Organization') }}</h1>
             <p class="mt-2 text-sm text-slate-500">{{ $t('Set up branches, departments and job positions for your workforce.') }}</p>
+            <div v-if="canEdit() && !((page.props.planPeriod?.days_left ?? 0) < 0)" class="mt-3 flex flex-wrap gap-2">
+                <Link href="/organization/import/departments" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" data-testid="org-import-departments">{{ $t('Import departments') }}</Link>
+                <Link href="/organization/import/positions" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50" data-testid="org-import-positions">{{ $t('Import positions') }}</Link>
+            </div>
         </section>
 
         <section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">

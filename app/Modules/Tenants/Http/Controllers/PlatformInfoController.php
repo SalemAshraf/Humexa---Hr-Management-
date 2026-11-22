@@ -71,9 +71,11 @@ class PlatformInfoController extends Controller
             if ($t->status === 'suspended') {
                 $items[] = ['kind' => 'suspended', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => $t->suspended_at?->toDateString()];
             }
+            // Same calendar day the company's own access check uses (the company timezone setting).
+            $today = \Illuminate\Support\Carbon::parse(\App\Modules\Settings\Support\CompanyClock::today((string) $t->getKey()));
             $ends = $t->getAttribute('subscription_ends_at');
             if ($ends) {
-                $days = (int) now()->startOfDay()->diffInDays(\Illuminate\Support\Carbon::parse((string) $ends)->startOfDay(), false);
+                $days = (int) $today->diffInDays(\Illuminate\Support\Carbon::parse((string) $ends)->startOfDay(), false);
                 if ($days < 0) {
                     $items[] = ['kind' => 'sub_expired', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => substr((string) $ends, 0, 10)];
                 } elseif ($days <= 14) {
@@ -82,7 +84,7 @@ class PlatformInfoController extends Controller
             }
             $trial = $t->getAttribute('trial_ends_at');
             if ($trial && ! $ends) {
-                $tdays = (int) now()->startOfDay()->diffInDays(\Illuminate\Support\Carbon::parse((string) $trial)->startOfDay(), false);
+                $tdays = (int) $today->diffInDays(\Illuminate\Support\Carbon::parse((string) $trial)->startOfDay(), false);
                 if ($tdays < 0) {
                     $items[] = ['kind' => 'trial_ended', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => substr((string) $trial, 0, 10)];
                 } elseif ($tdays <= 3) {

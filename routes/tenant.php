@@ -163,6 +163,11 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                     Route::delete('/{type}', 'destroy')->whereNumber('type')->name('destroy');
                 });
 
+            Route::prefix('/organization/import/{entity}')->middleware('tenant.can:organization.manage')->name('organization.import.')->controller(\App\Modules\Organization\Http\Controllers\OrganizationImportController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/template', 'template')->name('template');
+                Route::post('/', 'store')->middleware('throttle:20,1')->name('store');
+            });
             Route::prefix('/organization')->middleware('tenant.can:employees.view,organization.manage')->name('organization.')->controller(OrganizationController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::post('/branches', 'storeBranch')->name('branches.store');

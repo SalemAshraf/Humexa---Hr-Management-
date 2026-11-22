@@ -95,6 +95,14 @@ test('new companies get a 7-day trial date, existing ones do not, and an ended t
     expect($kinds())->toContain('trial_ending');
     \App\Models\Tenant::query()->whereKey($new->getKey())->update(['trial_ends_at' => now()->subDay()->toDateString()]);
     expect($kinds())->toContain('trial_ended');
+    // The day is the company's own: a company far ahead of UTC is already past a trial that ends on the UTC date.
+    \Illuminate\Support\Carbon::setTestNow('2026-11-22 12:00:00');
+    \App\Modules\Settings\Models\CompanySetting::query()->updateOrCreate(['tenant_id' => (string) $new->getKey()], ['timezone' => 'Pacific/Kiritimati']);
+    \App\Models\Tenant::query()->whereKey($new->getKey())->update(['trial_ends_at' => '2026-11-22']);
+    expect($kinds())->toContain('trial_ended');
+    \App\Modules\Settings\Models\CompanySetting::query()->where('tenant_id', (string) $new->getKey())->update(['timezone' => 'Pacific/Pago_Pago']);
+    expect($kinds())->not->toContain('trial_ended');
+    \Illuminate\Support\Carbon::setTestNow();
     expect($new->fresh()->status)->toBe('active');
     \App\Models\Tenant::query()->whereKey($new->getKey())->update(['subscription_ends_at' => now()->addDays(30)->toDateString()]);
     expect($kinds())->not->toContain('trial_ended');

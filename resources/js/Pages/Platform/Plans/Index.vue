@@ -81,14 +81,14 @@ const input = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm
 
         <section>
             <h2 class="mb-1 font-semibold text-white">{{ $t('Company plans') }}</h2>
-            <p class="mb-3 text-xs text-slate-500">{{ $t('A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The paid-until date controls access: after it passes, the company can still view and export its data, but cannot add or change records until you enter a later date.') }}</p>
+            <p class="mb-3 text-xs text-slate-500">{{ $t('A company with no plan has no employee or account limits. This does not change access: the trial end or paid-until date still controls whether the company can add or change records. Changing a plan never removes anything a company already has. Payment happens outside the app. After the date passes, the company can still view and export its data, but cannot add or change records until you enter a later date.') }}</p>
             <div class="grid gap-3 md:grid-cols-2">
                 <article v-for="c in companies" :key="c.id" class="hx-card p-4">
                     <h3 class="font-semibold text-white"><bdi>{{ c.name }}</bdi></h3>
                     <p class="mt-1 text-sm text-slate-400">{{ $t('Employees') }}: <bdi dir="ltr">{{ c.employees }}</bdi></p>
                     <label class="mt-3 block text-xs text-slate-400">{{ $t('Plan') }}
                         <select :class="input + ' mt-1 w-full'" :value="c.plan_id ?? ''" @change="assign(c, $event)">
-                            <option value="">{{ $t('No plan (no limits)') }}</option>
+                            <option value="">{{ $t('No plan (no employee/account limits)') }}</option>
                             <option v-for="p in plans" :key="p.id" :value="p.id">{{ p.name }}</option>
                         </select>
                     </label>
