@@ -37,7 +37,7 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ title }}
                     <span class="ml-2 rounded-full px-2 py-0.5 align-middle text-xs font-semibold" :class="draft ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-700'">{{ draft ? $t('draft run') : $t('locked run') }}</span></h1>
-                <p class="mt-2 text-sm text-slate-500">{{ $t('Rules') }}: {{ rule_name }}. {{ $t('Tax is the yearly tax on this month times 12, divided by 12. It is not the tax authority running-total method.') }}</p>
+                <p class="mt-2 text-sm text-slate-500">{{ $t('Rules') }}: {{ $t(rule_name) }}. {{ $t('Tax is the yearly tax on this month times 12, divided by 12. It is not the tax authority running-total method.') }}</p>
             </div>
             <div class="flex flex-wrap gap-2 text-sm font-semibold">
                 <a :href="`/payroll/runs/${run.id}/export`" class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200">{{ $t('Download run CSV') }}</a>
@@ -56,7 +56,7 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
 
         <section v-if="provisional" class="mb-5 rounded-xl border border-amber-400 bg-amber-50 px-4 py-3 text-xs text-amber-900" data-testid="run-provisional">
             <p class="text-sm font-bold">{{ $t('Provisional estimate. Not a statutory result and not safe to pay from without your accountant.') }}</p>
-            <p class="mt-1">{{ $t('Rules valid from {from} to {to}.', { from: provisional.valid_from, to: provisional.valid_to ?? '-' }) }} {{ $t('Extra levy base chosen by your company') }}: {{ provisional.levy_base ?? '-' }}.</p>
+            <p class="mt-1">{{ $t('Rules valid from {from} to {to}.', { from: provisional.valid_from, to: provisional.valid_to ?? '-' }) }} {{ $t('Extra levy base chosen by your company') }}: {{ provisional.levy_base ? $t(provisional.levy_base === 'gross' ? 'Gross pay' : provisional.levy_base === 'basic' ? 'Basic salary' : 'Taxable gross pay') : '-' }}.</p>
             <p class="mt-2 font-semibold">{{ $t('Not calculated') }}:</p>
             <ul class="list-disc ps-5"><li v-for="n in provisional.not_calculated" :key="n">{{ $t(n) }}</li></ul>
         </section>
