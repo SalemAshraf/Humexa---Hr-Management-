@@ -55,7 +55,7 @@ defineProps({
                             </span>
                             <div class="min-w-0">
                                 <h3 class="font-semibold text-slate-100">
-                                    {{ entry.event === 'company.suspended' ? $t('Company suspended') : (entry.event === 'company.plan_changed' ? $t('Plan changed') : $t('Company activated')) }}
+                                    {{ entry.event === 'company.suspended' ? $t('Company suspended') : (entry.event === 'company.plan_changed' ? $t('Plan changed') : entry.event === 'company.subscription_changed' ? $t('Paid-until date changed') : $t('Company activated')) }}
                                 </h3>
                                 <p class="mt-1 text-sm text-slate-400">{{ entry.companyName }}</p>
                                 <p class="mt-1 break-all text-xs text-slate-600">{{ $t('Company ID') }}: {{ entry.tenantId }}</p>

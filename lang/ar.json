@@ -1427,5 +1427,12 @@
  "Who works which shift": "مين على أنهي وردية",
  "Shift": "الوردية",
  "No shift": "من غير وردية",
- "Move the employees on this shift to another shift or none before deleting it.": "انقل الموظفين اللي على الوردية دي لوردية تانية أو من غير وردية قبل الحذف."
+ "Move the employees on this shift to another shift or none before deleting it.": "انقل الموظفين اللي على الوردية دي لوردية تانية أو من غير وردية قبل الحذف.",
+ "Paid until (you enter it after you receive payment)": "مدفوع لحد (تدخله بعد ما تستلم الدفع)",
+ "A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The date only reminds you: it never suspends or activates a company.": "الشركة من غير باقة ملهاش حدود. تغيير الباقة مبيمسحش حاجة الشركة عندها. الدفع بيحصل برّه التطبيق. التاريخ مجرد تذكير: مبيوقفش ولا بيفعّل أي شركة.",
+ "{company} paid-until date passed on {date}. Nothing was changed automatically.": "{company} تاريخ الدفع لحد {date} عدّى. مفيش حاجة اتغيرت تلقائي.",
+ "{company} is paid until {date}. Ask them about renewal.": "{company} مدفوعة لحد {date}. اسألهم عن التجديد.",
+ "Paid-until date changed": "تاريخ الدفع لحد اتغير",
+ "{company} 7-day trial ended on {date} and no paid-until date is set. Nothing was changed automatically.": "{company} التجربة (7 أيام) خلصت يوم {date} ومفيش تاريخ دفع متسجل. مفيش حاجة اتغيرت تلقائي.",
+ "{company} 7-day trial ends on {date}.": "{company} التجربة (7 أيام) بتخلص يوم {date}."
 }

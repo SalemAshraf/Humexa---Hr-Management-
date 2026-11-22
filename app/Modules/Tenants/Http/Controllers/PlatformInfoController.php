@@ -71,6 +71,24 @@ class PlatformInfoController extends Controller
             if ($t->status === 'suspended') {
                 $items[] = ['kind' => 'suspended', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => $t->suspended_at?->toDateString()];
             }
+            $ends = $t->getAttribute('subscription_ends_at');
+            if ($ends) {
+                $days = (int) now()->startOfDay()->diffInDays(\Illuminate\Support\Carbon::parse((string) $ends)->startOfDay(), false);
+                if ($days < 0) {
+                    $items[] = ['kind' => 'sub_expired', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => substr((string) $ends, 0, 10)];
+                } elseif ($days <= 14) {
+                    $items[] = ['kind' => 'sub_expiring', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => substr((string) $ends, 0, 10)];
+                }
+            }
+            $trial = $t->getAttribute('trial_ends_at');
+            if ($trial && ! $ends) {
+                $tdays = (int) now()->startOfDay()->diffInDays(\Illuminate\Support\Carbon::parse((string) $trial)->startOfDay(), false);
+                if ($tdays < 0) {
+                    $items[] = ['kind' => 'trial_ended', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => substr((string) $trial, 0, 10)];
+                } elseif ($tdays <= 3) {
+                    $items[] = ['kind' => 'trial_ending', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => substr((string) $trial, 0, 10)];
+                }
+            }
             if ($t->plan_id === null) {
                 $items[] = ['kind' => 'no_plan', 'company_id' => $t->getKey(), 'company' => $name($t), 'date' => null];
 

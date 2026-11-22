@@ -9,12 +9,16 @@ const text = (i) => {
     switch (i.kind) {
         case 'new': return t('{company} registered on {date}.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
         case 'suspended': return t('{company} is suspended.', { company: i.company });
+        case 'sub_expired': return t('{company} paid-until date passed on {date}. Nothing was changed automatically.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
+        case 'sub_expiring': return t('{company} is paid until {date}. Ask them about renewal.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
+        case 'trial_ended': return t('{company} 7-day trial ended on {date} and no paid-until date is set. Nothing was changed automatically.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
+        case 'trial_ending': return t('{company} 7-day trial ends on {date}.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
         case 'no_plan': return t('{company} has no plan assigned, so nothing limits it.', { company: i.company });
         case 'at_limit': return t('{company} reached its plan limit for {what}: {used} of {max}.', { company: i.company, what: t(i.what === 'employees' ? 'employees' : 'sign-in accounts'), used: i.used, max: i.max });
         default: return t('{company} is close to its plan limit for {what}: {used} of {max}.', { company: i.company, what: t(i.what === 'employees' ? 'employees' : 'sign-in accounts'), used: i.used, max: i.max });
     }
 };
-const tone = (k) => ({ suspended: 'text-red-300', at_limit: 'text-amber-300', near_limit: 'text-amber-200', no_plan: 'text-slate-300', new: 'text-emerald-300' }[k]);
+const tone = (k) => ({ trial_ended: 'text-red-300', trial_ending: 'text-amber-300', sub_expired: 'text-red-300', sub_expiring: 'text-amber-300', suspended: 'text-red-300', at_limit: 'text-amber-300', near_limit: 'text-amber-200', no_plan: 'text-slate-300', new: 'text-emerald-300' }[k]);
 </script>
 
 <template>

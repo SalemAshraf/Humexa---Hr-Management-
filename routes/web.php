@@ -59,6 +59,7 @@ Route::prefix('platform')->name('platform.')->group(function () {
         Route::get('/plans', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'index'])->name('plans.index');
         Route::post('/plans', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'store'])->name('plans.store');
         Route::patch('/plans/{plan}', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'update'])->name('plans.update');
+        Route::patch('/companies/{tenant}/subscription', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'subscription'])->name('companies.subscription');
         Route::patch('/companies/{tenant}/plan', [\App\Modules\Plans\Http\Controllers\PlatformPlanController::class, 'assign'])->name('companies.plan');
 
         Route::post('/logout', [PlatformAuthController::class, 'destroy'])

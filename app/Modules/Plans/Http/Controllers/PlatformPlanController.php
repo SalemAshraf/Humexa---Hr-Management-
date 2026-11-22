@@ -30,6 +30,7 @@ class PlatformPlanController extends Controller
                 'id' => $t->getKey(),
                 'name' => $t->getAttribute('company_name') ?: 'Unnamed Company',
                 'plan_id' => $t->getAttribute('plan_id'),
+                'subscription_ends_at' => $t->getAttribute('subscription_ends_at') ? substr((string) $t->getAttribute('subscription_ends_at'), 0, 10) : null,
                 'employees' => (int) ($counts[$t->getKey()] ?? 0),
             ]),
         ]);
@@ -75,6 +76,34 @@ class PlatformPlanController extends Controller
         });
 
         return back()->with('success', 'Company plan updated. Existing employees and accounts are not changed.');
+    }
+
+    /** Records "paid until" after an off-platform payment. Nothing is charged, suspended or activated by this. */
+    public function subscription(Request $request, string $tenant): RedirectResponse
+    {
+        $this->authorizePlans($request);
+        $data = $request->validate(['subscription_ends_at' => ['nullable', 'date_format:Y-m-d']]);
+
+        DB::transaction(function () use ($request, $tenant, $data): void {
+            $t = Tenant::query()->lockForUpdate()->findOrFail($tenant);
+            $old = $t->getAttribute('subscription_ends_at');
+            $new = $data['subscription_ends_at'] ?? null;
+            $t->setAttribute('subscription_ends_at', $new);
+            $t->save();
+
+            PlatformActivityLog::query()->create([
+                'actor_id' => $request->user('platform')->getKey(),
+                'tenant_id' => (string) $t->getKey(),
+                'event' => 'company.subscription_changed',
+                'old_status' => $old ? 'ends:' . substr((string) $old, 0, 10) : 'none',
+                'new_status' => $new ? 'ends:' . $new : 'none',
+                'reason' => null,
+                'ip_address' => $request->ip(),
+                'user_agent' => substr((string) $request->userAgent(), 0, 2000),
+            ]);
+        });
+
+        return back()->with('success', 'Subscription end date saved. The company was not suspended or changed.');
     }
 
     private function validated(Request $request, ?Plan $plan = null): array

@@ -24,6 +24,8 @@ class Tenant extends BaseTenant
             'id',
             'status',
             'plan_id',
+            'subscription_ends_at',
+            'trial_ends_at',
             'session_version',
             'suspended_at',
         ];

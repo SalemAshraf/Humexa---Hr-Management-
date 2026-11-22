@@ -39,6 +39,7 @@ class RegisterCompanyAction
         ) {
             $tenant = Tenant::create([
                 'company_name' => trim($companyName),
+                'trial_ends_at' => now()->addDays(7)->toDateString(), // owner decision: 7-day trial for new companies
             ]);
 
             // Provision the tenant's default attendance policy during onboarding.

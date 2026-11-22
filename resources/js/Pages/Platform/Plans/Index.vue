@@ -24,6 +24,7 @@ const create = () => form.transform(clean).post(route('platform.plans.store'), {
 const startEdit = (p) => { editing[p.id] = { name: p.name, max_employees: p.max_employees ?? '', max_accounts: p.max_accounts ?? '', indicative_price_egp: p.indicative_price_egp ?? '', notes: p.notes ?? '', is_active: p.is_active }; };
 const save = (p) => router.patch(route('platform.plans.update', p.id), clean(editing[p.id]), { preserveScroll: true, onSuccess: () => delete editing[p.id] });
 const assign = (company, event) => router.patch(route('platform.companies.plan', company.id), { plan_id: event.target.value || null }, { preserveScroll: true });
+const setEnd = (company, event) => router.patch(route('platform.companies.subscription', company.id), { subscription_ends_at: event.target.value || null }, { preserveScroll: true });
 const limit = (v) => (v === null || v === undefined ? null : v);
 const input = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none';
 </script>
@@ -80,7 +81,7 @@ const input = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm
 
         <section>
             <h2 class="mb-1 font-semibold text-white">{{ $t('Company plans') }}</h2>
-            <p class="mb-3 text-xs text-slate-500">{{ $t('A company with no plan has no limits. Changing a plan never removes anything a company already has.') }}</p>
+            <p class="mb-3 text-xs text-slate-500">{{ $t('A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The date only reminds you: it never suspends or activates a company.') }}</p>
             <div class="grid gap-3 md:grid-cols-2">
                 <article v-for="c in companies" :key="c.id" class="hx-card p-4">
                     <h3 class="font-semibold text-white"><bdi>{{ c.name }}</bdi></h3>
@@ -90,6 +91,9 @@ const input = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm
                             <option value="">{{ $t('No plan (no limits)') }}</option>
                             <option v-for="p in plans" :key="p.id" :value="p.id">{{ p.name }}</option>
                         </select>
+                    </label>
+                    <label class="mt-3 block text-xs text-slate-400">{{ $t('Paid until (you enter it after you receive payment)') }}
+                        <input :class="input + ' mt-1 w-full'" type="date" :value="c.subscription_ends_at ?? ''" @change="setEnd(c, $event)" />
                     </label>
                 </article>
             </div>
