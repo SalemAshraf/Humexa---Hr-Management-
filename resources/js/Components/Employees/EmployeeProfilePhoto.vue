@@ -5,6 +5,7 @@ const props = defineProps({
     employeeId: { type: [String, Number], required: true },
     employeeName: { type: String, required: true },
     canUpdate: { type: Boolean, default: false },
+    hasPhoto: { type: Boolean, default: true },
 });
 
 const photoUrl = ref(null);
@@ -96,7 +97,13 @@ const initials = props.employeeName
     .map((part) => part.charAt(0).toUpperCase())
     .join('');
 
-onMounted(loadPhoto);
+onMounted(() => {
+    if (props.hasPhoto) {
+        loadPhoto();
+    } else {
+        loading.value = false;
+    }
+});
 onBeforeUnmount(releasePhotoUrl);
 </script>
 

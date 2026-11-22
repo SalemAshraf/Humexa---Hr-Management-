@@ -186,6 +186,7 @@ class EmployeeController extends Controller
 
         return Inertia::render('Employees/Show', [
             'employee' => $record,
+            'hasPhoto' => filled($record->profile_photo_path),
             'canUpdate' => ($request->user('tenant')?->can('update', $record) ?? false) && $request->user('tenant')->can('employees.manage'),
         ]);
     }

@@ -57,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     ], 404);
                 }
 
-                return response('Not Found', 404);
+                return response()->view('errors.workspace-not-found', [], 404);
             }
         );
     })->create();

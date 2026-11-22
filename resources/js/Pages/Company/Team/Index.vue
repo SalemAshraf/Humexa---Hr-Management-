@@ -16,7 +16,20 @@ const resetFor = ref(null);
 const resetForm = useForm({ password: '' });
 const resetAccess = (a) => resetForm.put(`/team/${a.id}/reset-access`, { preserveScroll: true, onSuccess: () => { resetFor.value = null; resetForm.reset(); } });
 const changeRole = (account, role) => router.put(`/team/${account.id}/role`, { role }, { preserveScroll: true });
-const label = (p) => p.split('.').map((x) => t(x)).join(' · ');
+const moduleLabels = { employees: 'Employees', attendance: 'Attendance', leave: 'Leaves', payroll: 'Payroll', recruitment: 'Recruitment', performance: 'Performance', reports: 'Reports', settings: 'Settings', roles: 'Team & roles' };
+const actionLabels = { view: 'View', manage: 'Manage', approve: 'Approve', export: 'Export' };
+// Group "module.action" permissions into one readable line per module.
+const grouped = (permissions) => {
+    const map = {};
+    permissions.forEach((p) => {
+        const [mod, ...rest] = p.split('.');
+        (map[mod] ||= []).push(rest.join('.'));
+    });
+    return Object.entries(map).map(([mod, acts]) => ({
+        module: t(moduleLabels[mod] ?? mod),
+        actions: acts.map((a) => t(actionLabels[a] ?? a)).join(t(', ')),
+    }));
+};
 </script>
 
 <template>
@@ -32,7 +45,9 @@ const label = (p) => p.split('.').map((x) => t(x)).join(' · ');
             <article v-for="r in roles" :key="r.name" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <h2 class="text-sm font-bold text-slate-900">{{ $t(r.name) }}</h2>
                 <p v-if="!r.permissions.length" class="mt-2 text-xs text-slate-500">{{ $t('No company-wide access. Self-service only.') }}</p>
-                <p v-else class="mt-2 text-xs leading-5 text-slate-500">{{ r.permissions.map(label).join($t(', ')) }}</p>
+                <ul v-else class="mt-2 space-y-1 text-xs leading-5 text-slate-500">
+                    <li v-for="g in grouped(r.permissions)" :key="g.module"><span class="font-semibold text-slate-700">{{ g.module }}</span>: {{ g.actions }}</li>
+                </ul>
             </article>
         </section>
 

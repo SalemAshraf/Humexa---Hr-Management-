@@ -1,6 +1,7 @@
 
 <script setup>
 import AfradIcon from '@/Components/AfradIcon.vue';
+import NavIcon from '@/Components/Dashboard/NavIcon.vue';
 import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
@@ -166,7 +167,7 @@ function isActive(item) {
                                     : 'bg-slate-100 text-slate-500 group-hover:text-slate-800'"
                             aria-hidden="true"
                         >
-                            {{ item.shortcut || item.label?.charAt(0) || '?' }}
+                            <NavIcon :code="item.shortcut" :fallback="item.label?.charAt(0) || '?'" />
                         </span>
                         <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
                             {{ $t(item.label) }}
@@ -192,7 +193,7 @@ function isActive(item) {
                             :class="isPlatform ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-400'"
                             aria-hidden="true"
                         >
-                            {{ item.shortcut || item.label?.charAt(0) || '?' }}
+                            <NavIcon :code="item.shortcut" :fallback="item.label?.charAt(0) || '?'" />
                         </span>
                         <span v-if="!collapsed" class="min-w-0 flex-1 truncate">
                             {{ $t(item.label) }}

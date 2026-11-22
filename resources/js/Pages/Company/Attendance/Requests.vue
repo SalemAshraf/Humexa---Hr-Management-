@@ -28,7 +28,7 @@ const decide = (kind, id, decision) =>
 
         <template v-for="block in [{ key: 'correction', title: 'Time corrections', rows: corrections }, { key: 'overtime', title: 'Overtime', rows: overtime }]" :key="block.key">
             <section class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" :data-testid="block.key + '-list'">
-                <h2 class="border-b border-slate-100 px-5 py-4 text-base font-bold text-slate-900">{{ block.title }}</h2>
+                <h2 class="border-b border-slate-100 px-5 py-4 text-base font-bold text-slate-900">{{ $t(block.title) }}</h2>
                 <ul class="divide-y divide-slate-100">
                     <li v-for="r in block.rows" :key="r.id" class="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
                         <div class="min-w-0">

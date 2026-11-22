@@ -56,7 +56,7 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
 
         <section class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
             <article v-for="(label, key) in { gross: 'Gross (EGP)', insurance_employee: 'Employee insurance (EGP)', tax: 'Income tax (EGP)', insurance_employer: 'Employer insurance (EGP)', net: 'Net pay (EGP)' }" :key="key" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <p class="text-xs font-medium text-slate-500">{{ label }}</p><p class="mt-1 text-xl font-bold text-slate-900">{{ money(totals[key]) }}</p>
+                <p class="text-xs font-medium text-slate-500">{{ $t(label) }}</p><p class="mt-1 text-xl font-bold text-slate-900">{{ money(totals[key]) }}</p>
             </article>
         </section>
 

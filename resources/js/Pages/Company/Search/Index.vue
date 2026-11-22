@@ -24,7 +24,7 @@ const submit = () => router.get('/search', { q: q.value }, { preserveState: true
         <p v-if="tooShort" class="mb-4 text-sm text-slate-500">{{ $t('Type at least 2 characters.') }}</p>
 
         <section v-for="g in groups" :key="g.label" class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <h2 class="border-b border-slate-100 px-4 py-3 text-sm font-bold text-slate-900">{{ g.label }}</h2>
+            <h2 class="border-b border-slate-100 px-4 py-3 text-sm font-bold text-slate-900">{{ $t(g.label) }}</h2>
             <ul class="divide-y divide-slate-100">
                 <li v-for="(r, i) in g.results" :key="i">
                     <Link :href="r.url" class="flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-slate-50">

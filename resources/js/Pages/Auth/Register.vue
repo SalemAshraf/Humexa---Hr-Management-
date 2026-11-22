@@ -5,10 +5,19 @@ import GuestLayout from '@/Layouts/GuestLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const showPassword = ref(false);
 const showPasswordConfirmation = ref(false);
+
+const page = usePage();
+const registeredDomain = computed(() => page.props.flash?.registered_domain || null);
+const loginUrl = computed(() => {
+    if (!registeredDomain.value) return null;
+    const port = window.location.port ? `:${window.location.port}` : '';
+    return `${window.location.protocol}//${registeredDomain.value}${port}/login`;
+});
 
 const form = useForm({
     company_name: '',
@@ -50,7 +59,13 @@ const submit = () => {
                 <p class="mt-2 text-sm leading-5 text-slate-600">{{ $t('Set up your workspace and start managing your people in one place.') }}</p>
             </div>
 
-            <form @submit.prevent="submit" class="space-y-4">
+            <div v-if="registeredDomain" class="mb-5 rounded-2xl border border-[#2BD9A9]/50 bg-[#2BD9A9]/10 p-4" role="status" data-testid="register-success">
+                <p class="text-sm font-bold text-[#0B7A60]">{{ $t('Your company account is ready.') }}</p>
+                <p class="mt-1 text-sm text-slate-700">{{ $t('Your workspace address is') }} <span dir="ltr" class="font-semibold">{{ registeredDomain }}</span></p>
+                <a :href="loginUrl" class="mt-3 inline-flex items-center rounded-xl bg-[#0E2A47] px-4 py-2 text-sm font-semibold text-white hover:bg-[#12395f]">{{ $t('Open your workspace and sign in') }}</a>
+            </div>
+
+            <form v-else @submit.prevent="submit" class="space-y-4">
                 <!-- Company details -->
                 <div>
                     <div class="mb-3 flex items-center gap-3">

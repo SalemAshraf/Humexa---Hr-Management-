@@ -10,6 +10,7 @@ import EmployeeRecordsPanel from '@/Components/Employees/EmployeeRecordsPanel.vu
 const props = defineProps({
     employee: { type: Object, required: true },
     canUpdate: { type: Boolean, default: false },
+    hasPhoto: { type: Boolean, default: false },
 });
 
 const page = usePage();
@@ -87,6 +88,7 @@ function archiveEmployee() {
                     :employee-id="employee.id"
                     :employee-name="fullName"
                     :can-update="canUpdate"
+                    :has-photo="hasPhoto"
                 />
 
                 <div class="min-w-0 flex-1 text-center sm:text-start">

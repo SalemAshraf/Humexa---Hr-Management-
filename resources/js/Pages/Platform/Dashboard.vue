@@ -52,8 +52,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
         </div>
 
         <div class="mb-5 flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-xs">
-            <div><span class="font-bold tracking-wide text-slate-200">{{ $t('UI CONCEPT') }}</span><span class="ms-3 text-slate-500">{{ $t('Live platform data · Development') }}</span></div>
-            <span class="text-slate-500">{{ $t('Super admin view') }}</span>
+            <span class="font-bold tracking-wide text-slate-200">{{ $t('Super admin view') }}</span>
         </div>
 
         <section class="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
