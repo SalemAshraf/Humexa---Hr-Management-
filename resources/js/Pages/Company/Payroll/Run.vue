@@ -41,6 +41,7 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
             </div>
             <div class="flex flex-wrap gap-2 text-sm font-semibold">
                 <a :href="`/payroll/runs/${run.id}/export`" class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200">{{ $t('Download run CSV') }}</a>
+                <a :href="`/payroll/runs/${run.id}/transfer-list`" class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200">{{ $t('Download transfer list') }}</a>
                 <template v-if="abilities.manage && draft">
                     <button class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200" @click="recalc">{{ $t('Recalculate') }}</button>
                     <button class="rounded-lg bg-emerald-600 px-3 py-2 text-white" @click="approve">{{ $t('Lock run') }}</button>

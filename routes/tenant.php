@@ -112,11 +112,14 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::get('/', 'index')->name('index');
                 Route::get('/runs/{run}', 'showRun')->whereNumber('run')->name('runs.show');
                 Route::get('/runs/{run}/export', 'export')->whereNumber('run')->name('runs.export');
+                Route::get('/runs/{run}/transfer-list', 'exportBank')->whereNumber('run')->name('runs.transfer');
                 Route::middleware('tenant.can:payroll.manage')->group(function () {
                     Route::put('/rules', 'updateRules')->name('rules.update');
                     Route::post('/rules/confirm', 'confirmRules')->name('rules.confirm');
                     Route::post('/rules/egypt-template', 'loadEgyptTemplate')->name('rules.template');
                     Route::post('/employees/{employee}/compensation', 'storeCompensation')->whereNumber('employee')->name('compensation.store');
+                    Route::post('/advances', 'storeAdvance')->name('advances.store');
+                    Route::post('/advances/{advance}/cancel', 'cancelAdvance')->whereNumber('advance')->name('advances.cancel');
                     Route::post('/runs', 'storeRun')->name('runs.store');
                     Route::post('/runs/{run}/recalculate', 'recalculate')->whereNumber('run')->name('runs.recalculate');
                     Route::post('/runs/{run}/approve', 'approve')->whereNumber('run')->name('runs.approve');

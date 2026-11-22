@@ -98,6 +98,8 @@ class PayrollRunService
                 $earnTaxable = (float) $adjustments->where('kind', 'earning')->where('taxable', true)->sum('amount');
                 $earnExempt = (float) $adjustments->where('kind', 'earning')->where('taxable', false)->sum('amount');
                 $deductions = (float) $adjustments->where('kind', 'deduction')->sum('amount');
+                $advanceTaken = $this->advanceInstallments($tenantId, (int) $employee->id, $run);
+                $deductions += array_sum($advanceTaken);
 
                 $unpaidDays = $this->unpaidDays($tenantId, (int) $employee->id, $start, $end, $weekend);
 
@@ -116,7 +118,7 @@ class PayrollRunService
                     'insurance_employee' => $result['insurance_employee'], 'insurance_employer' => $result['insurance_employer'],
                     'annual_net_income' => $result['annual_net_income'], 'income_tax' => $result['income_tax'],
                     'after_tax_levy' => $result['after_tax_levy'], 'net_pay' => $result['net_pay'],
-                    'details' => ['compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured, 'estimate_only' => true,
+                    'details' => ['advance_installments' => $advanceTaken, 'compensation_effective_from' => $comp->effective_from->toDateString(), 'insured' => $comp->insured, 'estimate_only' => true,
                         'rules_snapshot' => $rules->only(['id', 'levy_base', 'name', 'effective_from', 'effective_to', 'template_key', 'strict_inputs', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'private_insurance_cap_pct', 'private_insurance_cap_amount', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables']), 'provisional' => $rules->strict_inputs ? [
                         'kind' => 'reviewed-assumptions estimate, not a statutory result',
                         'valid_from' => $rules->effective_from->toDateString(), 'valid_to' => $rules->effective_to?->toDateString(),
@@ -128,6 +130,33 @@ class PayrollRunService
         });
 
         return $skipped;
+    }
+
+    /**
+     * Installments this run would take for the employee's active advances, after tax like any other deduction.
+     * Never more than the remaining balance, and never before the advance's start month.
+     *
+     * @return array<int, float> advance id => amount
+     */
+    public function advanceInstallments(string $tenantId, int $employeeId, PayrollRun $run): array
+    {
+        $taken = [];
+        $advances = \App\Modules\Payroll\Models\EmployeeAdvance::query()->where('tenant_id', $tenantId)
+            ->where('employee_id', $employeeId)->where('status', 'active')->orderBy('id')->get();
+
+        foreach ($advances as $advance) {
+            if (! $advance->startsOnOrBefore((int) $run->year, (int) $run->month)) {
+                continue;
+            }
+
+            $amount = round(min($advance->installment, $advance->balance((int) $run->id)), 2);
+
+            if ($amount > 0) {
+                $taken[$advance->id] = $amount;
+            }
+        }
+
+        return $taken;
     }
 
     /** Working days of approved unpaid leave that fall inside the month. */

@@ -1586,5 +1586,21 @@
     "Days worked this month": "أيام العمل هذا الشهر",
     "Late arrivals this month": "تأخيرات هذا الشهر",
     "Plans set limits on employees and user accounts. Your plan is activated by the Afrad team, and payment is not taken online.": "الباقات تحدد عدد الموظفين وحسابات المستخدمين. يفعّل فريق أفراد باقتك، ولا تتم عملية الدفع عبر الموقع.",
-    "A new connector you add yourself in Claude. Answers appear in Claude and follow its terms.": "موصّل جديد تضيفه بنفسك في Claude. تظهر الإجابات في Claude وتخضع لشروطه."
+    "A new connector you add yourself in Claude. Answers appear in Claude and follow its terms.": "موصّل جديد تضيفه بنفسك في Claude. تظهر الإجابات في Claude وتخضع لشروطه.",
+    "Advances and loans": "السلف والقروض",
+    "An installment is deducted from net pay in each approved run from the start month until the balance is repaid. A draft run shows it but does not reduce the balance.": "القسط بيتخصم من صافي الراتب في كل كشف معتمد من شهر البداية لحد ما الرصيد يتسدد. الكشف المسودة بيعرضه لكن مش بينقص الرصيد.",
+    "Monthly installment": "القسط الشهري",
+    "Start month": "شهر البداية",
+    "Save advance": "حفظ السلفة",
+    "installment": "القسط",
+    "balance": "المتبقي",
+    "repaid": "اتسددت",
+    "No advances yet.": "مفيش سلف لسه.",
+    "Cancel this advance? Installments already taken stay on record.": "تلغي السلفة دي؟ الأقساط اللي اتخصمت قبل كده هتفضل مسجلة.",
+    "Bank name": "اسم البنك",
+    "Bank account or IBAN": "رقم الحساب أو الـ IBAN",
+    "Download transfer list": "تنزيل قائمة التحويل",
+    "Another payroll manager must approve this run. The person who created it cannot approve it.": "لازم مسؤول رواتب تاني يعتمد الكشف ده. اللي أنشأه مينفعش يعتمده.",
+    "Advance saved. It is deducted from net pay in each run from the start month until repaid.": "اتحفظت السلفة. بتتخصم من صافي الراتب في كل كشف من شهر البداية لحد ما تتسدد.",
+    "Advance cancelled. Installments already taken in approved runs stay on record.": "اتلغت السلفة. الأقساط اللي اتخصمت في كشوف معتمدة هتفضل مسجلة."
 }

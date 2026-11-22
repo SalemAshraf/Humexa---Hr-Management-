@@ -69,7 +69,11 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
     expect((float) Payslip::where('payroll_run_id', $run->id)->first()->net_pay)->toBe(22472.27);
 
     ($this->as)($hr)->get("{$this->base}/payroll/runs/{$run->id}/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8')->assertDownload('payroll-run-2026-11.csv');
-    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertRedirect();
+    // The creator cannot approve their own run while another payroll manager exists.
+    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertSessionHasErrors('run');
+    expect($run->fresh()->status)->toBe('draft');
+    ($this->as)($this->reg['user'])->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertSessionHasNoErrors();
+    expect($run->fresh()->status)->toBe('approved');
 
     // The approved run keeps the parameters it was calculated with, even if the rules change later.
     $before = Payslip::where('payroll_run_id', $run->id)->first();
@@ -141,4 +145,42 @@ test('a run uses the rule set in force for its month and keeps a snapshot', func
 
     $old->forceFill(['insurable_max' => 99999])->save();
     expect($early->fresh()->details['rules_snapshot']['insurable_max'])->toEqual(12000);
+});
+
+
+test('an advance is deducted in installments only from approved runs, never beyond the balance, and cancelling stops it', function () {
+    $hr = $this->hr;
+    ($this->as)($hr)->put("{$this->base}/payroll/rules", ['name' => 'Test', 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0.11, 'insurance_employer_rate' => 0.1875,
+        'insurable_min' => 2700, 'insurable_max' => 16700, 'personal_exemption_annual' => 20000, 'rounding_step' => 10, 'after_tax_levy_rate' => 0, 'month_days_basis' => 30,
+        'tax_tables_json' => json_encode(payrollTestTaxTables())])->assertSessionHasNoErrors();
+    ($this->as)($hr)->post("{$this->base}/payroll/employees/{$this->worker->id}/compensation", ['effective_from' => '2026-01-01', 'basic_salary' => 30000, 'allowances' => 0, 'insured' => true, 'bank_name' => 'Test Bank', 'bank_account' => 'EG00TEST'])->assertSessionHasNoErrors();
+    ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm")->assertRedirect();
+
+    ($this->as)($hr)->post("{$this->base}/payroll/advances", ['employee_id' => $this->worker->id, 'principal' => 1500, 'installment' => 1000, 'start_year' => 2026, 'start_month' => 11])->assertSessionHasNoErrors();
+    ($this->as)($hr)->post("{$this->base}/payroll/advances", ['employee_id' => $this->worker->id, 'principal' => 100, 'installment' => 500, 'start_year' => 2026, 'start_month' => 11])->assertSessionHasErrors('installment');
+
+    // Before the start month nothing is taken.
+    ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 10])->assertRedirect();
+    $oct = PayrollRun::where('tenant_id', $this->tid)->where('month', 10)->firstOrFail();
+    expect((float) Payslip::where('payroll_run_id', $oct->id)->first()->adjustments_deductions)->toBe(0.0);
+
+    ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 11])->assertRedirect();
+    $nov = PayrollRun::where('tenant_id', $this->tid)->where('month', 11)->firstOrFail();
+    expect((float) Payslip::where('payroll_run_id', $nov->id)->first()->net_pay)->toBe(22472.27);
+    $advance = \App\Modules\Payroll\Models\EmployeeAdvance::where('tenant_id', $this->tid)->firstOrFail();
+    expect($advance->balance())->toBe(1500.0); // a draft run takes nothing yet
+
+    ($this->as)($this->reg['user'])->post("{$this->base}/payroll/runs/{$nov->id}/approve")->assertSessionHasNoErrors();
+    expect($advance->fresh()->balance())->toBe(500.0);
+
+    ($this->as)($hr)->post("{$this->base}/payroll/runs", ['year' => 2026, 'month' => 12])->assertRedirect();
+    $dec = PayrollRun::where('tenant_id', $this->tid)->where('month', 12)->firstOrFail();
+    expect((float) Payslip::where('payroll_run_id', $dec->id)->first()->adjustments_deductions)->toBe(500.0); // only what is left
+
+    ($this->as)($hr)->post("{$this->base}/payroll/advances/{$advance->id}/cancel")->assertSessionHasNoErrors();
+    ($this->as)($hr)->post("{$this->base}/payroll/runs/{$dec->id}/recalculate");
+    expect((float) Payslip::where('payroll_run_id', $dec->id)->first()->adjustments_deductions)->toBe(0.0);
+
+    $csv = ($this->as)($hr)->get("{$this->base}/payroll/runs/{$nov->id}/transfer-list")->assertOk()->streamedContent();
+    expect($csv)->toContain('Test Bank')->and($csv)->toContain('EG00TEST')->and($csv)->toContain('net_pay_egp');
 });

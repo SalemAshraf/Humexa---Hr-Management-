@@ -7,6 +7,9 @@ namespace App\Modules\Payroll\Http\Controllers;
 use App\Http\Controllers\Concerns\InteractsWithTenant;
 use App\Http\Controllers\Controller;
 use App\Modules\Employees\Models\Employee;
+use App\Models\User;
+use App\Modules\Payroll\Models\AdvanceInstallment;
+use App\Modules\Payroll\Models\EmployeeAdvance;
 use App\Modules\Payroll\Models\EmployeeCompensation;
 use App\Modules\Payroll\Models\PayrollAdjustment;
 use App\Modules\Payroll\Models\PayrollRuleSet;
@@ -17,6 +20,7 @@ use App\Modules\Payroll\Services\EgyptTemplate;
 use App\Modules\Payroll\Services\PayrollRunService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -51,8 +55,13 @@ class PayrollController extends Controller
                 'id' => $e->id, 'name' => $e->full_name, 'employee_number' => $e->employee_number,
                 'compensation' => ($c = $latest->get($e->id)) ? [
                     'effective_from' => $c->effective_from->toDateString(), 'basic_salary' => $c->basic_salary, 'allowances' => $c->allowances,
-                    'insured' => $c->insured, 'insurable_wage' => $c->insurable_wage, 'note' => $c->note,
+                    'insured' => $c->insured, 'insurable_wage' => $c->insurable_wage, 'note' => $c->note, 'bank_name' => $c->bank_name, 'bank_account' => $c->bank_account,
                 ] : null,
+            ])->values(),
+            'advances' => EmployeeAdvance::query()->where('tenant_id', $tenantId)->orderByDesc('id')->get()->map(fn (EmployeeAdvance $a) => [
+                'id' => $a->id, 'employee_id' => $a->employee_id, 'employee' => $employees->firstWhere('id', $a->employee_id)?->full_name,
+                'principal' => $a->principal, 'installment' => $a->installment, 'start' => sprintf('%04d-%02d', $a->start_year, $a->start_month),
+                'reason' => $a->reason, 'status' => $a->status, 'balance' => $a->balance(),
             ])->values(),
             'abilities' => ['manage' => (bool) $request->user('tenant')?->can('payroll.manage')],
         ]);
@@ -133,6 +142,8 @@ class PayrollController extends Controller
             'basic_salary' => ['required', 'numeric', 'min:0', 'max:99999999'],
             'allowances' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'insured' => ['required', 'boolean'],
+            'bank_name' => ['nullable', 'string', 'max:120'],
+            'bank_account' => ['nullable', 'string', 'max:64'],
             'insurable_wage' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'note' => ['nullable', 'string', 'max:190'],
         ]);
@@ -209,10 +220,83 @@ class PayrollController extends Controller
     {
         $run = $this->run($request);
         abort_unless($run->status === PayrollRun::DRAFT, 422, 'Already approved.');
+        $approver = $request->user('tenant');
 
-        $run->forceFill(['status' => PayrollRun::APPROVED, 'approved_by_user_id' => $request->user('tenant')->id, 'approved_at' => now()])->save();
+        // Two-person control: whoever created the run cannot also approve it while another payroll manager exists.
+        if ((int) $run->created_by_user_id === (int) $approver->id && $this->otherPayrollManagerExists((string) $run->tenant_id, (int) $approver->id)) {
+            return back()->withErrors(['run' => 'Another payroll manager must approve this run. The person who created it cannot approve it.']);
+        }
+
+        DB::transaction(function () use ($run, $approver) {
+            // Recalculate first so advance installments reflect the balances at the moment of approval.
+            app(PayrollRunService::class)->build($run);
+
+            foreach (Payslip::query()->where('payroll_run_id', $run->id)->get() as $slip) {
+                foreach (($slip->details['advance_installments'] ?? []) as $advanceId => $amount) {
+                    AdvanceInstallment::query()->updateOrCreate(
+                        ['employee_advance_id' => (int) $advanceId, 'payroll_run_id' => $run->id],
+                        ['tenant_id' => $run->tenant_id, 'amount' => $amount],
+                    );
+                }
+            }
+
+            $run->forceFill(['status' => PayrollRun::APPROVED, 'approved_by_user_id' => $approver->id, 'approved_at' => now()])->save();
+        });
 
         return back()->with('status', 'Run approved and locked.');
+    }
+
+    private function otherPayrollManagerExists(string $tenantId, int $exceptUserId): bool
+    {
+        return User::query()->where('tenant_id', $tenantId)->where('account_type', User::ACCOUNT_TYPE_TENANT)->whereNull('disabled_at')
+            ->where('id', '!=', $exceptUserId)->get()->contains(fn (User $u) => $u->can('payroll.manage'));
+    }
+
+    public function storeAdvance(Request $request): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+        $data = $request->validate([
+            'employee_id' => ['required', 'integer', Rule::exists('employees', 'id')->where('tenant_id', $tenantId)],
+            'principal' => ['required', 'numeric', 'gt:0', 'max:99999999'],
+            'installment' => ['required', 'numeric', 'gt:0', 'lte:principal'],
+            'start_year' => ['required', 'integer', 'between:2020,2100'],
+            'start_month' => ['required', 'integer', 'between:1,12'],
+            'reason' => ['nullable', 'string', 'max:190'],
+        ]);
+
+        EmployeeAdvance::query()->create($data + ['tenant_id' => $tenantId, 'created_by_user_id' => $request->user('tenant')->id]);
+
+        return back()->with('status', 'Advance saved. It is deducted from net pay in each run from the start month until repaid.');
+    }
+
+    public function cancelAdvance(Request $request): RedirectResponse
+    {
+        $advance = EmployeeAdvance::query()->where('tenant_id', $this->tenantId())->findOrFail($request->route('advance'));
+        $advance->forceFill(['status' => 'cancelled'])->save();
+
+        return back()->with('status', 'Advance cancelled. Installments already taken in approved runs stay on record.');
+    }
+
+    /** Plain transfer list: names, bank details as typed by the company, net pay. Not a bank-specific file format. */
+    public function exportBank(Request $request): StreamedResponse
+    {
+        $run = $this->run($request);
+        $tenantId = $this->tenantId();
+        $end = \Illuminate\Support\Carbon::create((int) $run->year, (int) $run->month, 1)->endOfMonth()->toDateString();
+        $slips = Payslip::query()->where('payroll_run_id', $run->id)->with('employee:id,tenant_id,employee_number,first_name,middle_name,last_name')->orderBy('id')->get();
+        $comps = EmployeeCompensation::query()->where('tenant_id', $tenantId)->whereDate('effective_from', '<=', $end)->orderBy('effective_from')->get()->groupBy('employee_id')->map->last();
+        $name = sprintf('payroll-transfer-list-%04d-%02d.csv', $run->year, $run->month);
+
+        return response()->streamDownload(function () use ($slips, $comps) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['employee_number', 'employee', 'bank_name', 'bank_account', 'net_pay_egp', 'note']);
+            foreach ($slips as $p) {
+                $c = $comps->get($p->employee_id);
+                $note = $c?->bank_account ? '' : 'no bank details recorded';
+                fputcsv($out, array_map([$this, 'csvSafe'], [$p->employee?->employee_number, $p->employee?->full_name, $c?->bank_name, $c?->bank_account, $p->net_pay, $note]));
+            }
+            fclose($out);
+        }, $name, ['Content-Type' => 'text/csv']);
     }
 
     public function destroyRun(Request $request): RedirectResponse
