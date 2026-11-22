@@ -23,8 +23,6 @@ class DataExportController extends Controller
 {
     use InteractsWithTenant;
 
-    private const MAX_ROWS = 20000;
-
     private const ENTITIES = [
         'employees' => ['permission' => 'employees.manage', 'label' => 'Employees'],
         'leave' => ['permission' => 'leave.manage', 'label' => 'Leave requests'],
@@ -39,7 +37,6 @@ class DataExportController extends Controller
         return Inertia::render('Company/DataExport', [
             'exports' => collect(self::ENTITIES)->filter(fn ($e) => $user?->can($e['permission']))
                 ->map(fn ($e, $key) => ['key' => $key, 'label' => $e['label']])->values(),
-            'maxRows' => self::MAX_ROWS,
         ]);
     }
 
@@ -76,7 +73,7 @@ class DataExportController extends Controller
     private function employees(string $tenantId): array
     {
         $rows = Employee::query()->where('tenant_id', $tenantId)->with(['department:id,name', 'position:id,name'])
-            ->orderBy('id')->limit(self::MAX_ROWS)->get()->map(fn (Employee $e) => [
+            ->lazyById(1000)->map(fn (Employee $e) => [
                 $e->employee_number, $e->first_name, $e->last_name, $e->work_email, $e->phone,
                 optional($e->hire_date)->toDateString(), $e->employment_status, $e->department?->name, $e->position?->name,
             ]);
@@ -87,7 +84,7 @@ class DataExportController extends Controller
     private function leave(string $tenantId): array
     {
         $rows = LeaveRequest::query()->where('tenant_id', $tenantId)->with(['employee:id,employee_number,first_name,last_name', 'type:id,name'])
-            ->orderByDesc('id')->limit(self::MAX_ROWS)->get()->map(fn (LeaveRequest $r) => [
+            ->lazyByIdDesc(1000)->map(fn (LeaveRequest $r) => [
                 $r->employee?->employee_number, trim(($r->employee?->first_name ?? '').' '.($r->employee?->last_name ?? '')), $r->type?->name,
                 optional($r->start_date)->toDateString(), optional($r->end_date)->toDateString(), $r->days, $r->status,
             ]);
@@ -98,7 +95,7 @@ class DataExportController extends Controller
     private function attendance(string $tenantId): array
     {
         $rows = AttendanceRecord::query()->where('tenant_id', $tenantId)->with('employee:id,employee_number,first_name,last_name')
-            ->orderByDesc('attendance_date')->orderByDesc('id')->limit(self::MAX_ROWS)->get()->map(fn (AttendanceRecord $r) => [
+            ->lazyByIdDesc(1000)->map(fn (AttendanceRecord $r) => [
                 $r->employee?->employee_number, trim(($r->employee?->first_name ?? '').' '.($r->employee?->last_name ?? '')),
                 optional($r->attendance_date)->toDateString(), $r->status, $r->total_worked_minutes, $r->total_break_minutes,
                 $r->late_minutes, $r->early_leave_minutes, $r->overtime_minutes,

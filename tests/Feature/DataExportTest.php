@@ -53,3 +53,18 @@ test('managers, employees and guests cannot export, and unknown entities 404', f
     auth('tenant')->logout();
     $this->get("{$this->base}/data-export/employees")->assertRedirect();
 });
+
+test('a large export is never silently cut: every row of the company is in the file', function () {
+    $hr = ($this->mk)(TenantRoleCatalog::HR_ADMIN, 'hr3-exp@tenant-test.example');
+    $now = now()->toDateTimeString();
+    $rows = [];
+    for ($i = 1; $i <= 2300; $i++) {
+        $rows[] = ['tenant_id' => $this->aid, 'employee_number' => "BULK-{$i}", 'first_name' => "Bulk{$i}", 'last_name' => 'Row', 'employment_status' => 'active', 'created_at' => $now, 'updated_at' => $now];
+    }
+    foreach (array_chunk($rows, 500) as $chunk) {
+        \App\Modules\Employees\Models\Employee::query()->insert($chunk);
+    }
+    $csv = ($this->as)($hr)->get("{$this->base}/data-export/employees")->streamedContent();
+    expect(substr_count($csv, "\n"))->toBe(2300 + 1 + 1 + 0); // header + 2300 bulk + the one seeded employee
+    expect($csv)->toContain('BULK-2300')->and($csv)->toContain('BULK-1,');
+});

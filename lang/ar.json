@@ -1442,7 +1442,7 @@
  "Download your records as CSV": "نزّل سجلاتك كملفات CSV",
  "Download your company records as CSV files. Exports include only basic fields. They never include ID numbers, addresses, documents, salaries or sign-in details.": "نزّل سجلات شركتك كملفات CSV. التصدير فيه الحقول الأساسية بس، ومفيهوش أرقام هوية أو عناوين أو مستندات أو مرتبات أو بيانات دخول.",
  "You do not have permission to export any records.": "معندكش صلاحية تصدّر أي سجلات.",
- "Each file holds up to {n} rows.": "كل ملف فيه لحد {n} صف.",
  "Leave requests": "طلبات الإجازة",
- "Your plan period has ended. Your data is kept and you can still view and export it. Ask the platform administrator to renew your plan to add or change records.": "انتهت فترة اشتراكك. بياناتك محفوظة وتقدر تعرضها وتصدّرها. اطلب من إدارة المنصة تجديد الاشتراك عشان تضيف أو تعدّل سجلات."
+ "Your plan period has ended. Your data is kept and you can still view and export it. Ask the platform administrator to renew your plan to add or change records.": "انتهت فترة اشتراكك. بياناتك محفوظة وتقدر تعرضها وتصدّرها. اطلب من إدارة المنصة تجديد الاشتراك عشان تضيف أو تعدّل سجلات.",
+ "These values were pre-filled by an earlier version of Afrad. They are not verified. Check every rate, limit and tax table with your accountant before marking the rules as reviewed.": "القيم دي كانت معبّاة مسبقًا من نسخة أقدم من أفراد، وغير متحقق منها. راجع كل نسبة وحد وجدول ضريبة مع محاسبك قبل ما تعلّم القواعد كمراجَعة."
 }

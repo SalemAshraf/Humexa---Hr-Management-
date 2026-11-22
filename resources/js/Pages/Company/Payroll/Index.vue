@@ -62,6 +62,7 @@ const flash = computed(() => window.history.state?.props?.flash);
         <p v-for="(m, k) in $page.props.errors" :key="k" class="mb-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{{ $t(m) }}</p>
         <p v-if="$page.props.flash?.status" class="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{{ $t($page.props.flash.status) }}</p>
 
+        <p v-if="rules?.legacy_defaults" class="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" data-testid="rules-legacy">{{ $t('These values were pre-filled by an earlier version of Afrad. They are not verified. Check every rate, limit and tax table with your accountant before marking the rules as reviewed.') }}</p>
         <p v-if="rules?.missing?.length" class="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900" data-testid="rules-missing">{{ $t('Your payroll rules are not complete yet. Enter the insurance rates, insurable wage limits, personal exemption and tax tables from your accountant, then mark the rules as reviewed.') }}</p>
         <section v-if="rules" class="mb-6 rounded-2xl border bg-white p-5 shadow-sm" :class="'border-amber-300'">
             <div class="flex flex-wrap items-start justify-between gap-3">

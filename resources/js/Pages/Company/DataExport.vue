@@ -2,7 +2,7 @@
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
-defineProps({ exports: Array, maxRows: Number });
+defineProps({ exports: Array });
 </script>
 
 <template>
@@ -16,6 +16,5 @@ defineProps({ exports: Array, maxRows: Number });
                 <a :href="`/data-export/${e.key}`" class="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white">{{ $t('Download CSV') }}</a>
             </li>
         </ul>
-        <p class="mt-4 text-xs text-slate-500">{{ $t('Each file holds up to {n} rows.', { n: maxRows }) }}</p>
     </CompanyLayout>
 </template>

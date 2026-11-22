@@ -38,6 +38,11 @@ beforeEach(function () {
 test('a run needs confirmed rules, then calculates payslips and locks on approval', function () {
     $hr = $this->hr;
     ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
+    expect(PayrollRuleSet::where('tenant_id', $this->tid)->count())->toBe(0); // opening the page saves nothing
+    ($this->as)($hr)->put("{$this->base}/payroll/rules", ['name' => 'Blank', 'effective_from' => '2026-01-01', 'insurance_employee_rate' => 0, 'insurance_employer_rate' => 0,
+        'insurable_min' => 0, 'insurable_max' => 0, 'personal_exemption_annual' => 0, 'rounding_step' => 10, 'after_tax_levy_rate' => 0, 'month_days_basis' => 30,
+        'tax_tables_json' => json_encode([['up_to' => null, 'bands' => [[null, 0]]]])])->assertSessionHasNoErrors();
+    PayrollRuleSet::where('tenant_id', $this->tid)->update(['insurance_employee_rate' => null, 'insurance_employer_rate' => null, 'insurable_min' => null, 'insurable_max' => null, 'personal_exemption_annual' => null, 'tax_tables' => '[]']);
     $rules = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
     expect($rules->isConfirmed())->toBeFalse()->and($rules->missingSettings())->toHaveCount(6);
 
@@ -80,8 +85,7 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
 test('editing confirmed rules clears the confirmation and bad tables are refused', function () {
     $hr = $this->hr;
     ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
-    $r = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
-    $r->forceFill(payrollTestRules())->save();
+    $r = PayrollRuleSet::query()->forceCreate(['tenant_id' => $this->tid] + payrollTestRules());
     ($this->as)($hr)->post("{$this->base}/payroll/rules/confirm");
     expect($r->fresh()->isConfirmed())->toBeTrue();
 
@@ -120,8 +124,8 @@ test('roles without payroll access are refused, and other tenants cannot be reac
 test('a run uses the rule set in force for its month and keeps a snapshot', function () {
     $hr = $this->hr;
     ($this->as)($hr)->get("{$this->base}/payroll")->assertOk();
-    $old = PayrollRuleSet::where('tenant_id', $this->tid)->firstOrFail();
-    $old->forceFill(payrollTestRules())->forceFill(['effective_from' => '2025-01-01', 'confirmed_at' => now(), 'insurable_max' => 12000])->save();
+    $old = PayrollRuleSet::query()->forceCreate(['tenant_id' => $this->tid] + payrollTestRules());
+    $old->forceFill(['effective_from' => '2025-01-01', 'confirmed_at' => now(), 'insurable_max' => 12000])->save();
     $new = PayrollRuleSet::query()->forceCreate(['tenant_id' => $this->tid] + payrollTestRules() + []);
     $new->forceFill(['effective_from' => '2026-06-01', 'confirmed_at' => now()])->save();
 

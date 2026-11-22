@@ -30,7 +30,8 @@ class PayrollController extends Controller
     public function index(Request $request): Response
     {
         $tenantId = $this->tenantId();
-        $rules = $this->activeRules($tenantId, create: $request->user('tenant')?->can('payroll.manage') ?? false);
+        // Reading never creates a row: a company without saved rules sees a blank, unsaved set.
+        $rules = $this->activeRules($tenantId, create: false) ?? (new PayrollRuleSet)->forceFill(EgyptRuleDefaults::attributes());
 
         $employees = Employee::query()->where('tenant_id', $tenantId)
             ->whereNotIn('employment_status', [Employee::STATUS_DRAFT, Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])
@@ -39,7 +40,7 @@ class PayrollController extends Controller
         $latest = EmployeeCompensation::query()->where('tenant_id', $tenantId)->orderBy('effective_from')->get()->groupBy('employee_id')->map->last();
 
         return Inertia::render('Company/Payroll/Index', [
-            'rules' => $rules ? $this->rulesPayload($rules) : null,
+            'rules' => $this->rulesPayload($rules),
             'runs' => PayrollRun::query()->where('tenant_id', $tenantId)->orderByDesc('year')->orderByDesc('month')->get()->map(fn (PayrollRun $r) => [
                 'id' => $r->id, 'year' => $r->year, 'month' => $r->month, 'status' => $r->status,
                 'employees' => Payslip::where('payroll_run_id', $r->id)->count(),
@@ -266,7 +267,7 @@ class PayrollController extends Controller
     private function rulesPayload(PayrollRuleSet $r): array
     {
         return $r->only(['id', 'name', 'country', 'insurance_employee_rate', 'insurance_employer_rate', 'insurable_min', 'insurable_max', 'personal_exemption_annual', 'rounding_step', 'after_tax_levy_rate', 'after_tax_levy_label', 'month_days_basis', 'tax_tables', 'sources', 'open_questions'])
-            + ['missing' => $r->missingSettings()] + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
+            + ['missing' => $r->missingSettings(), 'legacy_defaults' => $r->exists && ! $r->isConfirmed() && str_contains((string) $r->name, 'ESTIMATOR (unverified starting values)')] + ['effective_from' => $r->effective_from->toDateString(), 'confirmed' => $r->isConfirmed(), 'confirmed_at' => $r->confirmed_at?->toDateTimeString()];
     }
 
     private function validateTables(mixed $tables): void

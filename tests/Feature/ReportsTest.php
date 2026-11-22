@@ -61,6 +61,9 @@ test('hr sees the whole company, a manager only direct reports, an employee noth
     ($this->as)($emp)->get("{$this->base}/reports")->assertForbidden();
     ($this->as)($emp)->get("{$this->base}/reports/export")->assertForbidden();
     ($this->as)($hr)->get("{$this->base}/reports/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8');
+    // the manager's CSV carries the same direct-report scope and none of the HR-only sections
+    $mgrCsv = ($this->as)($mgr)->get("{$this->base}/reports/export")->assertOk()->streamedContent();
+    expect($mgrCsv)->toContain('Direct reports only')->and($mgrCsv)->not->toContain('Whole company')->and($mgrCsv)->not->toContain('Payroll runs')->and($mgrCsv)->not->toContain('Recruitment pipeline');
     ($this->as)($hr)->get("{$this->base}/reports?from=2020-01-01&to=2026-01-01")->assertStatus(422);
 });
 
