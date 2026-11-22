@@ -135,7 +135,7 @@ class PayrollController extends Controller
         }
 
         if ($rules->missingSettings() !== [] || ! $rules->isConfirmed()) {
-            return back()->withErrors(['run' => 'Mark the payroll rules as reviewed before creating an estimate.']);
+            return back()->withErrors(['run' => 'Mark the payroll rules as reviewed before creating a run.']);
         }
 
         if (PayrollRun::where('tenant_id', $tenantId)->where('year', $data['year'])->where('month', $data['month'])->exists()) {
@@ -230,13 +230,13 @@ class PayrollController extends Controller
         $run = $this->run($request);
 
         $rows = Payslip::query()->where('payroll_run_id', $run->id)->with('employee:id,tenant_id,employee_number,first_name,middle_name,last_name')->orderBy('id')->get();
-        $name = sprintf('payroll-ESTIMATE-%04d-%02d.csv', $run->year, $run->month);
+        $name = sprintf('payroll-run-%04d-%02d.csv', $run->year, $run->month);
 
         return response()->streamDownload(function () use ($rows) {
             $out = fopen('php://output', 'w');
             fputcsv($out, array_merge(['employee_number', 'employee'], self::PAYSLIP_FIELDS, ['note']));
             foreach ($rows as $p) {
-                fputcsv($out, array_map([$this, 'csvSafe'], array_merge([$p->employee?->employee_number, $p->employee?->full_name], array_values($p->only(self::PAYSLIP_FIELDS)), ['ESTIMATE ONLY, amounts in EGP, not verified payroll'])));
+                fputcsv($out, array_map([$this, 'csvSafe'], array_merge([$p->employee?->employee_number, $p->employee?->full_name], array_values($p->only(self::PAYSLIP_FIELDS)), ['Calculated from company-entered rules, not verified by Afrad, amounts in EGP'])));
             }
             fclose($out);
         }, $name, ['Content-Type' => 'text/csv']);

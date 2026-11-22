@@ -68,7 +68,7 @@ test('a run needs confirmed rules, then calculates payslips and locks on approva
     ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/adjustments", ['employee_id' => $this->worker->id, 'kind' => 'deduction', 'label' => 'Advance', 'amount' => 1000, 'taxable' => false])->assertRedirect();
     expect((float) Payslip::where('payroll_run_id', $run->id)->first()->net_pay)->toBe(22472.27);
 
-    ($this->as)($hr)->get("{$this->base}/payroll/runs/{$run->id}/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8')->assertDownload('payroll-ESTIMATE-2026-11.csv');
+    ($this->as)($hr)->get("{$this->base}/payroll/runs/{$run->id}/export")->assertOk()->assertHeader('content-type', 'text/csv; charset=UTF-8')->assertDownload('payroll-run-2026-11.csv');
     ($this->as)($hr)->post("{$this->base}/payroll/runs/{$run->id}/approve")->assertRedirect();
 
     // The approved run keeps the parameters it was calculated with, even if the rules change later.

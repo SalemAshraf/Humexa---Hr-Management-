@@ -69,7 +69,7 @@ const money = (v) => `EGP ${Number(v).toLocaleString('en-US', { minimumFractionD
     <CompanyLayout :title="$t('My space')" :subtitle="$t('Your own records')">
         <section v-if="!linked" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="me-unlinked">
             <h1 class="text-xl font-bold text-slate-900">{{ $t('No employee profile linked') }}</h1>
-            <p class="mt-2 text-sm text-slate-500">{{ $t('Your sign-in is not linked to an employee record yet. Ask HR to link it, then your leave, attendance and payslip estimates will show here.') }}</p>
+            <p class="mt-2 text-sm text-slate-500">{{ $t('Your sign-in is not linked to an employee record yet. Ask HR to link it, then your leave, attendance and payslips will show here.') }}</p>
         </section>
 
         <template v-else>
@@ -153,9 +153,9 @@ const money = (v) => `EGP ${Number(v).toLocaleString('en-US', { minimumFractionD
             </section>
 
             <section class="overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm" data-testid="me-payslips">
-                <h2 class="p-4 text-base font-bold text-slate-900">{{ $t('Payslip estimates') }}</h2>
+                <h2 class="p-4 text-base font-bold text-slate-900">{{ $t('Payslips') }}</h2>
                 <p class="mx-4 mb-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{{ $t('These amounts are in EGP and come from your company payroll rules. Ask HR if something looks wrong.') }}</p>
-                <p v-if="!payslips.length" class="px-4 pb-4 text-sm text-slate-500">{{ $t('No locked estimate for you yet.') }}</p>
+                <p v-if="!payslips.length" class="px-4 pb-4 text-sm text-slate-500">{{ $t('No locked payslip for you yet.') }}</p>
                 <ul class="divide-y divide-slate-100">
                     <li v-for="p in payslips" :key="p.id" class="grid grid-cols-2 gap-2 p-4 text-sm sm:grid-cols-5">
                         <span class="font-semibold text-slate-800">{{ p.period }}</span>

@@ -35,14 +35,14 @@ const remove = () => confirm(`Delete the draft run for ${title}?`) && router.del
         <section class="mb-6 mt-2 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ title }}
-                    <span class="ml-2 rounded-full px-2 py-0.5 align-middle text-xs font-semibold" :class="draft ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-700'">{{ draft ? $t('draft estimate') : $t('locked estimate') }}</span></h1>
+                    <span class="ml-2 rounded-full px-2 py-0.5 align-middle text-xs font-semibold" :class="draft ? 'bg-slate-100 text-slate-600' : 'bg-emerald-50 text-emerald-700'">{{ draft ? $t('draft run') : $t('locked run') }}</span></h1>
                 <p class="mt-2 text-sm text-slate-500">{{ $t('Rules') }}: {{ rule_name }}. {{ $t('Tax is the yearly tax on this month times 12, divided by 12. It is not the tax authority running-total method.') }}</p>
             </div>
             <div class="flex flex-wrap gap-2 text-sm font-semibold">
-                <a :href="`/payroll/runs/${run.id}/export`" class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200">{{ $t('Download estimate CSV') }}</a>
+                <a :href="`/payroll/runs/${run.id}/export`" class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200">{{ $t('Download run CSV') }}</a>
                 <template v-if="abilities.manage && draft">
                     <button class="rounded-lg bg-white px-3 py-2 text-slate-700 ring-1 ring-slate-200" @click="recalc">{{ $t('Recalculate') }}</button>
-                    <button class="rounded-lg bg-emerald-600 px-3 py-2 text-white" @click="approve">{{ $t('Lock estimate') }}</button>
+                    <button class="rounded-lg bg-emerald-600 px-3 py-2 text-white" @click="approve">{{ $t('Lock run') }}</button>
                     <button class="px-3 py-2 text-red-600" @click="remove">{{ $t('Delete draft') }}</button>
                 </template>
             </div>

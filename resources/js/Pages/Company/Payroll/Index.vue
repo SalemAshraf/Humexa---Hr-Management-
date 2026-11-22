@@ -54,7 +54,7 @@ const flash = computed(() => window.history.state?.props?.flash);
         <section class="mb-6">
             <p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">{{ $t('MONEY') }}</p>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $t('Payroll') }}</h1>
-            <p class="mt-2 text-sm text-slate-500">{{ $t('Estimated monthly pay with social insurance and salary tax for Egypt. Rates are editable. Your company must mark them as reviewed before an estimate can be created.') }}</p>
+            <p class="mt-2 text-sm text-slate-500">{{ $t('Monthly pay with social insurance and salary tax, calculated from the rules your company enters. Your company must mark the rules as reviewed before a run can be created.') }}</p>
         </section>
 
                 <p class="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ $t('Payroll rules and rates are entered and reviewed by your company. Afrad does not verify them. Have your accountant check the results before anyone is paid. Amounts are in EGP.') }}</p>
@@ -117,12 +117,12 @@ const flash = computed(() => window.history.state?.props?.flash);
 
         <section class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-1">
-                <h2 class="text-base font-bold text-slate-900">{{ $t('Estimate runs') }}</h2>
+                <h2 class="text-base font-bold text-slate-900">{{ $t('Payroll runs') }}</h2>
                 <form v-if="abilities.manage" class="mt-3 flex flex-wrap items-end gap-2" @submit.prevent="createRun">
                     <label class="text-xs font-medium text-slate-500">{{ $t('Month') }}<select v-model="runForm.month" class="mt-1 rounded-lg border-slate-300 text-sm"><option v-for="m in 12" :key="m" :value="m">{{ monthName(m) }}</option></select>
                     </label>
                     <label class="text-xs font-medium text-slate-500">{{ $t('Year') }}<input v-model="runForm.year" type="number" class="mt-1 w-24 rounded-lg border-slate-300 text-sm" /></label>
-                    <button class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!rules?.confirmed || runForm.processing">{{ $t('Create estimate') }}</button>
+                    <button class="whitespace-nowrap rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" :disabled="!rules?.confirmed || runForm.processing">{{ $t('Create run') }}</button>
                 </form>
                 <p v-if="abilities.manage && !rules?.confirmed" class="mt-2 text-xs text-amber-700">{{ $t('Mark the rules as reviewed first.') }}</p>
                 <ul class="mt-4 divide-y divide-slate-100">
