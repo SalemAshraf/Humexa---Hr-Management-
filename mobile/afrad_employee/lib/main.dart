@@ -45,6 +45,9 @@ class _AfradAppState extends State<AfradApp> {
     return MaterialApp(
       title: 'Afrad',
       debugShowCheckedModeBanner: false,
+      locale: Locale(lang),
+      supportedLocales: const [Locale('en'), Locale('ar')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0E2A47)), useMaterial3: true),
       builder: (context, child) => Directionality(textDirection: lang == 'ar' ? TextDirection.rtl : TextDirection.ltr, child: child!),
       home: HomePage(prefs: widget.prefs, lang: lang, onToggleLang: _toggle, apiFactory: widget.apiFactory, location: widget.location),
@@ -345,8 +348,8 @@ class _HomePageState extends State<HomePage> {
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
               if (choice == 'corr') ...[
-                OutlinedButton(key: const Key('pick-in'), onPressed: () => pick(true), child: Text(inT ?? t('inTime'))),
-                OutlinedButton(key: const Key('pick-out'), onPressed: () => pick(false), child: Text(outT ?? t('outTime'))),
+                OutlinedButton(key: const Key('pick-in'), onPressed: () => pick(true), child: Text(inT == null ? t('inTime') : '${t('inShort')}: $inT')),
+                OutlinedButton(key: const Key('pick-out'), onPressed: () => pick(false), child: Text(outT == null ? t('outTime') : '${t('outShort')}: $outT')),
               ] else
                 TextField(key: const Key('ot-min'), controller: minutes, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: t('minutes'))),
               TextField(key: const Key('reason'), controller: reason, maxLines: 3, decoration: InputDecoration(labelText: t('reason'))),

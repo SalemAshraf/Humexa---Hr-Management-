@@ -8,6 +8,7 @@ const Map<String, Map<String, String>> _t = {
     'req': 'Requests', 'reqCorr': 'Request a correction', 'reqOt': 'Request overtime', 'reason': 'Reason', 'minutes': 'Overtime minutes', 'send': 'Send', 'cancel': 'Cancel', 'noReq': 'No requests yet.',
     'pending': 'Pending', 'approved': 'Approved', 'rejected': 'Rejected', 'corr': 'Correction', 'ot': 'Overtime', 'inTime': 'Check-in time (optional)', 'outTime': 'Check-out time (optional)', 'tapDay': 'Tap a day to request a correction or overtime.', 'needReason': 'Enter a reason.', 'needMinutes': 'Enter minutes from 1 to 1440.',
     'leave': 'Leave', 'reqLeave': 'Request leave', 'leaveType': 'Leave type', 'from': 'From', 'to': 'To', 'remaining': 'left', 'days': 'd', 'withdraw': 'Withdraw', 'cancelled': 'Withdrawn', 'needDates': 'Choose the type and both dates.', 'noLeave': 'No leave types set up yet.',
+    'inShort': 'Check-in', 'outShort': 'Check-out',
     'locNote': 'Location is sent with check-in when your company asks for it.',
   },
   'ar': {
@@ -19,6 +20,7 @@ const Map<String, Map<String, String>> _t = {
     'req': 'الطلبات', 'reqCorr': 'طلب تصحيح', 'reqOt': 'طلب وقت إضافي', 'reason': 'السبب', 'minutes': 'دقائق الوقت الإضافي', 'send': 'إرسال', 'cancel': 'إلغاء', 'noReq': 'لا توجد طلبات بعد.',
     'pending': 'قيد المراجعة', 'approved': 'تمت الموافقة', 'rejected': 'مرفوض', 'corr': 'تصحيح', 'ot': 'وقت إضافي', 'inTime': 'وقت الحضور (اختياري)', 'outTime': 'وقت الانصراف (اختياري)', 'tapDay': 'اضغط على يوم لطلب تصحيح أو وقت إضافي.', 'needReason': 'اكتب السبب.', 'needMinutes': 'اكتب عدد دقائق من 1 إلى 1440.',
     'leave': 'الإجازات', 'reqLeave': 'طلب إجازة', 'leaveType': 'نوع الإجازة', 'from': 'من', 'to': 'إلى', 'remaining': 'متبقي', 'days': 'يوم', 'withdraw': 'سحب الطلب', 'cancelled': 'تم السحب', 'needDates': 'اختر النوع والتاريخين.', 'noLeave': 'لا توجد أنواع إجازات بعد.',
+    'inShort': 'الحضور', 'outShort': 'الانصراف',
     'locNote': 'الموقع بيتبعت مع تسجيل الحضور لو الشركة طالباه.',
   },
 };
