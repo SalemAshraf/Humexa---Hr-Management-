@@ -35,7 +35,7 @@ function leaveCompany(string $name, string $email): array
 test('an employee sees balances, requests leave through the shared rules and withdraws it', function () {
     $c = leaveCompany('Leave Api', 'owner@leaveapi.test');
     $type = $c['tenant']->run(fn () => LeaveType::query()->create(['tenant_id' => $c['tenantId'], 'name' => 'Annual', 'annual_days' => 21, 'is_active' => true]));
-    $token = $c['user']->createToken('phone', ['attendance:mobile'])->plainTextToken;
+    $token = $c['user']->createToken('phone', ['attendance:mobile', 'leave:self'])->plainTextToken;
     $base = 'http://' . $c['domain'] . '/api/v1/leave';
 
     $this->withToken($token)->getJson($base)->assertOk()->assertJsonPath('data.balances.0.leave_type_id', $type->id);
@@ -60,8 +60,8 @@ test('an employee sees balances, requests leave through the shared rules and wit
 test('an employee cannot withdraw a colleague leave request', function () {
     $c = leaveCompany('Leave Scope', 'owner@leavescope.test');
     $type = $c['tenant']->run(fn () => LeaveType::query()->create(['tenant_id' => $c['tenantId'], 'name' => 'Annual', 'annual_days' => 21, 'is_active' => true]));
-    $tokenB = $c['other']->createToken('b', ['attendance:mobile'])->plainTextToken;
-    $tokenA = $c['user']->createToken('a', ['attendance:mobile'])->plainTextToken;
+    $tokenB = $c['other']->createToken('b', ['attendance:mobile', 'leave:self'])->plainTextToken;
+    $tokenA = $c['user']->createToken('a', ['attendance:mobile', 'leave:self'])->plainTextToken;
     $base = 'http://' . $c['domain'] . '/api/v1/leave';
     $monday = now()->next('Monday')->toDateString();
 
@@ -70,4 +70,16 @@ test('an employee cannot withdraw a colleague leave request', function () {
     $this->withToken($tokenA)->postJson($base . '/' . $id . '/cancel')->assertNotFound();
     Auth::forgetGuards();
     $this->withToken($tokenA)->getJson($base)->assertOk()->assertJsonCount(0, 'data.requests');
+});
+
+test('an attendance-only token cannot use leave endpoints', function () {
+    $c = leaveCompany('Leave Scope Two', 'owner@leavescope2.test');
+    $token = $c['user']->createToken('old', ['attendance:mobile'])->plainTextToken;
+    $base = 'http://' . $c['domain'] . '/api/v1/leave';
+
+    $this->withToken($token)->getJson($base)->assertForbidden();
+    Auth::forgetGuards();
+    $this->withToken($token)->postJson($base, ['leave_type_id' => 1, 'start_date' => now()->toDateString(), 'end_date' => now()->toDateString()])->assertForbidden();
+    Auth::forgetGuards();
+    $this->withToken($token)->getJson('http://' . $c['domain'] . '/api/v1/attendance/status')->assertOk();
 });

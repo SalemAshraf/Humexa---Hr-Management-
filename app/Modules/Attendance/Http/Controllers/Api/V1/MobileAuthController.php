@@ -22,7 +22,7 @@ class MobileAuthController extends Controller
         abort_if($user->disabled_at !== null,403,'This account is deactivated.');
         abort_if($user->must_change_password,403,'Sign in on the web once to choose your own password first.');
         abort_unless(Employee::query()->where('tenant_id',tenant('id'))->where('user_id',$user->id)->exists(),403,'No employee profile is linked to this account.');
-        $token=$user->createToken($data['device_name'],['attendance:mobile'])->plainTextToken;
+        $token=$user->createToken($data['device_name'],['attendance:mobile','leave:self'])->plainTextToken;
         return response()->json(['data'=>['token'=>$token,'token_type'=>'Bearer','user'=>['id'=>$user->id,'name'=>$user->name,'email'=>$user->email]]]);
     }
 

@@ -81,7 +81,7 @@ test('linked tenant employee can log in and receives an attendance-scoped Sanctu
         ->sole();
 
     expect($token->name)->toBe('Test Android Device')
-        ->and($token->abilities)->toBe(['attendance:mobile']);
+        ->and($token->abilities)->toBe(['attendance:mobile', 'leave:self']);
 
     $this->assertDatabaseCount('personal_access_tokens', 1);
 });

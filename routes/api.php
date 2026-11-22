@@ -19,9 +19,12 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))->middleware([
     Route::post('/auth/login',[MobileAuthController::class,'login'])->middleware('throttle:10,1');
     Route::middleware(['auth:sanctum', 'abilities:attendance:mobile'])->group(function(){
         Route::post('/auth/logout',[MobileAuthController::class,'logout']);
-        Route::get('/leave',[LeaveApiController::class,'index']);
-        Route::post('/leave',[LeaveApiController::class,'store'])->middleware('throttle:20,1');
-        Route::post('/leave/{leaveRequest}/cancel',[LeaveApiController::class,'cancel'])->whereNumber('leaveRequest');
+        // Employee-self leave needs its own ability: tokens issued before it existed stay attendance-only.
+        Route::middleware('abilities:leave:self')->group(function(){
+            Route::get('/leave',[LeaveApiController::class,'index']);
+            Route::post('/leave',[LeaveApiController::class,'store'])->middleware('throttle:20,1');
+            Route::post('/leave/{leaveRequest}/cancel',[LeaveApiController::class,'cancel'])->whereNumber('leaveRequest');
+        });
         Route::prefix('attendance')->group(function(){
             Route::get('/policy',[AttendanceController::class,'policy']);
             Route::get('/status',[AttendanceController::class,'status']);
