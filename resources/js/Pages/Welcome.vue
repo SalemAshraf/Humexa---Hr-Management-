@@ -464,7 +464,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             <section id="plans" class="mx-auto max-w-5xl scroll-mt-20 px-5 py-24 lg:px-8 lg:py-28">
                 <div class="max-w-2xl" v-reveal>
                     <h2 class="text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('Plans that follow your size') }}</h2>
-                    <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Plans set limits on employees and user accounts. The Afrad team assigns them, and there is no online payment yet.') }}</p>
+                    <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Plans set limits on employees and user accounts. Your plan is activated by the Afrad team, and payment is not taken online.') }}</p>
                 </div>
                 <div class="mt-10 grid gap-4 md:grid-cols-3">
                     <div v-for="(p, i) in plans" :key="p.name" v-reveal="i * 80" :class="['rounded-2xl border p-7', p.hot ? 'border-[#2BD9A9] bg-white ring-2 ring-[#2BD9A9]' : 'border-slate-200 bg-white']">
