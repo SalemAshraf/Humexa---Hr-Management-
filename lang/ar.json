@@ -1550,5 +1550,6 @@
  "Last used": "آخر استخدام",
  "Disconnect": "فصل",
  "Connect Claude to read company totals. Read-only, and you can disconnect at any time.": "اربط Claude لقراءة إجماليات الشركة. للقراءة فقط، ويمكنك الفصل في أي وقت.",
- "Open AI connections": "فتح ربط الذكاء الاصطناعي"
+ "Open AI connections": "فتح ربط الذكاء الاصطناعي",
+ "Built by": "تم تطوير هذا النظام بواسطة"
 }

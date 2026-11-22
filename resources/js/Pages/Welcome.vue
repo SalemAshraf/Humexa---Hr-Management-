@@ -449,6 +449,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 </nav>
                 <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
             </div>
+            <p class="border-t border-slate-100 px-5 py-4 text-center text-xs text-slate-500">{{ $t('Built by') }} <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#0E2A47] hover:underline">Reviv Solutions</a></p>
         </footer>
     </div>
 </template>
