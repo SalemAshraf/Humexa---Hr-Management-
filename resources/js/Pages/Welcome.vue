@@ -1,4 +1,11 @@
 <script setup>
+import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
+import '@fontsource/ibm-plex-sans-arabic/arabic-500.css';
+import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
+import '@fontsource/ibm-plex-sans-arabic/arabic-700.css';
+import '@fontsource/ibm-plex-sans-arabic/latin-400.css';
+import '@fontsource/ibm-plex-sans-arabic/latin-600.css';
+import '@fontsource/ibm-plex-sans-arabic/latin-700.css';
 import AfradIcon from '@/Components/AfradIcon.vue';
 import LanguageSwitch from '@/Components/LanguageSwitch.vue';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
@@ -73,7 +80,8 @@ onBeforeUnmount(() => window.removeEventListener('scroll', onScroll));
 
 const ring = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2BD9A9]';
 const btnMint = `inline-flex items-center justify-center rounded-xl bg-[#2BD9A9] px-6 py-3.5 text-sm font-bold text-[#0A2038] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#4BE5BB] hover:shadow-lg hover:shadow-[#2BD9A9]/25 ${ring}`;
-const btnGhost = `inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 ${ring}`;
+const btnGhost = `inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-[#0E2A47] transition-all duration-200 hover:bg-slate-100 ${ring}`;
+const btnGhostDark = `inline-flex items-center justify-center rounded-xl border border-white/25 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/10 ${ring}`;
 const btnDark = `inline-flex items-center justify-center rounded-xl border border-[#0E2A47]/20 px-6 py-3.5 text-sm font-semibold text-[#0E2A47] transition-all hover:bg-[#0E2A47]/5 ${ring}`;
 </script>
 
@@ -81,29 +89,26 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
     <Head>
         <title>{{ $t('Afrad | HR software for growing companies') }}</title>
         <meta name="description" content="Employee records, attendance, leave, hiring and reviews in one workspace, in Arabic and English." />
-        <meta name="theme-color" content="#0A2038" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet" />
+        <meta name="theme-color" content="#F3F6F8" />
     </Head>
 
-    <div class="afrad-font relative min-h-screen overflow-x-clip bg-[#F5F8FA] text-[#10304F] antialiased">
-        <header :class="['sticky top-0 z-30 border-b border-white/10 bg-[#0A2038]/90 backdrop-blur-md transition-shadow', scrolled ? 'shadow-lg shadow-black/20' : '']">
+    <div class="afrad-font relative min-h-screen overflow-x-clip bg-[#F3F6F8] text-[#0E2A47] antialiased">
+        <header :class="['sticky top-0 z-30 border-b border-slate-200/70 bg-[#F3F6F8]/90 backdrop-blur transition-shadow', scrolled ? 'shadow-sm' : '']">
             <nav class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-5 lg:px-8" :aria-label="$t('Main')">
                 <a href="#" :class="['flex items-center gap-2.5 rounded-md', ring]">
                     <AfradIcon class="h-9 w-9" aria-hidden="true" />
-                    <span class="text-lg font-extrabold text-white">{{ $t('Afrad') }}</span>
+                    <span class="text-lg font-bold text-[#0E2A47]">{{ $t('Afrad') }}</span>
                 </a>
-                <div class="hidden items-center gap-7 text-sm font-medium text-slate-300 lg:flex">
-                    <a href="#days" class="hover:text-white">{{ $t('Why Afrad') }}</a>
-                    <a href="#roles" class="hover:text-white">{{ $t('Roles') }}</a>
-                    <a href="#inside" class="hover:text-white">{{ $t('Inside') }}</a>
-                    <a href="#plans" class="hover:text-white">{{ $t('Plans') }}</a>
-                    <a href="#faq" class="hover:text-white">{{ $t('FAQ') }}</a>
+                <div class="hidden items-center gap-7 text-sm font-medium text-slate-600 lg:flex">
+                    <a href="#days" class="hover:text-[#0E2A47]">{{ $t('Why Afrad') }}</a>
+                    <a href="#roles" class="hover:text-[#0E2A47]">{{ $t('Roles') }}</a>
+                    <a href="#inside" class="hover:text-[#0E2A47]">{{ $t('Inside') }}</a>
+                    <a href="#plans" class="hover:text-[#0E2A47]">{{ $t('Plans') }}</a>
+                    <a href="#faq" class="hover:text-[#0E2A47]">{{ $t('FAQ') }}</a>
                 </div>
                 <div class="flex items-center gap-2">
-                    <LanguageSwitch dark />
-                    <Link :href="route('login')" :class="['hidden rounded-xl px-3 py-2.5 text-sm font-semibold text-white hover:bg-white/10 sm:inline-flex', ring]">{{ $t('Sign in') }}</Link>
+                    <LanguageSwitch />
+                    <Link :href="route('login')" :class="['hidden rounded-xl px-3 py-2.5 text-sm font-semibold text-[#0E2A47] hover:bg-slate-200/70 sm:inline-flex', ring]">{{ $t('Sign in') }}</Link>
                     <Link v-if="canRegister" :href="route('register')" :class="['inline-flex rounded-xl bg-[#2BD9A9] px-4 py-2.5 text-sm font-bold text-[#0A2038] hover:bg-[#4BE5BB]', ring]">{{ $t('Get started') }}</Link>
                 </div>
             </nav>
@@ -111,22 +116,23 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
 
         <main>
             <!-- 1. Hero -->
-            <section class="relative bg-gradient-to-b from-[#0A2038] via-[#0E2A47] to-[#13395F] text-white">
-                <div class="pointer-events-none absolute -top-24 end-0 h-80 w-80 rounded-full bg-[#2BD9A9]/15 blur-[100px] drift" aria-hidden="true"></div>
-                <div class="mx-auto max-w-6xl px-5 pb-0 pt-14 text-center lg:px-8 lg:pt-20">
-                    <h1 class="mx-auto max-w-3xl text-4xl font-extrabold leading-[1.25] sm:text-5xl lg:text-[56px]">
+            <section class="relative overflow-hidden">
+                <div class="pointer-events-none absolute -top-24 end-0 h-80 w-80 rounded-full bg-[#2BD9A9]/25 blur-[100px] drift" aria-hidden="true"></div>
+                <div class="relative mx-auto max-w-6xl px-5 pb-12 pt-14 text-center lg:px-8 lg:pt-20">
+                    <p class="hero-in mx-auto mb-5 inline-block rounded-full border border-slate-200 bg-white px-4 py-1 text-xs font-semibold text-[#0B7A60]" style="--d: 0ms">{{ $t('HR software for growing companies') }}</p>
+                    <h1 class="mx-auto max-w-3xl text-4xl font-bold leading-[1.25] tracking-tight sm:text-5xl lg:text-[54px]">
                         <span class="hero-in block" style="--d: 0ms">{{ $t('Your people deserve more') }}</span>
-                        <span class="hero-in block text-[#2BD9A9]" style="--d: 120ms">{{ $t('than a spreadsheet.') }}</span>
+                        <span class="hero-in block text-[#0B7A60]" style="--d: 120ms">{{ $t('than a spreadsheet.') }}</span>
                     </h1>
-                    <p class="hero-in mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300" style="--d: 240ms">{{ $t('Afrad brings employee records, attendance, leave, hiring and reviews into one calm workspace, in Arabic and English.') }}</p>
-                    <div class="hero-in mt-9 flex flex-col justify-center gap-3 sm:flex-row" style="--d: 360ms">
+                    <p class="hero-in mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600" style="--d: 240ms">{{ $t('Afrad brings employee records, attendance, leave, hiring and reviews into one calm workspace, in Arabic and English.') }}</p>
+                    <div class="hero-in mt-8 flex flex-col justify-center gap-3 sm:flex-row" style="--d: 360ms">
                         <Link v-if="canRegister" :href="route('register')" :class="btnMint">{{ $t('Create your workspace') }}</Link>
                         <a href="#days" :class="btnGhost">{{ $t('See how it helps') }}</a>
                     </div>
 
                     <!-- Product composition -->
-                    <div class="hero-in relative mx-auto mt-16 max-w-5xl translate-y-0 text-start" style="--d: 480ms">
-                        <div class="overflow-hidden rounded-t-2xl border border-white/10 bg-[#F5F8FA] text-[#10304F] shadow-2xl shadow-black/40">
+                    <div class="hero-in relative mx-auto mt-12 max-w-5xl text-start" style="--d: 480ms">
+                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-[#F3F6F8] text-[#0E2A47] shadow-2xl shadow-slate-900/10">
                             <div class="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
                                 <span class="flex items-center gap-2 text-sm font-bold"><AfradIcon class="h-6 w-6" aria-hidden="true" />{{ $t('Company overview') }}</span>
                                 <span class="text-xs text-slate-400">{{ $t('Sample data') }}</span>
@@ -134,7 +140,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                             <div class="grid gap-4 p-5 md:grid-cols-4">
                                 <div v-for="s in [{ l: 'Employees', v: '12' }, { l: 'Present today', v: '9' }, { l: 'On leave', v: '2' }, { l: 'Pending requests', v: '4' }]" :key="s.l" class="rounded-xl border border-slate-200 bg-white p-4">
                                     <p class="text-xs text-slate-500">{{ $t(s.l) }}</p>
-                                    <p class="mt-1 text-2xl font-extrabold">{{ s.v }}</p>
+                                    <p class="mt-1 text-2xl font-bold">{{ s.v }}</p>
                                 </div>
                             </div>
                             <div class="grid gap-4 px-5 pb-8 md:grid-cols-[1.4fr_1fr]">
@@ -159,55 +165,52 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             </section>
 
             <!-- 2. One-line scope -->
-            <section class="border-b border-slate-200 bg-white">
-                <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-2.5 px-5 py-8 lg:px-8">
-                    <span v-for="c in chips" :key="c" class="rounded-full border border-slate-200 bg-[#F5F8FA] px-4 py-2 text-sm font-semibold text-[#0E2A47]">{{ $t(c) }}</span>
+            <section>
+                <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-2 px-5 pb-10 lg:px-8">
+                    <span v-for="c in chips" :key="c" class="rounded-full bg-white px-4 py-1.5 text-sm font-medium text-slate-700 ring-1 ring-slate-200">{{ $t(c) }}</span>
                 </div>
             </section>
 
             <!-- 3. Why: moments -->
-            <section id="days" class="mx-auto max-w-5xl scroll-mt-20 px-5 py-24 lg:px-8 lg:py-32">
-                <div class="mx-auto max-w-2xl text-center" v-reveal>
-                    <h2 class="text-3xl font-extrabold leading-[1.3] sm:text-4xl">{{ $t('HR is mostly small things that pile up.') }}</h2>
-                    <p class="mt-5 text-lg leading-8 text-[#5A6B7D]">{{ $t('Afrad is built to catch them before they do.') }}</p>
-                </div>
-                <div class="mt-16 space-y-6">
-                    <div v-for="(m, i) in moments" :key="m.n" v-reveal="i * 60" class="grid overflow-hidden rounded-2xl border border-slate-200 bg-white md:grid-cols-2">
-                        <div class="p-7 md:p-9">
-                            <p class="text-sm font-extrabold text-slate-300">{{ m.n }}</p>
-                            <p class="mt-3 text-lg font-semibold leading-8 text-[#5A6B7D]">{{ $t(m.pain) }}</p>
-                        </div>
-                        <div class="bg-[#0E2A47] p-7 text-white md:p-9">
-                            <p class="text-sm font-bold text-[#2BD9A9]">{{ $t('With Afrad') }}</p>
-                            <p class="mt-3 text-lg font-semibold leading-8">{{ $t(m.fix) }}</p>
-                        </div>
+            <section id="days" class="scroll-mt-20 border-y border-slate-200 bg-white">
+                <div class="mx-auto max-w-6xl px-5 py-16 lg:px-8 lg:py-20">
+                    <div class="mx-auto max-w-2xl text-center" v-reveal>
+                        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">{{ $t('HR is mostly small things that pile up.') }}</h2>
+                        <p class="mt-3 text-slate-600">{{ $t('Afrad is built to catch them before they do.') }}</p>
                     </div>
+                    <ol class="mt-10 grid gap-4 md:grid-cols-3">
+                        <li v-for="(m, i) in moments" :key="m.n" v-reveal="i * 60" class="rounded-2xl border border-slate-200 bg-[#F3F6F8] p-6">
+                            <span class="grid h-10 w-10 place-items-center rounded-xl bg-[#0E2A47] text-sm font-bold text-[#2BD9A9]">{{ i + 1 }}</span>
+                            <p class="mt-4 text-sm leading-7 text-slate-500">{{ $t(m.pain) }}</p>
+                            <p class="mt-3 font-semibold leading-7">{{ $t(m.fix) }}</p>
+                        </li>
+                    </ol>
                 </div>
             </section>
 
             <!-- 4. Roles -->
-            <section id="roles" class="scroll-mt-20 bg-white py-24 lg:py-32">
+            <section id="roles" class="scroll-mt-20 py-16 lg:py-24">
                 <div class="mx-auto max-w-5xl px-5 lg:px-8">
                     <div class="max-w-2xl" v-reveal>
-                        <p class="text-sm font-bold text-[#0E9F7E]">{{ $t('Roles') }}</p>
-                        <h2 class="mt-3 text-3xl font-extrabold leading-[1.3] sm:text-4xl">{{ $t('One workspace, four different views') }}</h2>
+                        <p class="text-sm font-bold text-[#0B7A60]">{{ $t('Roles') }}</p>
+                        <h2 class="mt-3 text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('One workspace, four different views') }}</h2>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Everyone sees what their job needs, and nothing more.') }}</p>
                     </div>
                     <div class="mt-10 flex flex-wrap gap-2" role="tablist">
-                        <button v-for="r in roles" :key="r.id" type="button" role="tab" :aria-selected="activeRole === r.id" :class="['rounded-full px-5 py-2.5 text-sm font-bold transition-colors', activeRole === r.id ? 'bg-[#0E2A47] text-white' : 'bg-[#F5F8FA] text-[#0E2A47] hover:bg-slate-200', ring]" @click="activeRole = r.id">{{ $t(r.t) }}</button>
+                        <button v-for="r in roles" :key="r.id" type="button" role="tab" :aria-selected="activeRole === r.id" :class="['rounded-full px-5 py-2.5 text-sm font-bold transition-colors', activeRole === r.id ? 'bg-[#0E2A47] text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-[#0E2A47]', ring]" @click="activeRole = r.id">{{ $t(r.t) }}</button>
                     </div>
-                    <div v-for="r in roles.filter((x) => x.id === activeRole)" :key="r.id" class="mt-8 grid items-center gap-8 rounded-2xl bg-[#F5F8FA] p-7 md:grid-cols-2 md:p-10">
+                    <div v-for="r in roles.filter((x) => x.id === activeRole)" :key="r.id" class="mt-8 grid items-center gap-8 rounded-2xl border border-slate-200 bg-white p-7 md:grid-cols-2 md:p-10">
                         <div>
-                            <h3 class="text-2xl font-extrabold leading-[1.4]">{{ $t(r.lead) }}</h3>
+                            <h3 class="text-2xl font-bold leading-[1.4]">{{ $t(r.lead) }}</h3>
                             <ul class="mt-6 space-y-3 text-[15px] leading-7">
-                                <li v-for="p in r.pts" :key="p" class="flex gap-3"><span class="mt-0.5 text-[#0E9F7E]" aria-hidden="true">✓</span>{{ $t(p) }}</li>
+                                <li v-for="p in r.pts" :key="p" class="flex gap-3"><span class="mt-0.5 text-[#0B7A60]" aria-hidden="true">✓</span>{{ $t(p) }}</li>
                             </ul>
                         </div>
-                        <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div class="rounded-xl border border-slate-200 bg-[#F3F6F8] p-5">
                             <p class="text-xs font-semibold text-slate-400">{{ $t('Sample data') }}</p>
                             <div v-for="row in r.rows" :key="row[0]" class="flex items-center justify-between border-b border-slate-100 py-3.5 last:border-0">
                                 <span class="text-sm text-[#5A6B7D]">{{ $t(row[0]) }}</span>
-                                <span class="text-lg font-extrabold">{{ row[1] === '12 days' ? $t('12 days') : row[1] }}</span>
+                                <span class="text-lg font-bold">{{ row[1] === '12 days' ? $t('12 days') : row[1] }}</span>
                             </div>
                         </div>
                     </div>
@@ -217,14 +220,14 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             <!-- 5. Inside: alternating stories -->
             <section id="inside" class="mx-auto max-w-6xl scroll-mt-20 px-5 py-24 lg:px-8 lg:py-32">
                 <div class="mx-auto max-w-2xl text-center" v-reveal>
-                    <p class="text-sm font-bold text-[#0E9F7E]">{{ $t('Inside') }}</p>
-                    <h2 class="mt-3 text-3xl font-extrabold leading-[1.3] sm:text-4xl">{{ $t('A closer look at the work Afrad takes off your plate') }}</h2>
+                    <p class="text-sm font-bold text-[#0B7A60]">{{ $t('Inside') }}</p>
+                    <h2 class="mt-3 text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('A closer look at the work Afrad takes off your plate') }}</h2>
                 </div>
 
                 <!-- Documents -->
                 <div class="mt-20 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                     <div v-reveal>
-                        <h3 class="text-2xl font-extrabold leading-[1.4] sm:text-3xl">{{ $t('Never miss a renewal') }}</h3>
+                        <h3 class="text-2xl font-bold leading-[1.4] sm:text-3xl">{{ $t('Never miss a renewal') }}</h3>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Expired documents and the ones expiring soon appear together, with the employee next to each one.') }}</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" v-reveal="100">
@@ -248,7 +251,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         </div>
                     </div>
                     <div v-reveal="100">
-                        <h3 class="text-2xl font-extrabold leading-[1.4] sm:text-3xl">{{ $t('Leave and attendance without the chasing') }}</h3>
+                        <h3 class="text-2xl font-bold leading-[1.4] sm:text-3xl">{{ $t('Leave and attendance without the chasing') }}</h3>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Employees request, managers approve, and balances follow the approved requests. Late arrivals show up in the daily attendance record.') }}</p>
                     </div>
                 </div>
@@ -256,7 +259,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 <!-- Hiring -->
                 <div class="mt-24 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                     <div v-reveal>
-                        <h3 class="text-2xl font-extrabold leading-[1.4] sm:text-3xl">{{ $t('From first application to first day') }}</h3>
+                        <h3 class="text-2xl font-bold leading-[1.4] sm:text-3xl">{{ $t('From first application to first day') }}</h3>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Move candidates through the stages, and turn the one you choose into an employee in a single step.') }}</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" v-reveal="100">
@@ -273,36 +276,36 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 <!-- Reports -->
                 <div class="mt-24 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:order-first" v-reveal>
-                        <div class="flex items-center justify-between"><p class="text-sm font-bold">{{ $t('Reports') }}</p><span class="rounded-lg bg-[#F5F8FA] px-3 py-1.5 text-xs font-semibold text-[#0E2A47] ring-1 ring-slate-200">{{ $t('Export CSV') }}</span></div>
+                        <div class="flex items-center justify-between"><p class="text-sm font-bold">{{ $t('Reports') }}</p><span class="rounded-lg bg-[#F3F6F8] px-3 py-1.5 text-xs font-semibold text-[#0E2A47] ring-1 ring-slate-200">{{ $t('Export CSV') }}</span></div>
                         <p class="mt-1 text-xs text-slate-400">{{ $t('Sample data') }}</p>
                         <div class="mt-5 flex h-32 items-end gap-3" dir="ltr">
                             <div v-for="(b, i) in bars" :key="i" class="flex-1 rounded-t-md bg-[#13395F]" :style="{ height: b + '%' }"></div>
                         </div>
                     </div>
                     <div v-reveal="100">
-                        <h3 class="text-2xl font-extrabold leading-[1.4] sm:text-3xl">{{ $t('Numbers ready when management asks') }}</h3>
+                        <h3 class="text-2xl font-bold leading-[1.4] sm:text-3xl">{{ $t('Numbers ready when management asks') }}</h3>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Pick a period, read the people numbers for the whole company or for your own team, and export them as CSV.') }}</p>
                     </div>
                 </div>
             </section>
 
             <!-- 6. Language band -->
-            <section class="bg-[#2BD9A9] py-20 text-[#0A2038] lg:py-24">
+            <section class="bg-[#0E2A47] py-16 text-white lg:py-20">
                 <div class="mx-auto grid max-w-5xl items-center gap-10 px-5 md:grid-cols-2 lg:px-8">
                     <div v-reveal>
-                        <h2 class="text-3xl font-extrabold leading-[1.35] sm:text-4xl">{{ $t('Arabic and English, switched in one tap.') }}</h2>
-                        <p class="mt-4 text-lg leading-8 text-[#0A2038]/80">{{ $t('The whole interface flips, including right-to-left layout. Names and notes you type are never translated or changed.') }}</p>
+                        <h2 class="text-3xl font-bold leading-[1.35] sm:text-4xl">{{ $t('Arabic and English, switched in one tap.') }}</h2>
+                        <p class="mt-4 text-lg leading-8 text-slate-300">{{ $t('The whole interface flips, including right-to-left layout. Names and notes you type are never translated or changed.') }}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4" v-reveal="100">
-                        <div class="rounded-2xl bg-[#0A2038] p-7 text-center text-white" dir="rtl"><p class="text-4xl font-extrabold">أفراد</p><p class="mt-2 text-sm text-slate-300">العربية</p></div>
-                        <div class="rounded-2xl bg-white p-7 text-center" dir="ltr"><p class="text-4xl font-extrabold">Afrad</p><p class="mt-2 text-sm text-[#5A6B7D]">English</p></div>
+                        <div class="rounded-2xl bg-[#2BD9A9] p-7 text-center text-[#0A2038]" dir="rtl"><p class="text-4xl font-bold">أفراد</p><p class="mt-2 text-sm text-[#0A2038]/80">العربية</p></div>
+                        <div class="rounded-2xl bg-white p-7 text-center text-[#0E2A47]" dir="ltr"><p class="text-4xl font-bold">Afrad</p><p class="mt-2 text-sm text-[#5A6B7D]">English</p></div>
                     </div>
                 </div>
             </section>
 
             <!-- 7. Also included -->
             <section class="mx-auto max-w-5xl px-5 py-24 lg:px-8">
-                <h2 class="text-2xl font-extrabold leading-[1.4] sm:text-3xl" v-reveal>{{ $t('Also in the workspace') }}</h2>
+                <h2 class="text-2xl font-bold leading-[1.4] sm:text-3xl" v-reveal>{{ $t('Also in the workspace') }}</h2>
                 <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="(a, i) in [
                         ['Performance reviews', 'Review cycles that can be finalized, and reopened when something needs to change.'],
@@ -323,24 +326,24 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 <div class="rounded-2xl border border-amber-200 bg-amber-50 p-7 md:flex md:items-start md:gap-6 md:p-9" v-reveal>
                     <span class="mb-4 inline-flex shrink-0 rounded-full bg-amber-200 px-3 py-1 text-xs font-bold text-amber-900 md:mb-0">{{ $t('Experimental') }}</span>
                     <div>
-                        <h2 class="text-xl font-extrabold leading-[1.4]">{{ $t('Payroll is an estimator, not a payroll system yet.') }}</h2>
+                        <h2 class="text-xl font-bold leading-[1.4]">{{ $t('Payroll is an estimator, not a payroll system yet.') }}</h2>
                         <p class="mt-2 text-[15px] leading-7 text-amber-950/80">{{ $t('Afrad can estimate a monthly pay run to help you plan. The results are not official payslips, rates and rules may change, and an accountant must review them before anyone relies on a number.') }}</p>
                     </div>
                 </div>
             </section>
 
             <!-- 9. Security -->
-            <section class="bg-[#0E2A47] py-20 text-white lg:py-24">
+            <section class="border-y border-slate-200 bg-white py-16 lg:py-20">
                 <div class="mx-auto max-w-5xl px-5 lg:px-8">
-                    <h2 class="max-w-2xl text-3xl font-extrabold leading-[1.35] sm:text-4xl" v-reveal>{{ $t('Your people data stays yours.') }}</h2>
+                    <h2 class="max-w-2xl text-3xl font-bold leading-[1.35] sm:text-4xl" v-reveal>{{ $t('Your people data stays yours.') }}</h2>
                     <div class="mt-10 grid gap-8 md:grid-cols-3">
                         <div v-for="(s, i) in [
                             ['Isolated workspaces', 'Each company works in its own workspace, kept separate from every other company.'],
                             ['Role-based access', 'Permissions follow the role, and sensitive employee data is limited to authorized users.'],
                             ['Limits that protect', 'Plan limits only stop new additions. Existing records are never hidden or deleted.'],
-                        ]" :key="s[0]" v-reveal="i * 80" class="border-t border-[#2BD9A9]/50 pt-5">
+                        ]" :key="s[0]" v-reveal="i * 80" class="border-t-2 border-[#2BD9A9] pt-5">
                             <p class="text-lg font-bold">{{ $t(s[0]) }}</p>
-                            <p class="mt-2 text-[15px] leading-7 text-slate-300">{{ $t(s[1]) }}</p>
+                            <p class="mt-2 text-[15px] leading-7 text-slate-600">{{ $t(s[1]) }}</p>
                         </div>
                     </div>
                 </div>
@@ -349,12 +352,12 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             <!-- 10. Plans -->
             <section id="plans" class="mx-auto max-w-5xl scroll-mt-20 px-5 py-24 lg:px-8 lg:py-28">
                 <div class="max-w-2xl" v-reveal>
-                    <h2 class="text-3xl font-extrabold leading-[1.3] sm:text-4xl">{{ $t('Plans that follow your size') }}</h2>
+                    <h2 class="text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('Plans that follow your size') }}</h2>
                     <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Plans set limits on employees and user accounts. The Afrad team assigns them, and there is no online payment yet.') }}</p>
                 </div>
                 <div class="mt-10 grid gap-4 md:grid-cols-3">
-                    <div v-for="(p, i) in plans" :key="p.name" v-reveal="i * 80" :class="['rounded-2xl border p-7', p.hot ? 'border-[#2BD9A9] bg-[#0E2A47] text-white' : 'border-slate-200 bg-white']">
-                        <p class="text-lg font-extrabold">{{ $t(p.name) }}</p>
+                    <div v-for="(p, i) in plans" :key="p.name" v-reveal="i * 80" :class="['rounded-2xl border p-7', p.hot ? 'border-[#2BD9A9] bg-white ring-2 ring-[#2BD9A9]' : 'border-slate-200 bg-white']">
+                        <p class="text-lg font-bold">{{ $t(p.name) }}</p>
                         <p class="mt-4 text-[15px]">{{ $t(p.emp) }}</p>
                         <p class="mt-1 text-[15px]">{{ $t(p.acc) }}</p>
                     </div>
@@ -362,14 +365,14 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             </section>
 
             <!-- 11. FAQ -->
-            <section id="faq" class="scroll-mt-20 bg-white py-24 lg:py-28">
+            <section id="faq" class="scroll-mt-20 border-t border-slate-200 bg-white py-16 lg:py-24">
                 <div class="mx-auto max-w-3xl px-5 lg:px-8">
-                    <h2 class="text-3xl font-extrabold leading-[1.3] sm:text-4xl" v-reveal>{{ $t('Questions, answered') }}</h2>
-                    <div class="mt-10 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-[#F5F8FA]">
+                    <h2 class="text-3xl font-bold leading-[1.3] sm:text-4xl" v-reveal>{{ $t('Questions, answered') }}</h2>
+                    <div class="mt-10 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-[#F3F6F8]">
                         <details v-for="f in faqs" :key="f.q" class="group px-6 py-5">
                             <summary :class="['flex cursor-pointer list-none items-center justify-between gap-4 rounded font-bold', ring]">
                                 {{ $t(f.q) }}
-                                <span class="text-xl text-[#0E9F7E] transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                                <span class="text-xl text-[#0B7A60] transition-transform group-open:rotate-45" aria-hidden="true">+</span>
                             </summary>
                             <p class="mt-3 text-[15px] leading-7 text-[#5A6B7D]">{{ $t(f.a) }}</p>
                         </details>
@@ -378,27 +381,27 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             </section>
 
             <!-- 12. CTA -->
-            <section class="bg-gradient-to-b from-[#0E2A47] to-[#0A2038] py-20 text-center text-white lg:py-24">
-                <div class="mx-auto max-w-3xl px-5" v-reveal>
-                    <AfradIcon class="mx-auto h-14 w-14" aria-hidden="true" />
-                    <h2 class="mt-6 text-3xl font-extrabold leading-[1.3] sm:text-4xl">{{ $t('Give your people one home.') }}</h2>
-                    <p class="mx-auto mt-4 max-w-xl text-lg leading-8 text-slate-300">{{ $t('Create your workspace and start with your first employees today.') }}</p>
-                    <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+            <section class="px-5 py-16 lg:px-8 lg:py-20">
+                <div class="mx-auto max-w-4xl rounded-3xl bg-[#0E2A47] px-6 py-14 text-center text-white" v-reveal>
+                    <AfradIcon class="mx-auto h-12 w-12" aria-hidden="true" />
+                    <h2 class="mt-5 text-3xl font-bold tracking-tight sm:text-4xl">{{ $t('Give your people one home.') }}</h2>
+                    <p class="mx-auto mt-3 max-w-xl text-lg leading-8 text-slate-300">{{ $t('Create your workspace and start with your first employees today.') }}</p>
+                    <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                         <Link v-if="canRegister" :href="route('register')" :class="btnMint">{{ $t('Create your workspace') }}</Link>
-                        <Link :href="route('login')" :class="btnGhost">{{ $t('Sign in') }}</Link>
+                        <Link :href="route('login')" :class="btnGhostDark">{{ $t('Sign in') }}</Link>
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer class="bg-[#0A2038] text-slate-400">
+        <footer class="border-t border-slate-200 bg-white text-slate-500">
             <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm sm:flex-row sm:items-center sm:justify-between lg:px-8">
-                <div class="flex items-center gap-2.5 text-white"><AfradIcon class="h-8 w-8" aria-hidden="true" /><span class="font-extrabold">{{ $t('Afrad') }}</span></div>
+                <div class="flex items-center gap-2.5 text-[#0E2A47]"><AfradIcon class="h-8 w-8" aria-hidden="true" /><span class="font-bold">{{ $t('Afrad') }}</span></div>
                 <nav class="flex flex-wrap gap-x-6 gap-y-2" :aria-label="$t('Footer')">
-                    <a href="#days" class="hover:text-white">{{ $t('Why Afrad') }}</a>
-                    <a href="#plans" class="hover:text-white">{{ $t('Plans') }}</a>
-                    <a href="#faq" class="hover:text-white">{{ $t('FAQ') }}</a>
-                    <Link :href="route('login')" class="hover:text-white">{{ $t('Sign in') }}</Link>
+                    <a href="#days" class="hover:text-[#0E2A47]">{{ $t('Why Afrad') }}</a>
+                    <a href="#plans" class="hover:text-[#0E2A47]">{{ $t('Plans') }}</a>
+                    <a href="#faq" class="hover:text-[#0E2A47]">{{ $t('FAQ') }}</a>
+                    <Link :href="route('login')" class="hover:text-[#0E2A47]">{{ $t('Sign in') }}</Link>
                 </nav>
                 <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
             </div>
@@ -407,6 +410,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
 </template>
 
 <style scoped>
+
 .reveal {
     opacity: 0;
     transform: translateY(18px);
@@ -543,9 +547,7 @@ details[open] > p {
     }
 
 .afrad-font {
-    font-family: 'Sora', 'Noto Kufi Arabic', ui-sans-serif, system-ui, sans-serif;
-}
-:global([dir='rtl']) .afrad-font {
-    font-family: 'Noto Kufi Arabic', 'Sora', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', 'Segoe UI', Tahoma, system-ui, sans-serif;
+    font-feature-settings: 'tnum' 1;
 }
 </style>
