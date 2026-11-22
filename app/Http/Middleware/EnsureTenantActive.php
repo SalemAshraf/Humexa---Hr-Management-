@@ -72,11 +72,11 @@ class EnsureTenantActive
             }
         }
 
-        // Owner decision: after the 7-day trial without a manual activation the
-        // company keeps read/export access, but nothing can be added or changed.
+        // Owner decisions: after the 7-day trial without a manual activation, or after the
+        // paid-until date, the company keeps read/export access but nothing can be added or changed.
         if ($this->trialExpired($tenant) && ! $request->isMethodSafe()
             && ! $request->is('login', 'logout', 'locale', 'password/change', 'account', 'api/v1/auth/*', 'v1/auth/*')) {
-            $message = 'Your free trial has ended. Your data is kept and you can still view and export it. Ask the platform administrator to activate your plan to add or change records.';
+            $message = 'Your plan period has ended. Your data is kept and you can still view and export it. Ask the platform administrator to renew your plan to add or change records.';
 
             if ($request->is('api/*', 'v1/*') || $request->expectsJson() && ! $request->header('X-Inertia')) {
                 return response()->json(['message' => $message], 403);
@@ -88,17 +88,22 @@ class EnsureTenantActive
         return $next($request);
     }
 
+    /**
+     * True when the company has no running access: a trial that ended without an
+     * activation, or a paid-until date that has passed. The last day counts in full,
+     * on the company's calendar.
+     */
     private function trialExpired($tenant): bool
     {
-        $trialEnds = $tenant->getAttribute('trial_ends_at');
+        $paidUntil = $tenant->getAttribute('subscription_ends_at');
+        $limit = $paidUntil ?: $tenant->getAttribute('trial_ends_at');
 
-        if (! $trialEnds || $tenant->getAttribute('subscription_ends_at')) {
+        if (! $limit) {
             return false;
         }
 
-        // The last trial day is the whole day on the company's calendar.
         $today = \App\Modules\Settings\Support\CompanyClock::today((string) $tenant->getKey());
 
-        return $today > \Illuminate\Support\Carbon::parse($trialEnds)->toDateString();
+        return $today > \Illuminate\Support\Carbon::parse($limit)->toDateString();
     }
 }

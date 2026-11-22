@@ -176,6 +176,9 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
                 Route::delete('/positions/{position}', 'destroyPosition')->whereNumber('position')->name('positions.destroy');
             });
 
+            Route::get('/data-export', [\App\Modules\Tenants\Http\Controllers\DataExportController::class, 'index'])->name('data-export.index');
+            Route::get('/data-export/{entity}', [\App\Modules\Tenants\Http\Controllers\DataExportController::class, 'download'])->middleware('throttle:20,1')->name('data-export.download');
+
             Route::prefix('/employees')->middleware('tenant.can:employees.view,employees.manage')->name('employees.')->group(function () {
                 Route::controller(\App\Modules\Employees\Http\Controllers\EmployeeImportController::class)->prefix('/import')->middleware('tenant.can:employees.manage')->name('import.')->group(function () {
                     Route::get('/', 'index')->name('index');

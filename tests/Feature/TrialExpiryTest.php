@@ -54,5 +54,16 @@ test('the trial runs through its last day on the company calendar, and the mobil
     $this->tenant->forceFill(['trial_ends_at' => now()->subDays(2)->toDateString()])->save();
     $this->postJson("{$this->base}/api/v1/attendance/check-in", [])->assertStatus(401)->assertJsonMissing(['message' => 'x']);
     \Laravel\Sanctum\Sanctum::actingAs($this->owner, ['attendance:mobile']);
-    $this->postJson("{$this->base}/api/v1/attendance/check-in", [])->assertForbidden()->assertJsonPath('message', fn ($m) => str_contains($m, 'free trial has ended'));
+    $this->postJson("{$this->base}/api/v1/attendance/check-in", [])->assertForbidden()->assertJsonPath('message', fn ($m) => str_contains($m, 'plan period has ended'));
+});
+
+test('a lapsed paid-until date is read-only too, and renewing lifts it', function () {
+    $this->tenant->forceFill(['subscription_ends_at' => now()->subDays(3)->toDateString()])->save();
+    ($this->as)()->get("{$this->base}/employees")->assertOk();
+    ($this->as)()->post("{$this->base}/employees", $this->emp)->assertSessionHasErrors('trial');
+
+    tenancy()->end();
+    $this->flushSession();
+    $this->tenant->forceFill(['subscription_ends_at' => \App\Modules\Settings\Support\CompanyClock::today((string) $this->tenant->id)])->save();
+    ($this->as)()->post("{$this->base}/employees", $this->emp)->assertSessionHasNoErrors();
 });

@@ -1437,5 +1437,12 @@
  "No. Afrad calculates pay from the rules your company enters and keeps the result. It does not move money or file anything, and your accountant should review the numbers before anyone is paid.": "لا. أفراد بيحسب المرتب من القواعد اللي شركتك بتدخلها وبيحتفظ بالنتيجة. مبيحركش فلوس ومبيقدمش أي إقرارات، والمحاسب لازم يراجع الأرقام قبل ما أي حد ياخد مرتبه.",
  "Not reviewed yet. Check the values, then mark them as reviewed before creating a run.": "لسه مراجعتش. راجع القيم وبعدين علّمها كمراجَعة قبل ما تنشئ كشف.",
  "Your payroll rules are not complete yet. Enter the insurance rates, insurable wage limits, personal exemption and tax tables from your accountant, then mark the rules as reviewed.": "قواعد المرتبات لسه مش كاملة. أدخل نسب التأمينات وحدود الأجر التأميني والإعفاء الشخصي وجداول الضريبة من محاسبك، وبعدين علّم القواعد كمراجَعة.",
- "Enter every rate, limit and tax table in the rules before marking them as reviewed.": "أدخل كل النسب والحدود وجداول الضريبة في القواعد قبل ما تعلّمها كمراجَعة."
+ "Enter every rate, limit and tax table in the rules before marking them as reviewed.": "أدخل كل النسب والحدود وجداول الضريبة في القواعد قبل ما تعلّمها كمراجَعة.",
+ "Export data": "تصدير البيانات",
+ "Download your records as CSV": "نزّل سجلاتك كملفات CSV",
+ "Download your company records as CSV files. Exports include only basic fields. They never include ID numbers, addresses, documents, salaries or sign-in details.": "نزّل سجلات شركتك كملفات CSV. التصدير فيه الحقول الأساسية بس، ومفيهوش أرقام هوية أو عناوين أو مستندات أو مرتبات أو بيانات دخول.",
+ "You do not have permission to export any records.": "معندكش صلاحية تصدّر أي سجلات.",
+ "Each file holds up to {n} rows.": "كل ملف فيه لحد {n} صف.",
+ "Leave requests": "طلبات الإجازة",
+ "Your plan period has ended. Your data is kept and you can still view and export it. Ask the platform administrator to renew your plan to add or change records.": "انتهت فترة اشتراكك. بياناتك محفوظة وتقدر تعرضها وتصدّرها. اطلب من إدارة المنصة تجديد الاشتراك عشان تضيف أو تعدّل سجلات."
 }
