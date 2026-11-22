@@ -73,7 +73,7 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                     <p class="mt-1 text-xs text-slate-400">{{ $t('New registered workspaces · Last six months') }}</p>
                 </div>
                 <div class="overflow-hidden">
-                    <svg viewBox="0 0 620 190" class="w-full" role="img" :aria-label="$t('Monthly company registrations trend')">
+                    <svg viewBox="0 0 620 196" class="w-full" role="img" :aria-label="$t('Monthly company registrations trend')">
                         <g stroke="#263449" stroke-width="1">
                             <line x1="32" y1="34" x2="600" y2="34"/><line x1="32" y1="74" x2="600" y2="74"/>
                             <line x1="32" y1="114" x2="600" y2="114"/><line x1="32" y1="160" x2="600" y2="160"/>
@@ -82,8 +82,8 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                         <path v-if="chartPoints.length" :d="linePath" fill="none" stroke="#78d9ae" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                         <g v-for="(point,index) in chartPoints" :key="index">
                             <circle :cx="point.x" :cy="point.y" r="4" fill="#78d9ae"/>
-                            <text :x="point.x" :y="point.y-10" text-anchor="middle" fill="#dbe5ef" font-size="11" font-weight="600">{{ point.count }}</text>
-                            <text :x="point.x" y="180" text-anchor="middle" fill="#64748b" font-size="10">{{ $t(point.label) }}</text>
+                            <text :x="point.x" :y="point.y-10" text-anchor="middle" fill="#dbe5ef" font-weight="600" class="text-[24px] sm:text-[11px]">{{ point.count }}</text>
+                            <text :x="point.x" y="188" text-anchor="middle" fill="#94a3b8" class="text-[22px] sm:text-[10px]">{{ $t(point.label) }}</text>
                         </g>
                     </svg>
                 </div>
@@ -118,7 +118,17 @@ const maxDay = computed(() => Math.max(1, ...props.registrationActivity.map(d =>
                     <div><h2 class="font-semibold text-slate-100">{{ $t('Recently registered companies') }}</h2><p class="mt-1 text-xs text-slate-400">{{ $t('Workspace metadata and access status') }}</p></div>
                     <Link :href="route('platform.companies.index')" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">{{ $t('All companies →') }}</Link>
                 </div>
-                <div v-if="recentCompanies.length" class="overflow-x-auto">
+                <ul v-if="recentCompanies.length" class="divide-y divide-slate-800/70 sm:hidden">
+                    <li v-for="company in recentCompanies" :key="company.id" class="py-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="min-w-0 break-words font-semibold text-slate-200">{{ company.companyName }}</p>
+                            <span class="shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold capitalize" :class="company.status === 'active' ? 'bg-emerald-400/10 text-emerald-300' : company.status === 'suspended' ? 'bg-rose-400/10 text-rose-300' : 'bg-amber-400/10 text-amber-300'">{{ $t(company.status.replace('_',' ')) }}</span>
+                        </div>
+                        <p class="mt-1 text-xs text-slate-400">{{ $t('Registered') }}: {{ company.createdAt || '—' }}</p>
+                        <p class="mt-0.5 break-all text-xs text-slate-400">{{ company.domains.join(', ') || '—' }}</p>
+                    </li>
+                </ul>
+                <div v-if="recentCompanies.length" class="hidden overflow-x-auto sm:block">
                     <table class="w-full min-w-[520px] text-start text-sm">
                         <thead><tr class="border-b border-slate-800 text-[10px] uppercase tracking-wider text-slate-500"><th class="px-2 py-3">{{ $t('Company / Workspace') }}</th><th class="px-2 py-3">{{ $t('Status') }}</th><th class="px-2 py-3">{{ $t('Registered') }}</th><th class="px-2 py-3">{{ $t('Domains') }}</th></tr></thead>
                         <tbody>

@@ -175,7 +175,7 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
                                 <div class="w-3 rounded-t bg-emerald-500" :style="{ height: (m.hires / maxMonthly) * 100 + '%', minHeight: m.hires ? '4px' : '0' }" :title="t('{n} hires', { n: m.hires })" />
                                 <div class="w-3 rounded-t bg-slate-800" :style="{ height: (m.exits / maxMonthly) * 100 + '%', minHeight: m.exits ? '4px' : '0' }" :title="t('{n} exits', { n: m.exits })" />
                             </div>
-                            <span class="text-[10px] text-slate-500">{{ monthLabel(m.month) }}</span>
+                            <span class="text-[11px] text-slate-500">{{ monthLabel(m.month) }}</span>
                         </div>
                     </div>
                     <p class="mt-2 text-xs text-slate-500">
