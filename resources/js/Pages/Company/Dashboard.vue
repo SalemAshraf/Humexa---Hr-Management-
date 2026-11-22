@@ -4,7 +4,10 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 import { t, dateLocale } from '@/lib/i18n';
 
+const setupLabels = {"settings": "Save your company details and working hours", "organization": "Add departments and job positions", "employees": "Add your employees (one by one or from a CSV file)", "team": "Invite your team (HR, managers)", "attendance": "Turn on attendance and record the first day"};
+
 const props = defineProps({
+    setup: { type: Array, default: () => [] },
     company: {
         type: Object,
         required: true,
@@ -91,6 +94,19 @@ const modules = computed(() => allModules.filter((m) => !m.permission || !!page.
     <Head :title="$t('Company Overview')" />
 
     <CompanyLayout :title="$t('Overview')" :subtitle="$t('Your company workspace')">
+        <section v-if="setup.length && setup.some((s) => !s.done)" class="mb-7 rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:p-6" data-testid="setup-guide">
+            <h2 class="font-bold text-cyan-950">{{ $t('Get your company ready') }}</h2>
+            <p class="mt-1 text-sm text-cyan-900">{{ $t('{done} of {total} steps done.', { done: setup.filter((s) => s.done).length, total: setup.length }) }}</p>
+            <ul class="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+                <li v-for="s in setup" :key="s.key">
+                    <a :href="s.href" class="flex items-center gap-3 rounded-xl bg-white px-4 py-3 text-sm hover:bg-cyan-100">
+                        <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold" :class="s.done ? 'bg-emerald-500 text-white' : 'border border-slate-300 text-slate-400'" aria-hidden="true">{{ s.done ? '✓' : '' }}</span>
+                        <span :class="s.done ? 'text-slate-400 line-through' : 'font-semibold text-slate-800'">{{ $t(setupLabels[s.key]) }}</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+
         <!-- Page heading -->
         <section class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>

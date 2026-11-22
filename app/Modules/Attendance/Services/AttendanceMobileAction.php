@@ -17,7 +17,7 @@ use Illuminate\Validation\ValidationException;
 
 class AttendanceMobileAction
 {
-    public function record(Employee $employee, string $type, array $data, ?UploadedFile $selfie): AttendanceSession
+    public function record(Employee $employee, string $type, array $data, ?UploadedFile $selfie, string $source = 'mobile'): AttendanceSession
     {
         $tenantId = (string) tenant('id');
         $policy = AttendancePolicy::query()->where('tenant_id', $tenantId)->firstOrFail();
@@ -63,7 +63,7 @@ class AttendanceMobileAction
             : null;
 
         try {
-            return DB::transaction(function () use ($employee, $tenantId, $type, $data, $storedSelfie, $location) {
+            return DB::transaction(function () use ($employee, $tenantId, $type, $data, $storedSelfie, $location, $source) {
                 $employee = Employee::query()
                     ->where('tenant_id', $tenantId)
                     ->whereKey($employee->id)
@@ -116,7 +116,7 @@ class AttendanceMobileAction
                         'employee_id' => $employee->id,
                         'session_number' => $nextSessionNumber,
                         'check_in_at' => $now,
-                        'check_in_source' => 'mobile',
+                        'check_in_source' => $source,
                         'status' => 'open',
                     ]);
                 } else {
@@ -136,7 +136,7 @@ class AttendanceMobileAction
                         ->sum(fn ($break) => max(0, $break->started_at->diffInMinutes($break->ended_at)));
 
                     $openSession->check_out_at = $now;
-                    $openSession->check_out_source = 'mobile';
+                    $openSession->check_out_source = $source;
                     $openSession->break_minutes = $breakMinutes;
                     $openSession->worked_minutes = max(
                         0,
@@ -153,7 +153,7 @@ class AttendanceMobileAction
                     'attendance_session_id' => $session->id,
                     'employee_id' => $employee->id,
                     'event_type' => $type,
-                    'source' => 'mobile',
+                    'source' => $source,
                     'occurred_at' => $now,
                     'latitude' => $data['latitude'] ?? null,
                     'longitude' => $data['longitude'] ?? null,

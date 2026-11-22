@@ -41,6 +41,12 @@ class TenantAttendanceDashboardController extends Controller
             'date' => $today,
             'canViewRecords' => $user->can('attendance.view'),
             'canReviewRequests' => $user->can('attendance.manage'),
+            'employees' => $user->can('attendance.manage')
+                ? Employee::query()->where('tenant_id', $tenantId)
+                    ->whereNotIn('employment_status', [Employee::STATUS_RESIGNED, Employee::STATUS_TERMINATED])
+                    ->orderBy('first_name')->get(['id', 'first_name', 'last_name'])
+                    ->map(fn ($e) => ['id' => $e->id, 'name' => trim($e->first_name.' '.$e->last_name)])->values()
+                : [],
             'stats' => [
                 'total_employees' => Employee::query()
                     ->where('tenant_id', $tenantId)

@@ -1,16 +1,25 @@
 <script setup>
 import { dateLocale } from '@/lib/i18n';
 import { computed } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import CompanyLayout from '@/Layouts/Dashboard/CompanyLayout.vue';
 
 const props = defineProps({
     canViewRecords: { type: Boolean, default: false },
     canReviewRequests: { type: Boolean, default: false },
+    employees: { type: Array, default: () => [] },
     date: { type: String, required: true },
     stats: { type: Object, required: true },
     policy: { type: Object, required: true },
 });
+
+const manual = useForm({ employee_id: '', date: props.date, check_in: '09:00', check_out: '17:00', note: '' });
+const saveManual = () => manual.post('/attendance/manual', { preserveScroll: true, onSuccess: () => manual.reset('employee_id', 'note') });
+const setPolicy = (key, value) => router.put('/attendance/policy', {
+    mobile_checkin_enabled: props.policy.mobile_checkin_enabled,
+    manual_attendance_enabled: props.policy.manual_attendance_enabled,
+    [key]: value,
+}, { preserveScroll: true });
 
 const formattedDate = computed(() => new Intl.DateTimeFormat(dateLocale(), {
     weekday: 'long',
@@ -79,6 +88,27 @@ const formattedDate = computed(() => new Intl.DateTimeFormat(dateLocale(), {
                     </span>
                 </div>
             </div>
+        </section>
+
+        <section v-if="canReviewRequests" class="mb-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" data-testid="attendance-manual">
+            <h2 class="font-bold text-slate-900">{{ $t('Add an attendance entry') }}</h2>
+            <p class="mt-1 text-sm text-slate-500">{{ $t('Record a finished work session for an employee, for example when they forgot to check in.') }}</p>
+            <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                <label class="flex items-center gap-2"><input type="checkbox" :checked="policy.mobile_checkin_enabled" @change="setPolicy('mobile_checkin_enabled', $event.target.checked)" /> {{ $t('Employees can check in themselves') }}</label>
+                <label class="flex items-center gap-2"><input type="checkbox" :checked="policy.manual_attendance_enabled" @change="setPolicy('manual_attendance_enabled', $event.target.checked)" /> {{ $t('Allow manual entries by HR') }}</label>
+            </div>
+            <form v-if="policy.manual_attendance_enabled" class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-6" @submit.prevent="saveManual">
+                <select v-model="manual.employee_id" class="rounded-lg border-slate-300 text-sm md:col-span-2" required>
+                    <option value="" disabled>{{ $t('Employee') }}</option>
+                    <option v-for="e in employees" :key="e.id" :value="e.id">{{ e.name }}</option>
+                </select>
+                <input v-model="manual.date" type="date" :max="date" class="rounded-lg border-slate-300 text-sm" required />
+                <input v-model="manual.check_in" type="time" class="rounded-lg border-slate-300 text-sm" required />
+                <input v-model="manual.check_out" type="time" class="rounded-lg border-slate-300 text-sm" required />
+                <button class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white" :disabled="manual.processing">{{ $t('Save entry') }}</button>
+                <input v-model="manual.note" :placeholder="$t('Note (optional)')" class="rounded-lg border-slate-300 text-sm md:col-span-6" />
+                <p v-for="(m, k) in manual.errors" :key="k" class="text-xs text-red-600 md:col-span-6">{{ m }}</p>
+            </form>
         </section>
 
         <section v-if="canReviewRequests" class="mb-4 flex flex-col justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center">

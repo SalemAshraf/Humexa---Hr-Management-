@@ -38,7 +38,18 @@ class TenantDashboardController extends Controller
             ->where('account_type', User::ACCOUNT_TYPE_TENANT)
             ->count();
 
+        $tid = (string) $tenant->getTenantKey();
+        // First-run steps are shown only to people who can act on them.
+        $setup = $user->can('settings.manage') ? [
+            ['key' => 'settings', 'href' => '/settings', 'done' => \App\Modules\Settings\Models\CompanySetting::query()->where('tenant_id', $tid)->exists()],
+            ['key' => 'organization', 'href' => '/organization', 'done' => \App\Modules\Organization\Models\Department::query()->where('tenant_id', $tid)->exists()],
+            ['key' => 'employees', 'href' => '/employees/import', 'done' => \App\Modules\Employees\Models\Employee::query()->where('tenant_id', $tid)->exists()],
+            ['key' => 'team', 'href' => '/team', 'done' => $teamAccounts > 1],
+            ['key' => 'attendance', 'href' => '/attendance', 'done' => \App\Modules\Attendance\Models\AttendanceRecord::query()->where('tenant_id', $tid)->exists()],
+        ] : [];
+
         return Inertia::render('Company/Dashboard', [
+            'setup' => $setup,
             'company' => [
                 'name' => $tenant->getAttribute('company_name') ?: 'Your Company',
                 'domain' => $request->getHost(),

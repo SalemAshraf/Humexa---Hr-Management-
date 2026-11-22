@@ -6,7 +6,10 @@ namespace App\Modules\SelfService\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Attendance\Models\AttendancePolicy;
 use App\Modules\Attendance\Models\AttendanceRecord;
+use App\Modules\Attendance\Models\AttendanceSession;
+use App\Modules\Attendance\Services\AttendanceMobileAction;
 use App\Modules\Employees\Models\Employee;
 use App\Modules\Leave\Models\LeaveRequest;
 use App\Modules\Leave\Models\LeaveType;
@@ -16,6 +19,7 @@ use App\Modules\Payroll\Models\PayrollRun;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rules\File;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -96,9 +100,56 @@ class SelfServiceController extends Controller
             'types' => LeaveType::query()->where('tenant_id', $tenantId)->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'requests' => $requests,
             'attendance' => $attendance,
+            'clock' => $this->clockState($tenantId, $employee),
             'payslips' => $payslips,
             'year' => $year,
         ]);
+    }
+
+    /** Today's check-in state and the policy flags the clock card needs. */
+    private function clockState(string $tenantId, Employee $employee): array
+    {
+        $policy = AttendancePolicy::query()->where('tenant_id', $tenantId)->first();
+        $open = AttendanceSession::query()
+            ->where('tenant_id', $tenantId)->where('employee_id', $employee->id)
+            ->whereNotNull('check_in_at')->whereNull('check_out_at')
+            ->latest('id')->first();
+
+        return [
+            'enabled' => (bool) ($policy?->mobile_checkin_enabled ?? false),
+            'needs_location' => (bool) ($policy?->location_verification_enabled ?? false),
+            'needs_selfie' => (bool) ($policy?->selfie_verification_enabled ?? false),
+            'state' => $open ? 'checked_in' : 'not_checked_in',
+            'since' => $open?->check_in_at?->toIso8601String(),
+        ];
+    }
+
+    public function checkIn(Request $request, AttendanceMobileAction $action): RedirectResponse
+    {
+        return $this->clock($request, $action, 'check_in', 'Checked in.');
+    }
+
+    public function checkOut(Request $request, AttendanceMobileAction $action): RedirectResponse
+    {
+        return $this->clock($request, $action, 'check_out', 'Checked out.');
+    }
+
+    private function clock(Request $request, AttendanceMobileAction $action, string $type, string $message): RedirectResponse
+    {
+        $tenantId = $this->tenantId();
+        $employee = $this->employee($tenantId, $this->user($request));
+        abort_unless($employee, 403, 'No employee profile is linked to this account.');
+
+        $data = $request->validate([
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'accuracy' => ['nullable', 'integer', 'min:0'],
+            'selfie' => ['nullable', File::image()->max(5 * 1024)],
+        ]);
+
+        $action->record($employee, $type, $data, $request->file('selfie'), 'web');
+
+        return back()->with('success', $message);
     }
 
     public function storeLeave(Request $request): RedirectResponse

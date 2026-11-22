@@ -56,6 +56,9 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/attendance', TenantAttendanceDashboardController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.index');
             Route::get('/attendance/records', TenantAttendanceRecordsController::class)->middleware('tenant.can:attendance.view')->name('tenant.attendance.records');
 
+            Route::post('/attendance/manual', [\App\Modules\Attendance\Http\Controllers\TenantManualAttendanceController::class, 'store'])->middleware(['tenant.can:attendance.manage', 'throttle:60,1'])->name('tenant.attendance.manual');
+            Route::put('/attendance/policy', [\App\Modules\Attendance\Http\Controllers\TenantManualAttendanceController::class, 'updatePolicy'])->middleware('tenant.can:attendance.manage')->name('tenant.attendance.policy');
+
             Route::prefix('/attendance/requests')->middleware('tenant.can:attendance.manage')->name('tenant.attendance.requests.')->controller(TenantAttendanceRequestsController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::post('/correction/{correction}/review', 'reviewCorrection')->whereNumber('correction')->name('correction');
@@ -117,6 +120,8 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
             Route::prefix('/me')->middleware(\App\Http\Middleware\ExcludeOwnerFromSelfService::class)->name('me.')->controller(\App\Modules\SelfService\Http\Controllers\SelfServiceController::class)->group(function () {
                 Route::get('/', 'index')->name('index');
+                Route::post('/attendance/check-in', 'checkIn')->middleware('throttle:30,1')->name('attendance.check-in');
+                Route::post('/attendance/check-out', 'checkOut')->middleware('throttle:30,1')->name('attendance.check-out');
                 Route::post('/leave', 'storeLeave')->middleware('throttle:20,1')->name('leave.store');
                 Route::post('/leave/{leaveRequest}/cancel', 'cancelLeave')->whereNumber('leaveRequest')->name('leave.cancel');
             });
@@ -167,6 +172,12 @@ Route::domain('{tenant}.'.config('humexa.tenant_domain'))
             });
 
             Route::prefix('/employees')->middleware('tenant.can:employees.view,employees.manage')->name('employees.')->group(function () {
+                Route::controller(\App\Modules\Employees\Http\Controllers\EmployeeImportController::class)->prefix('/import')->middleware('tenant.can:employees.manage')->name('import.')->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/template', 'template')->name('template');
+                    Route::post('/', 'store')->middleware('throttle:20,1')->name('store');
+                });
+
                 Route::controller(EmployeeController::class)->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('/archived', 'archived')->name('archived');

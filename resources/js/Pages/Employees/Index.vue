@@ -43,6 +43,7 @@ const paginationLinks = computed(() => props.employees.links || []);
             </div>
             <div class="flex flex-wrap gap-2">
                 <Link v-if="$page.props.can?.['employees.manage']" href="/employees/archived" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ $t('Archived employees') }}</Link>
+                <Link v-if="$page.props.can?.['employees.manage']" href="/employees/import" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ $t('Import CSV') }}</Link>
                 <Link v-if="$page.props.can?.['employees.manage']" href="/employees/create" class="rounded-xl bg-cyan-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700">{{ $t('+ Add employee') }}</Link>
             </div>
         </section>
