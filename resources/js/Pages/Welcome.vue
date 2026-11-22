@@ -24,10 +24,10 @@ const moments = [
 ];
 
 const roles = [
-    { id: 'owner', t: 'Owner', lead: 'See the whole company without asking anyone.', pts: ['Company dashboard with headcount and today\'s attendance', 'Invite the team and choose each person\'s role', 'Company settings in one place'], rows: [['Employees', '12'], ['Present today', '9'], ['Pending leave requests', '4']] },
-    { id: 'hr', t: 'HR', lead: 'Keep every record, request and hire moving.', pts: ['Employee records with archive and restore', 'Attendance, leave and document expiry in one workspace', 'Open positions and candidates through to hiring'], rows: [['Documents expiring soon', '3'], ['Open positions', '2'], ['Attendance requests', '5']] },
-    { id: 'manager', t: 'Manager', lead: 'Decide on requests without leaving the page.', pts: ['Review leave and attendance requests from your team', 'Reports limited to your direct reports', 'Write and finalize performance reviews'], rows: [['Team members', '6'], ['Waiting for you', '2'], ['Reviews to finish', '1']] },
-    { id: 'employee', t: 'Employee', lead: 'A simple space for the things that are yours.', pts: ['Your own attendance record', 'Request leave and see your balance', 'Your profile and account'], rows: [['Annual leave left', '12 days'], ['Last check-in', '08:52'], ['Open requests', '1']] },
+    { id: 'owner', t: 'Owner', lead: 'See the whole company without asking anyone.', pts: ['Company dashboard with headcount and today\'s attendance', 'Invite the team and choose each person\'s role', 'Company settings in one place'], rows: [['Employees', '48'], ['Present today', '41'], ['Pending leave requests', '4'], ['Departments', '6'], ['Open positions', '3'], ['Documents expiring soon', '7']] },
+    { id: 'hr', t: 'HR', lead: 'Keep every record, request and hire moving.', pts: ['Employee records with archive and restore', 'Attendance, leave and document expiry in one workspace', 'Open positions and candidates through to hiring'], rows: [['Documents expiring soon', '7'], ['Open positions', '3'], ['Attendance requests', '5'], ['Candidates in pipeline', '29'], ['New hires this month', '4'], ['Employees on leave', '3']] },
+    { id: 'manager', t: 'Manager', lead: 'Decide on requests without leaving the page.', pts: ['Review leave and attendance requests from your team', 'Reports limited to your direct reports', 'Write and finalize performance reviews'], rows: [['Team members', '8'], ['Waiting for you', '3'], ['Reviews to finish', '2'], ['Present today', '6'], ['On leave this week', '1'], ['Late arrivals this week', '2']] },
+    { id: 'employee', t: 'Employee', lead: 'A simple space for the things that are yours.', pts: ['Your own attendance record', 'Request leave and see your balance', 'Your profile and account'], rows: [['Annual leave left', '12 days'], ['Sick leave left', '9 days'], ['Last check-in', '08:52'], ['Open requests', '1'], ['Days worked this month', '15'], ['Late arrivals this month', '1']] },
 ];
 const activeRole = ref('hr');
 
@@ -287,7 +287,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                             <p class="text-xs font-semibold text-slate-400">{{ $t('Sample data') }}</p>
                             <div v-for="row in r.rows" :key="row[0]" class="flex items-center justify-between border-b border-slate-100 py-3.5 last:border-0">
                                 <span class="text-sm text-[#5A6B7D]">{{ $t(row[0]) }}</span>
-                                <span class="text-lg font-bold">{{ row[1] === '12 days' ? $t('12 days') : row[1] }}</span>
+                                <span class="text-lg font-bold">{{ /days/.test(row[1]) ? $t(row[1]) : row[1] }}</span>
                             </div>
                         </div>
                     </div>

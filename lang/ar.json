@@ -1575,5 +1575,14 @@
  "Driving licence": "رخصة القيادة",
  "5 days left": "باقي 5 أيام",
  "19 days left": "باقي 19 يومًا",
- "34 days left": "باقي 34 يومًا"
+ "34 days left": "باقي 34 يومًا",
+    "Candidates in pipeline": "مرشحون في المراحل",
+    "New hires this month": "تعيينات جديدة هذا الشهر",
+    "Employees on leave": "موظفون في إجازة",
+    "On leave this week": "في إجازة هذا الأسبوع",
+    "Late arrivals this week": "تأخيرات هذا الأسبوع",
+    "Sick leave left": "رصيد المرضي المتبقي",
+    "9 days": "9 أيام",
+    "Days worked this month": "أيام العمل هذا الشهر",
+    "Late arrivals this month": "تأخيرات هذا الشهر"
 }
