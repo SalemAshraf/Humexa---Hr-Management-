@@ -16,7 +16,7 @@ People records, attendance, leave, hiring, performance, payroll and reports in o
 
 The application follows a **Modular Monolith** architecture with Laravel on the backend and Vue 3 + Inertia.js on the frontend. It uses a **single-database tenancy model**, with tenant context resolved by domain and tenant-owned records scoped at the application level.
 
-This README describes the `feature/humexa-completion` branch. It has not been merged into `main` and has not been deployed. The status below reflects the code on this branch, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
+This README describes the `feature/humexa-completion` branch. Release `b65d605` of `main` is deployed at `afrad.mancydigitals.com` (MariaDB 10.6, PHP 8.3). This branch adds the MariaDB foreign-key fix and host settings on top of it. The status below reflects the code on this branch, not a claim that every HR workflow is production-ready. See [Limits and open decisions](#limits-and-open-decisions).
 
 ## Key Capabilities
 
@@ -63,7 +63,7 @@ All of the following exist in the code and are covered by automated tests unless
 | Backend | PHP 8.3+, Laravel 13 |
 | Frontend | Vue 3, Inertia.js 2 |
 | Styling | Tailwind CSS |
-| Database | MySQL 8 (the test suite also runs against it) |
+| Database | MySQL 8 or MariaDB 10.6+ (the test suite runs on MySQL; the migrations were also run on MariaDB 10.6) |
 | Cache and queues | Redis or the configured Laravel drivers |
 | Multi-tenancy | `stancl/tenancy` 3.10 — single-database mode |
 | Authorization | Spatie Laravel Permission with Teams |
@@ -344,7 +344,9 @@ Contributions and new features should follow these conventions:
 
 ## Limits and open decisions
 
-- Not deployed and not merged into `main`.
+- Deployed on one shared host as an early instance; this branch is not merged into `main`. The test suite has not been run on MariaDB.
+- Host settings are environment variables: `HUMEXA_TENANT_DOMAIN` and `HUMEXA_CENTRAL_DOMAINS` (company and platform hosts) and `HUMEXA_FORCE_HTTPS=true` (redirect HTTP to HTTPS). Company subdomains need a wildcard DNS record and a wildcard certificate.
+- Composite tenant foreign keys restrict updates (ids are assumed immutable).
 - No real email delivery is configured (password reset and email confirmation are written to the log only). A sending domain and mail service are needed.
 - AI features are planned only and are not built.
 - Payroll has no built-in legal numbers and makes no compliance claim.

@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Redirect plain HTTP web requests to HTTPS (set HUMEXA_FORCE_HTTPS=true in production).
+    'force_https' => (bool) env('HUMEXA_FORCE_HTTPS', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
