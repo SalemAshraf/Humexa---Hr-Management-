@@ -81,4 +81,86 @@ void main() {
     await tester.pumpAndSettle();
     expect(prefs.getString('token'), isNull);
   });
+
+  testWidgets('request overtime and a correction from a day, and see their status', (tester) async {
+    SharedPreferences.setMockInitialValues({'host': 'acme.example.com', 'token': 'tok123'});
+    final prefs = await SharedPreferences.getInstance();
+    final posts = <String, Map<String, dynamic>>{};
+    final overtime = <Map<String, dynamic>>[];
+    final client = MockClient((req) async {
+      final path = req.url.path;
+      if (req.method == 'POST') {
+        final body = jsonDecode(req.body) as Map<String, dynamic>;
+        posts[path] = body;
+        if (path.endsWith('/overtime-requests')) overtime.add({'requested_minutes': body['requested_minutes'], 'status': 'pending'});
+        return http.Response('{}', 201);
+      }
+      if (path.endsWith('/status')) return http.Response(jsonEncode({'data': {'date': '2026-11-22', 'state': 'checked_out', 'active_session': null}}), 200);
+      if (path.endsWith('/history')) {
+        return http.Response(jsonEncode({'data': [{'id': 5, 'attendance_date': '2026-11-21T00:00:00Z', 'total_worked_minutes': 468, 'late_minutes': 0, 'sessions': [{'id': 9}]}]}), 200);
+      }
+      if (path.endsWith('/overtime-requests')) return http.Response(jsonEncode({'data': {'data': overtime}}), 200);
+      if (path.endsWith('/corrections')) return http.Response(jsonEncode({'data': {'data': []}}), 200);
+      return http.Response('{}', 200);
+    });
+    await tester.pumpWidget(AfradApp(
+      prefs: prefs,
+      apiFactory: (h, t) => AfradApi(h, token: t, client: client),
+      location: () async => {},
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('noreq')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('day-5')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('act-ot')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('send-req')));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter minutes from 1 to 1440.'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('ot-min')), '45');
+    await tester.enterText(find.byKey(const Key('reason')), 'Stayed for the delivery');
+    await tester.tap(find.byKey(const Key('send-req')));
+    await tester.pumpAndSettle();
+    expect(posts['/api/v1/attendance/overtime-requests']!['attendance_session_id'], 9);
+    expect(posts['/api/v1/attendance/overtime-requests']!['requested_minutes'], 45);
+    expect(find.text('45 min'), findsOneWidget);
+    expect(find.text('Pending'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('day-5')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('act-corr')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('send-req')));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter a reason.'), findsOneWidget);
+    expect(posts.containsKey('/api/v1/attendance/corrections'), isFalse);
+  });
+
+  testWidgets('leave balances show and a pending request can be withdrawn', (tester) async {
+    SharedPreferences.setMockInitialValues({'host': 'acme.example.com', 'token': 'tok123'});
+    final prefs = await SharedPreferences.getInstance();
+    final calls = <String>[];
+    var status = 'pending';
+    final client = MockClient((req) async {
+      final path = req.url.path;
+      calls.add('${req.method} $path');
+      if (path.endsWith('/leave/4/cancel')) { status = 'cancelled'; return http.Response('{}', 200); }
+      if (path.endsWith('/leave')) {
+        return http.Response(jsonEncode({'data': {'balances': [{'leave_type_id': 1, 'name': 'Annual', 'remaining': 19.5}], 'requests': [{'id': 4, 'start_date': '2026-11-23', 'end_date': '2026-11-24', 'days': 2, 'status': status}]}}), 200);
+      }
+      if (path.endsWith('/status')) return http.Response(jsonEncode({'data': {'date': '2026-11-22', 'state': 'checked_out', 'active_session': null}}), 200);
+      if (path.endsWith('/history')) return http.Response(jsonEncode({'data': []}), 200);
+      return http.Response(jsonEncode({'data': {'data': []}}), 200);
+    });
+    await tester.pumpWidget(AfradApp(prefs: prefs, apiFactory: (h, t) => AfradApi(h, token: t, client: client), location: () async => {}));
+    await tester.pumpAndSettle();
+    expect(find.text('19.5 left'), findsOneWidget);
+    expect(find.textContaining('2026-11-23'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('wd-4')));
+    await tester.tap(find.byKey(const Key('wd-4')));
+    await tester.pumpAndSettle();
+    expect(calls, contains('POST /api/v1/leave/4/cancel'));
+    expect(find.text('Withdrawn'), findsOneWidget);
+  });
 }

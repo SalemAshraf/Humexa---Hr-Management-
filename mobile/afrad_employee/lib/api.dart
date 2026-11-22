@@ -90,4 +90,22 @@ class AfradApi {
 
   Future<void> breakStart(int sessionId) async => _send(() => _client.post(_uri('/attendance/breaks/start'), headers: _headers, body: jsonEncode({'attendance_session_id': sessionId})));
   Future<void> breakEnd(int sessionId) async => _send(() => _client.post(_uri('/attendance/breaks/end'), headers: _headers, body: jsonEncode({'attendance_session_id': sessionId})));
+
+  Future<List<Map<String, dynamic>>> _list(String path) async {
+    final b = await _send(() => _client.get(_uri(path), headers: _headers));
+    final d = b['data'];
+    final rows = d is Map ? d['data'] : d;
+    return ((rows as List?) ?? []).map((e) => (e as Map).cast<String, dynamic>()).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> corrections() => _list('/attendance/corrections');
+  Future<List<Map<String, dynamic>>> overtimeRequests() => _list('/attendance/overtime-requests');
+
+  Future<void> requestCorrection(int sessionId, String reason, {String? checkIn, String? checkOut}) async => _send(() => _client.post(_uri('/attendance/corrections'), headers: _headers, body: jsonEncode({'attendance_session_id': sessionId, 'reason': reason, 'requested_check_in': ?checkIn, 'requested_check_out': ?checkOut})));
+
+  Future<void> requestOvertime(int sessionId, int minutes, String? reason) async => _send(() => _client.post(_uri('/attendance/overtime-requests'), headers: _headers, body: jsonEncode({'attendance_session_id': sessionId, 'requested_minutes': minutes, if (reason != null && reason.isNotEmpty) 'reason': reason})));
+
+  Future<Map<String, dynamic>> leave() async => ((await _send(() => _client.get(_uri('/leave'), headers: _headers)))['data'] as Map).cast<String, dynamic>();
+  Future<void> requestLeave(int typeId, String start, String end, String? reason) async => _send(() => _client.post(_uri('/leave'), headers: _headers, body: jsonEncode({'leave_type_id': typeId, 'start_date': start, 'end_date': end, if (reason != null && reason.isNotEmpty) 'reason': reason})));
+  Future<void> cancelLeave(int id) async => _send(() => _client.post(_uri('/leave/$id/cancel'), headers: _headers));
 }

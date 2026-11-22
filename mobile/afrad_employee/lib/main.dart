@@ -67,6 +67,9 @@ class _HomePageState extends State<HomePage> {
   AfradApi? api;
   Map<String, dynamic>? status;
   List<Map<String, dynamic>> history = [];
+  List<Map<String, dynamic>> corrs = [];
+  List<Map<String, dynamic>> ots = [];
+  Map<String, dynamic> leaveData = {};
   String? message;
   @override
   void didUpdateWidget(covariant HomePage old) {
@@ -132,7 +135,12 @@ class _HomePageState extends State<HomePage> {
     if (a == null) return;
     final s = await a.status();
     final h = await a.history();
-    if (mounted) setState(() { status = s; history = h; });
+    List<Map<String, dynamic>> c = [], o = [];
+    try { c = await a.corrections(); } catch (_) {}
+    try { o = await a.overtimeRequests(); } catch (_) {}
+    Map<String, dynamic> l = {};
+    try { l = await a.leave(); } catch (_) {}
+    if (mounted) setState(() { status = s; history = h; corrs = c; ots = o; leaveData = l; });
   }
 
   Future<void> _login() => _guard(() async {
@@ -234,19 +242,186 @@ class _HomePageState extends State<HomePage> {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(t('hist'), style: const TextStyle(fontWeight: FontWeight.bold)),
             if (history.isEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(t('empty'))),
+            if (history.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4), child: Text(t('tapDay'), style: const TextStyle(color: Colors.black54, fontSize: 12))),
             for (final r in history)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+              InkWell(
+                key: Key('day-${r['id']}'),
+                onTap: () => _dayActions(r),
+                child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Row(children: [
                   Expanded(flex: 3, child: Text(r['attendance_date'].toString().substring(0, 10))),
                   Expanded(flex: 2, child: Text(_hm(r['total_worked_minutes']))),
                   Expanded(flex: 2, child: Text(((r['late_minutes'] as num?) ?? 0) > 0 ? '${r['late_minutes']} ${t('min')}' : '-')),
                 ]),
-              ),
+              )),
+          ]),
+        ),
+      ),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(t('leave'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            for (final b in ((leaveData['balances'] as List?) ?? []))
+              Padding(padding: const EdgeInsets.only(top: 6), child: Row(children: [
+                Expanded(child: Text('${(b as Map)['name']}')),
+                Text('${b['remaining']} ${t('remaining')}'),
+              ])),
+            const SizedBox(height: 8),
+            OutlinedButton(key: const Key('req-leave'), onPressed: busy ? null : _leaveDialog, child: Text(t('reqLeave'))),
+            for (final r in ((leaveData['requests'] as List?) ?? []))
+              Padding(padding: const EdgeInsets.only(top: 8), child: Row(children: [
+                Expanded(child: Text('${(r as Map)['start_date'].toString().substring(0, 10)} → ${r['end_date'].toString().substring(0, 10)} (${r['days']} ${t('days')})')),
+                if (r['status'] == 'pending') TextButton(key: Key('wd-${r['id']}'), onPressed: busy ? null : () => _guard(() async { await api!.cancelLeave((r['id'] as num).toInt()); await _refresh(); }, success: true), child: Text(t('withdraw')))
+                else Text({'approved': t('approved'), 'rejected': t('rejected'), 'cancelled': t('cancelled')}[r['status']] ?? '${r['status']}'),
+              ])),
+          ]),
+        ),
+      ),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(t('req'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            if (corrs.isEmpty && ots.isEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(t('noReq'), key: const Key('noreq'))),
+            for (final c in corrs) _reqRow(t('corr'), c['reason']?.toString() ?? '', c['status']),
+            for (final o in ots) _reqRow(t('ot'), '${o['requested_minutes']} ${t('min')}', o['status']),
           ]),
         ),
       ),
     ]);
+  }
+
+  Widget _reqRow(String kind, String detail, dynamic status) {
+    final st = status?.toString() ?? 'pending';
+    final label = {'pending': t('pending'), 'approved': t('approved'), 'rejected': t('rejected')}[st] ?? st;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(children: [
+        Expanded(flex: 2, child: Text(kind, style: const TextStyle(fontWeight: FontWeight.w600))),
+        Expanded(flex: 4, child: Text(detail, maxLines: 2, overflow: TextOverflow.ellipsis)),
+        Expanded(flex: 2, child: Text(label, textAlign: TextAlign.end)),
+      ]),
+    );
+  }
+
+  int? _lastSessionId(Map<String, dynamic> r) {
+    final ss = (r['sessions'] as List?) ?? [];
+    if (ss.isEmpty) return null;
+    return ((ss.last as Map)['id'] as num).toInt();
+  }
+
+  Future<void> _dayActions(Map<String, dynamic> r) async {
+    final sid = _lastSessionId(r);
+    if (sid == null) return;
+    final day = r['attendance_date'].toString().substring(0, 10);
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(title: Text(day, style: const TextStyle(fontWeight: FontWeight.bold))),
+          ListTile(key: const Key('act-corr'), leading: const Icon(Icons.edit_calendar), title: Text(t('reqCorr')), onTap: () => Navigator.pop(c, 'corr')),
+          ListTile(key: const Key('act-ot'), leading: const Icon(Icons.more_time), title: Text(t('reqOt')), onTap: () => Navigator.pop(c, 'ot')),
+        ]),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    final reason = TextEditingController();
+    final minutes = TextEditingController();
+    String? inT, outT;
+    String? err;
+    final send = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(builder: (c, set) {
+        Future<void> pick(bool isIn) async {
+          final p = await showTimePicker(context: c, initialTime: const TimeOfDay(hour: 9, minute: 0));
+          if (p == null) return;
+          final v = '${p.hour.toString().padLeft(2, '0')}:${p.minute.toString().padLeft(2, '0')}';
+          set(() { if (isIn) { inT = v; } else { outT = v; } });
+        }
+        return AlertDialog(
+          title: Text(choice == 'corr' ? t('reqCorr') : t('reqOt')),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              if (choice == 'corr') ...[
+                OutlinedButton(key: const Key('pick-in'), onPressed: () => pick(true), child: Text(inT ?? t('inTime'))),
+                OutlinedButton(key: const Key('pick-out'), onPressed: () => pick(false), child: Text(outT ?? t('outTime'))),
+              ] else
+                TextField(key: const Key('ot-min'), controller: minutes, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: t('minutes'))),
+              TextField(key: const Key('reason'), controller: reason, maxLines: 3, decoration: InputDecoration(labelText: t('reason'))),
+              if (err != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(err!, style: const TextStyle(color: Colors.red))),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(t('cancel'))),
+            FilledButton(
+              key: const Key('send-req'),
+              onPressed: () {
+                if (choice == 'corr' && reason.text.trim().isEmpty) { set(() => err = t('needReason')); return; }
+                final n = int.tryParse(minutes.text.trim());
+                if (choice == 'ot' && (n == null || n < 1 || n > 1440)) { set(() => err = t('needMinutes')); return; }
+                Navigator.pop(c, true);
+              },
+              child: Text(t('send')),
+            ),
+          ],
+        );
+      }),
+    );
+    if (send != true || !mounted) return;
+    await _guard(() async {
+      if (choice == 'corr') {
+        await api!.requestCorrection(sid, reason.text.trim(), checkIn: inT == null ? null : '$day $inT:00', checkOut: outT == null ? null : '$day $outT:00');
+      } else {
+        await api!.requestOvertime(sid, int.parse(minutes.text.trim()), reason.text.trim());
+      }
+      await _refresh();
+    }, success: true);
+  }
+
+  Future<void> _leaveDialog() async {
+    final balances = ((leaveData['balances'] as List?) ?? []).map((e) => (e as Map).cast<String, dynamic>()).toList();
+    if (balances.isEmpty) { setState(() { message = t('noLeave'); ok = false; }); return; }
+    int? typeId;
+    DateTime? from, to;
+    final reason = TextEditingController();
+    String? err;
+    String fmt(DateTime d) => '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final send = await showDialog<bool>(
+      context: context,
+      builder: (c) => StatefulBuilder(builder: (c, set) {
+        Future<void> pick(bool isFrom) async {
+          final now = DateTime.now();
+          final d = await showDatePicker(context: c, initialDate: (isFrom ? from : to) ?? now, firstDate: DateTime(now.year - 1), lastDate: DateTime(now.year + 1, 12, 31));
+          if (d != null) set(() { if (isFrom) { from = d; to ??= d; } else { to = d; } });
+        }
+        return AlertDialog(
+          title: Text(t('reqLeave')),
+          content: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              DropdownButtonFormField<int>(key: const Key('leave-type'), decoration: InputDecoration(labelText: t('leaveType')), initialValue: typeId, items: [for (final b in balances) DropdownMenuItem(value: (b['leave_type_id'] as num).toInt(), child: Text('${b['name']}'))], onChanged: (v) => set(() => typeId = v)),
+              OutlinedButton(key: const Key('leave-from'), onPressed: () => pick(true), child: Text(from == null ? t('from') : fmt(from!))),
+              OutlinedButton(key: const Key('leave-to'), onPressed: () => pick(false), child: Text(to == null ? t('to') : fmt(to!))),
+              TextField(key: const Key('leave-reason'), controller: reason, maxLines: 2, decoration: InputDecoration(labelText: t('reason'))),
+              if (err != null) Padding(padding: const EdgeInsets.only(top: 8), child: Text(err!, style: const TextStyle(color: Colors.red))),
+            ]),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(c, false), child: Text(t('cancel'))),
+            FilledButton(key: const Key('send-leave'), onPressed: () {
+              if (typeId == null || from == null || to == null) { set(() => err = t('needDates')); return; }
+              Navigator.pop(c, true);
+            }, child: Text(t('send'))),
+          ],
+        );
+      }),
+    );
+    if (send != true || !mounted) return;
+    await _guard(() async {
+      await api!.requestLeave(typeId!, fmt(from!), fmt(to!), reason.text.trim());
+      await _refresh();
+    }, success: true);
   }
 
   Future<void> _record(bool inn) => _guard(() async {
