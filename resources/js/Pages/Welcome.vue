@@ -380,7 +380,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         <ul class="mt-6 space-y-3">
                             <li v-for="a in aiAsks" :key="a" class="flex gap-3 text-[15px] leading-7 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#2BD9A9]" aria-hidden="true"></span>{{ $t(a) }}</li>
                         </ul>
-                        <p class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950/80">{{ $t('This is a private connector you add by hand in Claude, not an assistant inside Afrad. It is new, and we are still trying it with real accounts. Answers are shown to Claude and handled under its own terms.') }}</p>
+                        <p class="mt-5 text-sm leading-7 text-[#5A6B7D]">{{ $t('A new connector you add yourself in Claude. Answers appear in Claude and follow its terms.') }}</p>
                     </div>
                     <div v-reveal="80">
                         <div class="rounded-2xl border border-slate-200 bg-[#F3F6F8] p-5">
