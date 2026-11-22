@@ -31,6 +31,7 @@ class PlatformPlanController extends Controller
                 'name' => $t->getAttribute('company_name') ?: 'Unnamed Company',
                 'plan_id' => $t->getAttribute('plan_id'),
                 'subscription_ends_at' => $t->getAttribute('subscription_ends_at') ? substr((string) $t->getAttribute('subscription_ends_at'), 0, 10) : null,
+                'trial_ends_at' => $t->getAttribute('trial_ends_at') ? substr((string) $t->getAttribute('trial_ends_at'), 0, 10) : null,
                 'employees' => (int) ($counts[$t->getKey()] ?? 0),
             ]),
         ]);

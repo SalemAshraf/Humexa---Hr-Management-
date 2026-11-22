@@ -81,7 +81,7 @@ const input = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm
 
         <section>
             <h2 class="mb-1 font-semibold text-white">{{ $t('Company plans') }}</h2>
-            <p class="mb-3 text-xs text-slate-500">{{ $t('A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The date only reminds you: it never suspends or activates a company.') }}</p>
+            <p class="mb-3 text-xs text-slate-500">{{ $t('A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The paid-until date controls access: after it passes, the company can still view and export its data, but cannot add or change records until you enter a later date.') }}</p>
             <div class="grid gap-3 md:grid-cols-2">
                 <article v-for="c in companies" :key="c.id" class="hx-card p-4">
                     <h3 class="font-semibold text-white"><bdi>{{ c.name }}</bdi></h3>
@@ -92,6 +92,7 @@ const input = 'rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm
                             <option v-for="p in plans" :key="p.id" :value="p.id">{{ p.name }}</option>
                         </select>
                     </label>
+                    <p v-if="c.trial_ends_at && !c.subscription_ends_at" class="mt-2 text-xs text-slate-400">{{ $t('Free trial ends on {date}. Without a paid-until date the company becomes view and export only after that day.', { date: c.trial_ends_at }) }}</p>
                     <label class="mt-3 block text-xs text-slate-400">{{ $t('Paid until (you enter it after you receive payment)') }}
                         <input :class="input + ' mt-1 w-full'" type="date" :value="c.subscription_ends_at ?? ''" @change="setEnd(c, $event)" />
                     </label>

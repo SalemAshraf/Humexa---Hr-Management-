@@ -9,9 +9,9 @@ const text = (i) => {
     switch (i.kind) {
         case 'new': return t('{company} registered on {date}.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
         case 'suspended': return t('{company} is suspended.', { company: i.company });
-        case 'sub_expired': return t('{company} paid-until date passed on {date}. Nothing was changed automatically.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
+        case 'sub_expired': return t('{company} paid-until date passed on {date}. The company is view and export only until you enter a later date.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
         case 'sub_expiring': return t('{company} is paid until {date}. Ask them about renewal.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
-        case 'trial_ended': return t('{company} 7-day trial ended on {date} and no paid-until date is set. Nothing was changed automatically.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
+        case 'trial_ended': return t('{company} 7-day trial ended on {date} and no paid-until date is set. The company is view and export only until you enter one.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
         case 'trial_ending': return t('{company} 7-day trial ends on {date}.', { company: i.company, date: '\u2066' + i.date + '\u2069' });
         case 'no_plan': return t('{company} has no plan assigned, so nothing limits it.', { company: i.company });
         case 'at_limit': return t('{company} reached its plan limit for {what}: {used} of {max}.', { company: i.company, what: t(i.what === 'employees' ? 'employees' : 'sign-in accounts'), used: i.used, max: i.max });

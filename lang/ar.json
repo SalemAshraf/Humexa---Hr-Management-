@@ -1411,11 +1411,8 @@
  "No shift": "من غير وردية",
  "Move the employees on this shift to another shift or none before deleting it.": "انقل الموظفين اللي على الوردية دي لوردية تانية أو من غير وردية قبل الحذف.",
  "Paid until (you enter it after you receive payment)": "مدفوع لحد (تدخله بعد ما تستلم الدفع)",
- "A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The date only reminds you: it never suspends or activates a company.": "الشركة من غير باقة ملهاش حدود. تغيير الباقة مبيمسحش حاجة الشركة عندها. الدفع بيحصل برّه التطبيق. التاريخ مجرد تذكير: مبيوقفش ولا بيفعّل أي شركة.",
- "{company} paid-until date passed on {date}. Nothing was changed automatically.": "{company} تاريخ الدفع لحد {date} عدّى. مفيش حاجة اتغيرت تلقائي.",
  "{company} is paid until {date}. Ask them about renewal.": "{company} مدفوعة لحد {date}. اسألهم عن التجديد.",
  "Paid-until date changed": "تاريخ الدفع لحد اتغير",
- "{company} 7-day trial ended on {date} and no paid-until date is set. Nothing was changed automatically.": "{company} التجربة (7 أيام) خلصت يوم {date} ومفيش تاريخ دفع متسجل. مفيش حاجة اتغيرت تلقائي.",
  "{company} 7-day trial ends on {date}.": "{company} التجربة (7 أيام) بتخلص يوم {date}.",
  "Payroll rules and rates are entered and reviewed by your company. Afrad does not verify them. Have your accountant check the results before anyone is paid. Amounts are in EGP.": "قواعد ونسب المرتبات بتدخلها وتراجعها شركتك. أفراد مبيتحققش منها. خلّي المحاسب يراجع النتايج قبل ما أي حد ياخد مرتبه. المبالغ بالجنيه المصري.",
  "Payroll runs on your company rules.": "المرتبات بتتحسب بقواعد شركتك.",
@@ -1448,5 +1445,9 @@
  "free trial": "التجربة المجانية",
  "plan": "الاشتراك",
  "Your {what} ended on {date}. You can still view and export your data, but adding or changing records is paused until the plan is renewed.": "انتهى {what} بتاريخ {date}. لسه تقدر تعرض بياناتك وتصدّرها، لكن إضافة أو تعديل السجلات متوقف لحد ما الاشتراك يتجدد.",
- "Your {what} ends on {date} ({n} days left). After that, adding or changing records is paused until the plan is renewed.": "{what} هينتهي بتاريخ {date} (فاضل {n} يوم). بعدها إضافة أو تعديل السجلات هتتوقف لحد ما الاشتراك يتجدد."
+ "Your {what} ends on {date} ({n} days left). After that, adding or changing records is paused until the plan is renewed.": "{what} هينتهي بتاريخ {date} (فاضل {n} يوم). بعدها إضافة أو تعديل السجلات هتتوقف لحد ما الاشتراك يتجدد.",
+ "{company} paid-until date passed on {date}. The company is view and export only until you enter a later date.": "تاريخ «مدفوع لحد» لـ{company} عدّى في {date}. الشركة عرض وتصدير بس لحد ما تدخل تاريخ أحدث.",
+ "{company} 7-day trial ended on {date} and no paid-until date is set. The company is view and export only until you enter one.": "تجربة الـ7 أيام لـ{company} انتهت في {date} ومفيش تاريخ «مدفوع لحد». الشركة عرض وتصدير بس لحد ما تدخل واحد.",
+ "A company with no plan has no limits. Changing a plan never removes anything a company already has. Payment happens outside the app. The paid-until date controls access: after it passes, the company can still view and export its data, but cannot add or change records until you enter a later date.": "الشركة من غير باقة ملهاش حدود. تغيير الباقة مبيشيلش أي حاجة الشركة عندها. الدفع بيتم خارج التطبيق. تاريخ «مدفوع لحد» هو اللي بيتحكم في الوصول: بعد ما يعدّي، الشركة تقدر تعرض بياناتها وتصدّرها بس، ومتقدرش تضيف أو تعدّل سجلات لحد ما تدخل تاريخ أحدث.",
+ "Free trial ends on {date}. Without a paid-until date the company becomes view and export only after that day.": "التجربة المجانية بتنتهي في {date}. من غير تاريخ «مدفوع لحد» الشركة بتبقى عرض وتصدير بس بعد اليوم ده."
 }
