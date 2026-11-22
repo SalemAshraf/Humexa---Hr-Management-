@@ -22,7 +22,7 @@ const submit = () => form.post('/password/change', { onFinish: () => form.reset(
             <p v-if="form.errors.password" class="text-xs text-red-600">{{ form.errors.password }}</p>
             <label class="block text-sm font-medium text-slate-600">{{ $t('Repeat new password') }}<input v-model="form.password_confirmation" type="password" autocomplete="new-password" class="mt-1 w-full rounded-lg border-slate-300" />
             </label>
-            <button class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white" :disabled="form.processing">{{ $t('Save password') }}</button>
+            <button class="w-full rounded-lg bg-[#2BD9A9] px-4 py-2.5 text-sm font-bold text-[#0A2038] hover:bg-[#4BE5BB]" :disabled="form.processing">{{ $t('Save password') }}</button>
         </form>
     </GuestLayout>
 </template>

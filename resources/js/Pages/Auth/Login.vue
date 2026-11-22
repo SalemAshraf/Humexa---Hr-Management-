@@ -51,22 +51,22 @@ const submit = () => {
     <GuestLayout>
         <Head :title="$t('Sign In')" />
 
-        <div class="rounded-3xl border border-white/10 bg-[#111C30]/90 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-7">
+        <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5 sm:p-7">
 
             <!-- Header -->
             <div class="mb-6">
-                <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10 text-cyan-300">
+                <div class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#2BD9A9]/40 bg-[#2BD9A9]/15 text-[#0B7A60]">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
                         <path d="m10 17 5-5-5-5m5 5H3" />
                     </svg>
                 </div>
 
-                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">{{ $t('Welcome Back') }}</p>
+                <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-[#0B7A60]">{{ $t('Welcome Back') }}</p>
 
-                <h2 class="text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ $t('Sign in to Afrad') }}</h2>
+                <h2 class="text-2xl font-bold tracking-tight text-[#0E2A47] sm:text-3xl">{{ $t('Sign in to Afrad') }}</h2>
 
-                <p class="mt-2 text-sm leading-5 text-slate-400">{{ $t('Access your company workspace and manage your team.') }}</p>
+                <p class="mt-2 text-sm leading-5 text-slate-600">{{ $t('Access your company workspace and manage your team.') }}</p>
             </div>
 
             <!-- Status -->
@@ -95,13 +95,13 @@ const submit = () => {
                     <InputLabel
                         for="email"
                         value="Work Email"
-                        class="!text-slate-300"
+                        class="!text-slate-700"
                     />
 
                     <TextInput
                         id="email"
                         type="email"
-                        class="mt-2 block w-full !border-white/10 !bg-[#0B1425] !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
+                        class="mt-2 block w-full !border-slate-300 !bg-white !text-[#0E2A47] placeholder:!text-slate-600 focus:!border-[#0B7A60] focus:!ring-[#2BD9A9]/30"
                         v-model="form.email"
                         :placeholder="$t('you@company.com')"
                         required
@@ -121,13 +121,13 @@ const submit = () => {
                         <InputLabel
                             for="password"
                             value="Password"
-                            class="!text-slate-300"
+                            class="!text-slate-700"
                         />
 
                         <Link
                             v-if="canResetPassword"
                             :href="route('password.request')"
-                            class="text-xs font-medium text-cyan-400 transition hover:text-cyan-300"
+                            class="text-xs font-medium text-[#0B7A60] transition hover:text-[#0E2A47]"
                         >{{ $t('Forgot password?') }}</Link>
                     </div>
 
@@ -135,7 +135,7 @@ const submit = () => {
                         <TextInput
                             id="password"
                             :type="showPassword ? 'text' : 'password'"
-                            class="block w-full !border-white/10 !bg-[#0B1425] !pe-16 !text-white placeholder:!text-slate-600 focus:!border-cyan-400 focus:!ring-cyan-400/20"
+                            class="block w-full !border-slate-300 !bg-white !pe-16 !text-[#0E2A47] placeholder:!text-slate-600 focus:!border-[#0B7A60] focus:!ring-[#2BD9A9]/30"
                             v-model="form.password"
                             :placeholder="$t('Enter your password')"
                             required
@@ -146,7 +146,7 @@ const submit = () => {
                             type="button"
                             @click="showPassword = !showPassword"
                             :aria-label="showPassword ? $t('Hide password') : $t('Show password')"
-                            class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 transition hover:text-cyan-400 focus:outline-none focus:text-cyan-400"
+                            class="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-600 transition hover:text-[#0B7A60] focus:outline-none focus:text-[#0B7A60]"
                         >
                             {{ showPassword ? $t('Hide') : $t('Show') }}
                         </button>
@@ -166,7 +166,7 @@ const submit = () => {
                             v-model:checked="form.remember"
                         />
 
-                        <span class="text-sm text-slate-400">{{ $t('Remember me') }}</span>
+                        <span class="text-sm text-slate-600">{{ $t('Remember me') }}</span>
                     </label>
                 </div>
 
@@ -175,7 +175,7 @@ const submit = () => {
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-900/30 transition hover:from-cyan-400 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-[#111C30] disabled:cursor-not-allowed disabled:opacity-50"
+                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2BD9A9] px-5 py-3.5 text-sm font-bold text-[#0A2038] shadow-sm transition hover:bg-[#4BE5BB] focus:outline-none focus:ring-2 focus:ring-[#0B7A60] focus:ring-offset-2 focus:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <svg
                             v-if="form.processing"
@@ -215,17 +215,17 @@ const submit = () => {
 
                     <p
                         v-if="form.hasErrors"
-                        class="mt-3 text-center text-xs text-red-400"
+                        class="mt-3 text-center text-xs text-red-600"
                         role="alert"
                     >{{ $t('Please check your email and password.') }}</p>
                 </div>
             </form>
 
             <!-- Registration link -->
-            <div v-if="showRegistrationLink" class="mt-6 border-t border-white/10 pt-5 text-center">
-                <p class="text-sm text-slate-400">{{ $t('Don\'t have a company account?') }}<Link
+            <div v-if="showRegistrationLink" class="mt-6 border-t border-slate-200 pt-5 text-center">
+                <p class="text-sm text-slate-600">{{ $t('Don\'t have a company account?') }}<Link
                         :href="route('register')"
-                        class="ms-1 font-semibold text-cyan-400 transition hover:text-cyan-300"
+                        class="ms-1 font-semibold text-[#0B7A60] transition hover:text-[#0E2A47]"
                     >{{ $t('Create account') }}</Link>
                 </p>
             </div>
