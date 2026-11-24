@@ -24,10 +24,10 @@ const moments = [
 ];
 
 const roles = [
-    { id: 'owner', t: 'Owner', lead: 'See the whole company without asking anyone.', pts: ['Company dashboard with headcount and today\'s attendance', 'Invite the team and choose each person\'s role', 'Company settings in one place'], rows: [['Employees', '12'], ['Present today', '9'], ['Pending leave requests', '4']] },
-    { id: 'hr', t: 'HR', lead: 'Keep every record, request and hire moving.', pts: ['Employee records with archive and restore', 'Attendance, leave and document expiry in one workspace', 'Open positions and candidates through to hiring'], rows: [['Documents expiring soon', '3'], ['Open positions', '2'], ['Attendance requests', '5']] },
-    { id: 'manager', t: 'Manager', lead: 'Decide on requests without leaving the page.', pts: ['Review leave and attendance requests from your team', 'Reports limited to your direct reports', 'Write and finalize performance reviews'], rows: [['Team members', '6'], ['Waiting for you', '2'], ['Reviews to finish', '1']] },
-    { id: 'employee', t: 'Employee', lead: 'A simple space for the things that are yours.', pts: ['Your own attendance record', 'Request leave and see your balance', 'Your profile and account'], rows: [['Annual leave left', '12 days'], ['Last check-in', '08:52'], ['Open requests', '1']] },
+    { id: 'owner', t: 'Owner', lead: 'See the whole company without asking anyone.', pts: ['Company dashboard with headcount and today\'s attendance', 'Invite the team and choose each person\'s role', 'Company settings in one place'], rows: [['Employees', '48'], ['Present today', '41'], ['Pending leave requests', '4'], ['Departments', '6'], ['Open positions', '3'], ['Documents expiring soon', '7']] },
+    { id: 'hr', t: 'HR', lead: 'Keep every record, request and hire moving.', pts: ['Employee records with archive and restore', 'Attendance, leave and document expiry in one workspace', 'Open positions and candidates through to hiring'], rows: [['Documents expiring soon', '7'], ['Open positions', '3'], ['Attendance requests', '5'], ['Candidates in pipeline', '29'], ['New hires this month', '4'], ['Employees on leave', '3']] },
+    { id: 'manager', t: 'Manager', lead: 'Decide on requests without leaving the page.', pts: ['Review leave and attendance requests from your team', 'Reports limited to your direct reports', 'Write and finalize performance reviews'], rows: [['Team members', '8'], ['Waiting for you', '3'], ['Reviews to finish', '2'], ['Present today', '6'], ['On leave this week', '1'], ['Late arrivals this week', '2']] },
+    { id: 'employee', t: 'Employee', lead: 'A simple space for the things that are yours.', pts: ['Your own attendance record', 'Request leave and see your balance', 'Your profile and account'], rows: [['Annual leave left', '12 days'], ['Sick leave left', '9 days'], ['Last check-in', '08:52'], ['Open requests', '1'], ['Days worked this month', '15'], ['Late arrivals this month', '1']] },
 ];
 const activeRole = ref('hr');
 
@@ -35,25 +35,59 @@ const docs = [
     { who: 'Ahmed Hassan', what: 'Passport', when: 'Expired', tone: 'bg-red-50 text-red-700' },
     { who: 'Mona Adel', what: 'Work contract', when: '12 days left', tone: 'bg-amber-50 text-amber-700' },
     { who: 'Karim Samir', what: 'Health card', when: '27 days left', tone: 'bg-amber-50 text-amber-700' },
+    { who: 'Sara Mostafa', what: 'ID card', when: 'Expired', tone: 'bg-red-50 text-red-700' },
+    { who: 'Tarek Salem', what: 'Driving licence', when: '5 days left', tone: 'bg-amber-50 text-amber-700' },
+    { who: 'Nour Ibrahim', what: 'Work contract', when: '19 days left', tone: 'bg-amber-50 text-amber-700' },
+    { who: 'Hossam Ali', what: 'Passport', when: '34 days left', tone: 'bg-slate-100 text-slate-600' },
 ];
 
 const stages = [
-    { s: 'Applied', n: 14 },
-    { s: 'Screening', n: 9 },
-    { s: 'Interview', n: 5 },
-    { s: 'Offer', n: 2 },
-    { s: 'Hired', n: 1 },
+    { s: 'Applied', n: 42 },
+    { s: 'Screening', n: 18 },
+    { s: 'Interview', n: 9 },
+    { s: 'Offer', n: 3 },
+    { s: 'Hired', n: 2 },
 ];
 
-const bars = [38, 52, 44, 61, 57, 70];
+const bars = [52, 58, 64, 72, 82, 94];
+const hc = [128, 131, 135, 139, 144, 148];
+const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+const kpis = [{ l: 'Employees', v: '148' }, { l: 'Present today', v: '126' }, { l: 'On leave', v: '9' }, { l: 'Late today', v: '7' }, { l: 'Open positions', v: '5' }, { l: 'Pending requests', v: '14' }];
+const depts = [{ n: 'Operations', c: 38 }, { n: 'Sales', c: 31 }, { n: 'Customer Service', c: 24 }, { n: 'IT', c: 19 }, { n: 'Finance', c: 14 }, { n: 'Human Resources', c: 9 }];
+const attToday = [
+    { w: 'Ahmed Hassan', d: 'Operations', t: '08:47', s: 'On time', tone: 'bg-emerald-50 text-emerald-700' },
+    { w: 'Sara Mostafa', d: 'Sales', t: '08:55', s: 'On time', tone: 'bg-emerald-50 text-emerald-700' },
+    { w: 'Omar Khaled', d: 'IT', t: '09:22', s: 'Late', tone: 'bg-amber-50 text-amber-700' },
+    { w: 'Hana Fathy', d: 'Finance', t: '08:41', s: 'On time', tone: 'bg-emerald-50 text-emerald-700' },
+    { w: 'Tarek Salem', d: 'Customer Service', t: '09:35', s: 'Late', tone: 'bg-amber-50 text-amber-700' },
+];
+const leaveList = [
+    { w: 'Mona Adel', k: 'Annual leave', n: '3 days' },
+    { w: 'Youssef Nabil', k: 'Sick leave', n: '2 days' },
+    { w: 'Dina Ramy', k: 'Annual leave', n: '5 days' },
+];
+const leaveDone = [{ w: 'Laila Fathy', k: 'Casual leave', n: '1 day' }];
 
 const faqs = [
     { q: 'Is my company data separated from other companies?', a: 'Yes. Afrad is built as a multi-tenant platform where each organization has its own workspace, and its data is kept isolated from every other organization.' },
     { q: 'Does Afrad pay salaries or file taxes?', a: 'No. Afrad calculates pay from the rules your company enters and keeps the result. It does not move money or file anything, and your accountant should review the numbers before anyone is paid.' },
     { q: 'Can I use it in Arabic?', a: 'Yes. The interface works in Arabic and English with a language switch and right-to-left layout. Names and other data you enter stay exactly as you typed them.' },
-    { q: 'Does it have an AI assistant?', a: 'Not yet. It is planned, and no AI connection exists today.' },
+    { q: 'Does it have an AI assistant?', a: 'There is no assistant inside Afrad. You can connect your own Claude account to Afrad, read-only, to ask about company totals. It never receives names, contact details, salaries, ID numbers or documents, and it cannot change anything.' },
     { q: 'What happens at a plan limit?', a: 'Adding a new employee or user account is blocked once you reach the limit. Existing records are never hidden or deleted.' },
     { q: 'How do I get started?', a: 'Create your workspace, add your departments and employees, and invite your team. You can start with one area and add the others as you need them.' },
+];
+
+const aiAsks = [
+    'How many people work here, by department?',
+    'How many people are late today?',
+    'How many leave requests are waiting for approval?',
+    'Which positions are open, and how many candidates are at each stage?',
+];
+const aiTrust = [
+    ['Read-only', 'The connection can read. It cannot add, edit, approve or delete anything.'],
+    ['Totals, not people', 'Answers are counts. No names, contact details, salaries, ID numbers or documents are sent.'],
+    ['Follows your role', 'Each person can only ask about what their Afrad role already lets them see.'],
+    ['You stay in control', 'You approve each connection, and you can disconnect it at any time in Settings.'],
 ];
 
 const plans = [
@@ -103,6 +137,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                     <a href="#days" class="hover:text-[#0E2A47]">{{ $t('Why Afrad') }}</a>
                     <a href="#roles" class="hover:text-[#0E2A47]">{{ $t('Roles') }}</a>
                     <a href="#inside" class="hover:text-[#0E2A47]">{{ $t('Inside') }}</a>
+                    <a href="#ai" class="hover:text-[#0E2A47]">{{ $t('AI') }}</a>
                     <a href="#plans" class="hover:text-[#0E2A47]">{{ $t('Plans') }}</a>
                     <a href="#faq" class="hover:text-[#0E2A47]">{{ $t('FAQ') }}</a>
                 </div>
@@ -137,25 +172,67 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                                 <span class="flex items-center gap-2 text-sm font-bold"><AfradIcon class="h-6 w-6" aria-hidden="true" />{{ $t('Company overview') }}</span>
                                 <span class="text-xs text-slate-400">{{ $t('Sample data') }}</span>
                             </div>
-                            <div class="grid gap-4 p-5 md:grid-cols-4">
-                                <div v-for="s in [{ l: 'Employees', v: '12' }, { l: 'Present today', v: '9' }, { l: 'On leave', v: '2' }, { l: 'Pending requests', v: '4' }]" :key="s.l" class="rounded-xl border border-slate-200 bg-white p-4">
+                            <div class="grid grid-cols-2 gap-3 p-5 pb-3 md:grid-cols-6">
+                                <div v-for="s in kpis" :key="s.l" class="rounded-xl border border-slate-200 bg-white p-3.5">
                                     <p class="text-xs text-slate-500">{{ $t(s.l) }}</p>
-                                    <p class="mt-1 text-2xl font-bold">{{ s.v }}</p>
+                                    <p class="mt-1 text-2xl font-bold tabular-nums">{{ s.v }}</p>
                                 </div>
                             </div>
-                            <div class="grid gap-4 px-5 pb-8 md:grid-cols-[1.4fr_1fr]">
+                            <div class="grid gap-3 px-5 pb-3 md:grid-cols-3">
                                 <div class="rounded-xl border border-slate-200 bg-white p-4">
-                                    <p class="text-sm font-bold">{{ $t('Headcount, last 6 months') }}</p>
-                                    <div class="mt-4 flex h-28 items-end gap-3" dir="ltr">
-                                        <div v-for="(b, i) in bars" :key="i" class="flex-1 rounded-t-md bg-[#2BD9A9]" :style="{ height: b + '%' }"></div>
+                                    <p class="text-sm font-bold">{{ $t('Headcount by department') }}</p>
+                                    <div class="mt-3 space-y-2.5">
+                                        <div v-for="d in depts" :key="d.n">
+                                            <div class="flex justify-between text-xs"><span class="text-slate-600">{{ $t(d.n) }}</span><span class="font-bold tabular-nums">{{ d.c }}</span></div>
+                                            <div class="mt-1 h-1.5 rounded-full bg-slate-100"><div class="h-1.5 rounded-full bg-[#2BD9A9]" :style="{ width: (d.c / 38) * 100 + '%' }"></div></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="rounded-xl border border-slate-200 bg-white p-4">
-                                    <p class="text-xs font-semibold text-slate-500">{{ $t('Leave request') }}</p>
-                                    <p class="mt-1 text-sm font-bold">{{ $t('Mona Adel, 3 days') }}</p>
-                                    <div class="mt-4 flex items-center justify-between">
-                                        <span :class="['rounded-full px-2.5 py-1 text-xs font-semibold', leaveState === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700']">{{ leaveState === 'pending' ? $t('Pending') : $t('Approved') }}</span>
-                                        <button v-if="leaveState === 'pending'" type="button" :class="['rounded-lg bg-[#0E2A47] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#13395F]', ring]" @click="leaveState = 'approved'">{{ $t('Approve') }}</button>
+                                    <p class="text-sm font-bold">{{ $t("Today's attendance") }}</p>
+                                    <div class="mt-2">
+                                        <div v-for="r in attToday" :key="r.w" class="flex items-center justify-between gap-2 border-b border-slate-100 py-2 last:border-0">
+                                            <div class="min-w-0"><p class="truncate text-xs font-bold">{{ $t(r.w) }}</p><p class="truncate text-[11px] text-slate-500">{{ $t(r.d) }} · <span dir="ltr">{{ r.t }}</span></p></div>
+                                            <span :class="['shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold', r.tone]">{{ $t(r.s) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                                    <p class="text-sm font-bold">{{ $t('Leave requests') }}</p>
+                                    <div class="mt-2">
+                                        <div v-for="(r, i) in leaveList" :key="r.w" class="flex items-center justify-between gap-2 border-b border-slate-100 py-2">
+                                            <div class="min-w-0"><p class="truncate text-xs font-bold">{{ $t(r.w) }}</p><p class="truncate text-[11px] text-slate-500">{{ $t(r.k) }} · {{ $t(r.n) }}</p></div>
+                                            <template v-if="i === 0">
+                                                <span v-if="leaveState === 'pending'" class="flex shrink-0 items-center gap-2"><span class="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{{ $t('Pending') }}</span><button type="button" :class="['rounded-lg bg-[#0E2A47] px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-[#13395F]', ring]" @click="leaveState = 'approved'">{{ $t('Approve') }}</button></span>
+                                                <span v-else class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{{ $t('Approved') }}</span>
+                                            </template>
+                                            <span v-else class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">{{ $t('Pending') }}</span>
+                                        </div>
+                                        <div v-for="r in leaveDone" :key="r.w" class="flex items-center justify-between gap-2 py-2">
+                                            <div class="min-w-0"><p class="truncate text-xs font-bold">{{ $t(r.w) }}</p><p class="truncate text-[11px] text-slate-500">{{ $t(r.k) }} · {{ $t(r.n) }}</p></div>
+                                            <span class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">{{ $t('Approved') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid gap-3 px-5 pb-6 md:grid-cols-[1.4fr_1fr]">
+                                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                                    <p class="text-sm font-bold">{{ $t('Headcount, last 6 months') }}</p>
+                                    <div class="mt-3 flex h-24 items-end gap-3" dir="ltr">
+                                        <div v-for="(b, i) in bars" :key="i" class="flex flex-1 flex-col items-center justify-end" :style="{ height: '100%' }">
+                                            <span class="mb-1 text-[11px] font-bold tabular-nums text-slate-600">{{ hc[i] }}</span>
+                                            <div class="w-full rounded-t-md bg-[#2BD9A9]" :style="{ height: b * 0.6 + '%' }"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-1 flex gap-3 text-[11px] text-slate-400" dir="ltr"><span v-for="m in months" :key="m" class="flex-1 text-center">{{ $t(m) }}</span></div>
+                                </div>
+                                <div class="rounded-xl border border-slate-200 bg-white p-4">
+                                    <p class="text-sm font-bold">{{ $t('Documents expiring soon') }}</p>
+                                    <div class="mt-2">
+                                        <div v-for="d in docs.slice(0, 4)" :key="d.who" class="flex items-center justify-between gap-2 border-b border-slate-100 py-2 last:border-0">
+                                            <div class="min-w-0"><p class="truncate text-xs font-bold">{{ $t(d.who) }}</p><p class="truncate text-[11px] text-slate-500">{{ $t(d.what) }}</p></div>
+                                            <span :class="['shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold', d.tone]">{{ $t(d.when) }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -210,7 +287,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                             <p class="text-xs font-semibold text-slate-400">{{ $t('Sample data') }}</p>
                             <div v-for="row in r.rows" :key="row[0]" class="flex items-center justify-between border-b border-slate-100 py-3.5 last:border-0">
                                 <span class="text-sm text-[#5A6B7D]">{{ $t(row[0]) }}</span>
-                                <span class="text-lg font-bold">{{ row[1] === '12 days' ? $t('12 days') : row[1] }}</span>
+                                <span class="text-lg font-bold">{{ /days/.test(row[1]) ? $t(row[1]) : row[1] }}</span>
                             </div>
                         </div>
                     </div>
@@ -244,7 +321,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                     <div class="rounded-2xl bg-[#0E2A47] p-6 text-white shadow-xl lg:order-first" v-reveal>
                         <p class="text-sm font-semibold text-slate-300">{{ $t('Leave balance') }} <span class="text-xs text-slate-500">({{ $t('Sample data') }})</span></p>
                         <div class="mt-5 space-y-5">
-                            <div v-for="b in [{ n: 'Annual leave', u: 9, t: 21 }, { n: 'Casual leave', u: 2, t: 6 }, { n: 'Sick leave', u: 1, t: 10 }]" :key="b.n">
+                            <div v-for="b in [{ n: 'Annual leave', u: 9, t: 21 }, { n: 'Casual leave', u: 2, t: 6 }, { n: 'Sick leave', u: 1, t: 10 }, { n: 'Unpaid leave', u: 3, t: 15 }]" :key="b.n">
                                 <div class="flex justify-between text-sm"><span>{{ $t(b.n) }}</span><span class="tabular-nums text-slate-300" dir="ltr">{{ b.u }} / {{ b.t }}</span></div>
                                 <div class="mt-2 h-2 rounded-full bg-white/10"><div class="h-2 rounded-full bg-[#2BD9A9]" :style="{ width: (b.u / b.t) * 100 + '%' }"></div></div>
                             </div>
@@ -267,7 +344,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         <div class="mt-4 space-y-3">
                             <div v-for="s in stages" :key="s.s" class="flex items-center gap-3">
                                 <span class="w-24 shrink-0 text-sm text-[#5A6B7D]">{{ $t(s.s) }}</span>
-                                <div class="h-7 flex-1 rounded-md bg-slate-100"><div class="flex h-7 items-center rounded-md bg-[#0E2A47] px-2 text-xs font-bold text-white" :style="{ width: Math.max((s.n / 14) * 100, 9) + '%' }">{{ s.n }}</div></div>
+                                <div class="h-7 flex-1 rounded-md bg-slate-100"><div class="flex h-7 items-center rounded-md bg-[#0E2A47] px-2 text-xs font-bold text-white" :style="{ width: Math.max((s.n / 42) * 100, 9) + '%' }">{{ s.n }}</div></div>
                             </div>
                         </div>
                     </div>
@@ -279,12 +356,46 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         <div class="flex items-center justify-between"><p class="text-sm font-bold">{{ $t('Reports') }}</p><span class="rounded-lg bg-[#F3F6F8] px-3 py-1.5 text-xs font-semibold text-[#0E2A47] ring-1 ring-slate-200">{{ $t('Export CSV') }}</span></div>
                         <p class="mt-1 text-xs text-slate-400">{{ $t('Sample data') }}</p>
                         <div class="mt-5 flex h-32 items-end gap-3" dir="ltr">
-                            <div v-for="(b, i) in bars" :key="i" class="flex-1 rounded-t-md bg-[#13395F]" :style="{ height: b + '%' }"></div>
+                            <div v-for="(b, i) in bars" :key="i" class="flex flex-1 flex-col items-center justify-end" style="height: 100%">
+                                <span class="mb-1 text-xs font-bold tabular-nums text-slate-600">{{ hc[i] }}</span>
+                                <div class="w-full rounded-t-md bg-[#13395F]" :style="{ height: b * 0.75 + '%' }"></div>
+                            </div>
                         </div>
+                        <div class="mt-1 flex gap-3 text-xs text-slate-400" dir="ltr"><span v-for="m in months" :key="m" class="flex-1 text-center">{{ $t(m) }}</span></div>
                     </div>
                     <div v-reveal="100">
                         <h3 class="text-2xl font-bold leading-[1.4] sm:text-3xl">{{ $t('Numbers ready when management asks') }}</h3>
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Pick a period, read the people numbers for the whole company or for your own team, and export them as CSV.') }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5b. AI connection -->
+            <section id="ai" class="scroll-mt-20 border-y border-slate-200 bg-white py-16 lg:py-24">
+                <div class="mx-auto grid max-w-6xl items-center gap-12 px-5 lg:grid-cols-2 lg:px-8">
+                    <div v-reveal>
+                        <p class="text-sm font-bold text-[#0B7A60]">{{ $t('AI') }}</p>
+                        <h2 class="mt-3 text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('Ask Claude about your people numbers.') }}</h2>
+                        <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Connect your own Claude account to Afrad, read-only. Ask in plain language and get company totals back, without opening each page.') }}</p>
+                        <ul class="mt-6 space-y-3">
+                            <li v-for="a in aiAsks" :key="a" class="flex gap-3 text-[15px] leading-7 text-slate-700"><span class="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#2BD9A9]" aria-hidden="true"></span>{{ $t(a) }}</li>
+                        </ul>
+                        <p class="mt-5 text-sm leading-7 text-[#5A6B7D]">{{ $t('A new connector you add yourself in Claude. Answers appear in Claude and follow its terms.') }}</p>
+                    </div>
+                    <div v-reveal="80">
+                        <div class="rounded-2xl border border-slate-200 bg-[#F3F6F8] p-5">
+                            <p class="text-xs font-semibold text-slate-400">{{ $t('Illustration, sample data') }}</p>
+                            <div class="mt-3 space-y-3 text-sm">
+                                <p class="ms-auto max-w-[85%] rounded-2xl rounded-ee-sm bg-[#0E2A47] px-4 py-3 text-white">{{ $t('How many people are late today?') }}</p>
+                                <p class="max-w-[90%] rounded-2xl rounded-es-sm border border-slate-200 bg-white px-4 py-3 text-slate-700">{{ $t('4 of 38 expected people checked in late today, and 2 have no attendance record yet.') }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 grid gap-5 sm:grid-cols-2">
+                            <div v-for="(t, i) in aiTrust" :key="t[0]" v-reveal="i * 60" class="border-t-2 border-[#2BD9A9] pt-4">
+                                <p class="font-bold">{{ $t(t[0]) }}</p>
+                                <p class="mt-1 text-sm leading-7 text-slate-600">{{ $t(t[1]) }}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -321,17 +432,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 </div>
             </section>
 
-            <!-- 8. Payroll honesty -->
-            <section class="mx-auto max-w-5xl px-5 pb-24 lg:px-8">
-                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-7 md:flex md:items-start md:gap-6 md:p-9" v-reveal>
-                    <span class="mb-4 inline-flex shrink-0 rounded-full bg-amber-200 px-3 py-1 text-xs font-bold text-amber-900 md:mb-0">{{ $t('Payroll') }}</span>
-                    <div>
-                        <h2 class="text-xl font-bold leading-[1.4]">{{ $t('Payroll runs on your company rules.') }}</h2>
-                        <p class="mt-2 text-[15px] leading-7 text-amber-950/80">{{ $t('You enter your rates and rules in company settings, and Afrad calculates the monthly run from them. Afrad does not pay salaries or file anything, and your accountant should review a run before anyone relies on it.') }}</p>
-                    </div>
-                </div>
-            </section>
-
             <!-- 9. Security -->
             <section class="border-y border-slate-200 bg-white py-16 lg:py-20">
                 <div class="mx-auto max-w-5xl px-5 lg:px-8">
@@ -353,7 +453,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
             <section id="plans" class="mx-auto max-w-5xl scroll-mt-20 px-5 py-24 lg:px-8 lg:py-28">
                 <div class="max-w-2xl" v-reveal>
                     <h2 class="text-3xl font-bold leading-[1.3] sm:text-4xl">{{ $t('Plans that follow your size') }}</h2>
-                    <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Plans set limits on employees and user accounts. The Afrad team assigns them, and there is no online payment yet.') }}</p>
+                    <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Plans set limits on employees and user accounts. Your plan is activated by the Afrad team, and payment is not taken online.') }}</p>
                 </div>
                 <div class="mt-10 grid gap-4 md:grid-cols-3">
                     <div v-for="(p, i) in plans" :key="p.name" v-reveal="i * 80" :class="['rounded-2xl border p-7', p.hot ? 'border-[#2BD9A9] bg-white ring-2 ring-[#2BD9A9]' : 'border-slate-200 bg-white']">
@@ -405,6 +505,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 </nav>
                 <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
             </div>
+            <p class="border-t border-slate-100 px-5 py-4 text-center text-xs text-slate-500">{{ $t('Built by') }} <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#0E2A47] hover:underline">Reviv Solutions</a></p>
         </footer>
     </div>
 </template>
