@@ -1461,5 +1461,8 @@
  "A company with no plan has no employee or account limits. This does not change access: the trial end or paid-until date still controls whether the company can add or change records. Changing a plan never removes anything a company already has. Payment happens outside the app. After the date passes, the company can still view and export its data, but cannot add or change records until you enter a later date.": "الشركة بلا باقة ليس لها حد للموظفين أو الحسابات. ده لا يغيّر الوصول: تاريخ انتهاء التجربة أو الاشتراك هو اللي بيحدد هل الشركة تقدر تضيف أو تعدّل. تغيير الباقة لا يحذف أي شيء تملكه الشركة بالفعل. الدفع بيتم خارج التطبيق. بعد انتهاء التاريخ تقدر الشركة تعرض وتصدّر بياناتها فقط، ولا تضيف أو تعدّل لحد ما تدخل تاريخًا أحدث.",
  "No plan (no employee/account limits)": "بلا باقة (بلا حد للموظفين والحسابات)",
  "No plan assigned (no employee/account limits)": "لا توجد باقة مخصصة (بلا حد للموظفين والحسابات)",
- "{company} has no plan assigned, so its employee and account counts are not limited. Access still follows its trial or paid-until date.": "{company} ملهاش باقة، فمفيش حد لعدد الموظفين والحسابات. الوصول لسه بيتبع تاريخ انتهاء التجربة أو الاشتراك."
+ "{company} has no plan assigned, so its employee and account counts are not limited. Access still follows its trial or paid-until date.": "{company} ملهاش باقة، فمفيش حد لعدد الموظفين والحسابات. الوصول لسه بيتبع تاريخ انتهاء التجربة أو الاشتراك.",
+    "Product": "المنتج",
+    "Account": "الحساب",
+    "Contact": "تواصل"
 }

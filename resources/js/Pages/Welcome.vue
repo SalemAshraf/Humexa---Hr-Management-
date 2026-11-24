@@ -495,17 +495,40 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
         </main>
 
         <footer class="border-t border-slate-200 bg-white text-slate-500">
-            <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm sm:flex-row sm:items-center sm:justify-between lg:px-8">
-                <div class="flex items-center gap-2.5 text-[#0E2A47]"><AfradIcon class="h-8 w-8" aria-hidden="true" /><span class="font-bold">{{ $t('Afrad') }}</span></div>
-                <nav class="flex flex-wrap gap-x-6 gap-y-2" :aria-label="$t('Footer')">
-                    <a href="#days" class="hover:text-[#0E2A47]">{{ $t('Why Afrad') }}</a>
-                    <a href="#plans" class="hover:text-[#0E2A47]">{{ $t('Plans') }}</a>
-                    <a href="#faq" class="hover:text-[#0E2A47]">{{ $t('FAQ') }}</a>
-                    <Link :href="route('login')" class="hover:text-[#0E2A47]">{{ $t('Sign in') }}</Link>
-                </nav>
-                <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
+            <div class="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+                <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2.5 text-[#0E2A47]"><AfradIcon class="h-8 w-8" aria-hidden="true" /><span class="font-bold">{{ $t('Afrad') }}</span></div>
+                        <p class="text-sm leading-relaxed">{{ $t('HR software for growing companies') }}</p>
+                    </div>
+                    <nav :aria-label="$t('Product')">
+                        <p class="mb-4 text-sm font-bold text-[#0E2A47]">{{ $t('Product') }}</p>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="#days" class="transition hover:text-[#0B7A60]">{{ $t('Why Afrad') }}</a></li>
+                            <li><a href="#plans" class="transition hover:text-[#0B7A60]">{{ $t('Plans') }}</a></li>
+                            <li><a href="#faq" class="transition hover:text-[#0B7A60]">{{ $t('FAQ') }}</a></li>
+                        </ul>
+                    </nav>
+                    <nav :aria-label="$t('Account')">
+                        <p class="mb-4 text-sm font-bold text-[#0E2A47]">{{ $t('Account') }}</p>
+                        <ul class="space-y-3 text-sm">
+                            <li><Link :href="route('login')" class="transition hover:text-[#0B7A60]">{{ $t('Sign in') }}</Link></li>
+                            <li><Link v-if="canRegister" :href="route('register')" class="transition hover:text-[#0B7A60]">{{ $t('Create your workspace') }}</Link></li>
+                        </ul>
+                    </nav>
+                    <div>
+                        <p class="mb-4 text-sm font-bold text-[#0E2A47]">{{ $t('Contact') }}</p>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="transition hover:text-[#0B7A60]"><span dir="ltr">+20 109 897 1853</span></a></li>
+                            <li><a href="https://www.facebook.com/RevivSolutions" target="_blank" rel="noopener noreferrer" class="transition hover:text-[#0B7A60]">Facebook</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-10 flex flex-col gap-2 border-t border-slate-200 pt-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+                    <p>© {{ new Date().getFullYear() }} {{ $t('Afrad') }}. {{ $t('All rights reserved.') }}</p>
+                    <p>{{ $t('Built by') }} <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#0E2A47] hover:underline">Reviv Solutions</a></p>
+                </div>
             </div>
-            <p class="border-t border-slate-100 px-5 py-4 text-center text-xs text-slate-500">{{ $t('Built by') }} <a href="https://wa.me/201098971853" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#0E2A47] hover:underline">Reviv Solutions</a></p>
         </footer>
     </div>
 </template>
