@@ -170,7 +170,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-[#F3F6F8] text-[#0E2A47] shadow-2xl shadow-slate-900/10">
                             <div class="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
                                 <span class="flex items-center gap-2 text-sm font-bold"><AfradIcon class="h-6 w-6" aria-hidden="true" />{{ $t('Company overview') }}</span>
-                                <span class="text-xs text-slate-400">{{ $t('Sample data') }}</span>
                             </div>
                             <div class="grid grid-cols-2 gap-3 p-5 pb-3 md:grid-cols-6">
                                 <div v-for="s in kpis" :key="s.l" class="rounded-xl border border-slate-200 bg-white p-3.5">
@@ -284,7 +283,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                             </ul>
                         </div>
                         <div class="rounded-xl border border-slate-200 bg-[#F3F6F8] p-5">
-                            <p class="text-xs font-semibold text-slate-400">{{ $t('Sample data') }}</p>
                             <div v-for="row in r.rows" :key="row[0]" class="flex items-center justify-between border-b border-slate-100 py-3.5 last:border-0">
                                 <span class="text-sm text-[#5A6B7D]">{{ $t(row[0]) }}</span>
                                 <span class="text-lg font-bold">{{ /days/.test(row[1]) ? $t(row[1]) : row[1] }}</span>
@@ -308,7 +306,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Expired documents and the ones expiring soon appear together, with the employee next to each one.') }}</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" v-reveal="100">
-                        <p class="text-xs font-semibold text-slate-400">{{ $t('Sample data') }}</p>
                         <div v-for="d in docs" :key="d.who" class="flex items-center justify-between gap-3 border-b border-slate-100 py-3.5 last:border-0">
                             <div><p class="text-sm font-bold">{{ $t(d.who) }}</p><p class="text-xs text-slate-500">{{ $t(d.what) }}</p></div>
                             <span :class="['shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold', d.tone]">{{ $t(d.when) }}</span>
@@ -319,7 +316,7 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 <!-- Leave + attendance -->
                 <div class="mt-24 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                     <div class="rounded-2xl bg-[#0E2A47] p-6 text-white shadow-xl lg:order-first" v-reveal>
-                        <p class="text-sm font-semibold text-slate-300">{{ $t('Leave balance') }} <span class="text-xs text-slate-500">({{ $t('Sample data') }})</span></p>
+                        <p class="text-sm font-semibold text-slate-300">{{ $t('Leave balance') }}</p>
                         <div class="mt-5 space-y-5">
                             <div v-for="b in [{ n: 'Annual leave', u: 9, t: 21 }, { n: 'Casual leave', u: 2, t: 6 }, { n: 'Sick leave', u: 1, t: 10 }, { n: 'Unpaid leave', u: 3, t: 15 }]" :key="b.n">
                                 <div class="flex justify-between text-sm"><span>{{ $t(b.n) }}</span><span class="tabular-nums text-slate-300" dir="ltr">{{ b.u }} / {{ b.t }}</span></div>
@@ -340,7 +337,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                         <p class="mt-4 text-lg leading-8 text-[#5A6B7D]">{{ $t('Move candidates through the stages, and turn the one you choose into an employee in a single step.') }}</p>
                     </div>
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" v-reveal="100">
-                        <p class="text-xs font-semibold text-slate-400">{{ $t('Sample data') }}</p>
                         <div class="mt-4 space-y-3">
                             <div v-for="s in stages" :key="s.s" class="flex items-center gap-3">
                                 <span class="w-24 shrink-0 text-sm text-[#5A6B7D]">{{ $t(s.s) }}</span>
@@ -354,7 +350,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                 <div class="mt-24 grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:order-first" v-reveal>
                         <div class="flex items-center justify-between"><p class="text-sm font-bold">{{ $t('Reports') }}</p><span class="rounded-lg bg-[#F3F6F8] px-3 py-1.5 text-xs font-semibold text-[#0E2A47] ring-1 ring-slate-200">{{ $t('Export CSV') }}</span></div>
-                        <p class="mt-1 text-xs text-slate-400">{{ $t('Sample data') }}</p>
                         <div class="mt-5 flex h-32 items-end gap-3" dir="ltr">
                             <div v-for="(b, i) in bars" :key="i" class="flex flex-1 flex-col items-center justify-end" style="height: 100%">
                                 <span class="mb-1 text-xs font-bold tabular-nums text-slate-600">{{ hc[i] }}</span>
@@ -384,7 +379,6 @@ const btnDark = `inline-flex items-center justify-center rounded-xl border borde
                     </div>
                     <div v-reveal="80">
                         <div class="rounded-2xl border border-slate-200 bg-[#F3F6F8] p-5">
-                            <p class="text-xs font-semibold text-slate-400">{{ $t('Illustration, sample data') }}</p>
                             <div class="mt-3 space-y-3 text-sm">
                                 <p class="ms-auto max-w-[85%] rounded-2xl rounded-ee-sm bg-[#0E2A47] px-4 py-3 text-white">{{ $t('How many people are late today?') }}</p>
                                 <p class="max-w-[90%] rounded-2xl rounded-es-sm border border-slate-200 bg-white px-4 py-3 text-slate-700">{{ $t('4 of 38 expected people checked in late today, and 2 have no attendance record yet.') }}</p>
